@@ -321,3 +321,112 @@ public:
     return RayStatus::NORMAL;
   }
 };
+
+
+
+//std::array<Real, 2> ob_to_conserve(Real alpha, Real beta, Real theta_o, Real a) {
+//  Real lambda, eta;
+//
+//  lambda = -alpha * std::sin(theta_o);
+//  eta = (alpha * alpha - a * a) * std::cos(theta_o) * std::cos(theta_o) + beta * beta;
+//
+//  return {lambda, eta};
+//}
+//
+//// conserve_to_ob function
+//std::array<Real, 2> conserve_to_ob(Real lambda, Real eta, Real theta_o, Real a, Real nu_theta_o) {
+//  Real alpha, beta;
+//
+//  alpha = -lambda / std::sin(theta_o);
+//  beta = nu_theta_o * std::sqrt(eta + a * a * std::cos(theta_o) * std::cos(theta_o) -
+//                                lambda * lambda / (1 / std::tan(theta_o)) / (1 / std::tan(theta_o)));
+//
+//  return {alpha, beta};
+//}
+//
+
+//
+//// Potentials
+//
+//Real R(Real r, Real a, Real lambda, Real eta) {
+//  return pow(r * r + a * a - a * lambda, 2) - (r * r - 2 * r + a * a) * (eta + pow(lambda - a, 2));
+//}
+//
+//Real Theta(Real theta, Real a, Real lambda, Real eta) {
+//  return eta + a * a * std::cos(theta) * std::cos(theta) - lambda * lambda / std::tan(theta) / std::tan(theta);
+//}
+//
+//std::array<Real, 2> Theta_pm(Real a, Real lambda, Real eta) {
+//  Real deltaTheta = 0.5 * (1 - (eta + lambda * lambda) / a / a);
+//  Real up = deltaTheta + std::sqrt(deltaTheta * deltaTheta + eta / a / a);
+//  Real um = deltaTheta - std::sqrt(deltaTheta * deltaTheta + eta / a / a);
+//  Real thetaP = std::acos(-std::sqrt(up));
+//  Real thetaM = std::acos(std::sqrt(up));
+//  return {thetaP, thetaM};
+//}
+//
+////int main() {
+////  // Test the functions with example values.
+////  Real a = 1.0, lambda = 2.0, eta = 3.0;
+////  std::array<Real, 2> res = roots(a, lambda, eta);
+////  for (Real val : res) {
+////    std::cout << val << " ";
+////  }
+////  std::cout << std::endl;
+////  return 0;
+////}
+//
+
+//
+
+
+//Real FindImage(Real a, Real rs, Real Theta_s, Real Nu_rs, Real Nu_Theta_s,
+//               Real Theta_o, Real Phi_o, std::vector<Real> parameters) {
+//  Real sol;
+//  Real rcsol;
+//  Real dsol;
+//  Real ray;
+//  Real m;
+//  Real Lambda;
+//  Real Eta;
+//  Real r4;
+//  Real w0;
+
+//  if (opt == "out") {
+//    // sol = FindRoot...
+//    std::cout << "{r_c, lgd} = " << sol << std::endl;
+//    rcsol = sol; // Assuming a correct implementation of FindRoot
+//    dsol = std::pow(10, sol); // For simplicity, this is a placeholder
+//  }
+//  else if (opt == "in") {
+//    // sol = FindRoot...
+//    std::cout << "{r_c, lgmd} = " << sol << std::endl;
+//    rcsol = sol; // Assuming a correct implementation of FindRoot
+//    dsol = -std::pow(10, sol); // For simplicity, this is a placeholder
+//  }
+//  else {
+//    std::cerr << "'opt' should be either 'out' or 'in'!" << std::endl;
+//    return -1;  // Error value
+//  }
+//
+//  ray = /* Call to Rayrcd */;
+//  m = ray; // Simplified for this demonstration.
+//
+//  std::cout << "{Theta_inf, Phi_inf, t_inf-r_inf, m, nhalf} = " << ray << std::endl;
+//  std::cout << "Mod[Phi_inf, 2 * PI] = " << std::fmod(ray, 2 * M_PI) << std::endl;
+//
+//  std::tie(Lambda, Eta) = /* Call to lametav2 */;
+//  std::cout << "{Lambda, Eta} = " << Lambda << ", " << Eta << std::endl;
+//
+//  std::vector<Real> results = /* Call to roots */;
+//  std::sort(results.begin(), results.end());
+//  r4 = results.back();
+//
+//  w0 = /* Call to Cos or Theta_pm */;
+//  std::cout << "{r4, w0} = " << r4 << ", " << w0 << std::endl;
+//
+//  std::cout << "{Alpha, Beta} = " << /* Call to ConserveToOb */ << std::endl;
+//
+//  return /* Call to Shape */;
+//}
+
