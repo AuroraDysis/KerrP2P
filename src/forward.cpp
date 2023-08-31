@@ -10,6 +10,7 @@
 
 using boost::math::constants::half;
 using boost::math::constants::third;
+using boost::math::constants::sixth;
 
 class ForwardRayTracing {
 private:
@@ -37,25 +38,31 @@ private:
         Real BB = 2 * (eta + (lambda - a) * (lambda - a));
         Real CC = -a * a * eta;
         Real PP = -(AA * AA / 12) - CC;
-        Real QQ = -(AA / RCONST(3)) * (pow(AA / RCONST(6), RCONST(2)) - CC) - BB * BB / 8;
+        Real QQ = -(AA * third<Real>()) * (std::pow(AA * sixth<Real>(), 2) - CC) - BB * BB / 8;
 
         Real omega_p, omega_m;
 
-        if (pow(PP / 3, 3) + pow(QQ / 2, 2) > 0) {
-            omega_p = std::pow(-QQ / 2 + std::sqrt(pow(PP / 3, 3) + pow(QQ / 2, 2)), RCONST(1.0) / RCONST(3.0));
-            omega_m = std::pow(-QQ / 2 - std::sqrt(pow(PP / 3, 3) + pow(QQ / 2, 2)), RCONST(1.0) / RCONST(3.0));
+        if (std::pow(PP / 3, 3) + std::pow(QQ * half<Real>(), 2) > 0) {
+            omega_p = std::pow(
+                    -QQ * half<Real>() + std::sqrt(std::pow(PP * third<Real>(), 3) + std::pow(QQ * half<Real>(), 2)),
+                    third<Real>());
+            omega_m = std::pow(
+                    -QQ * half<Real>() - std::sqrt(std::pow(PP * third<Real>(), 3) + std::pow(QQ * half<Real>(), 2)),
+                    third<Real>());
         } else {
-            omega_p = std::cbrt(-QQ / 2 + std::sqrt(pow(PP / 3, 3) + pow(QQ / 2, 2)));
-            omega_m = std::cbrt(-QQ / 2 - std::sqrt(pow(PP / 3, 3) + pow(QQ / 2, 2)));
+            omega_p = std::cbrt(
+                    -QQ * half<Real>() + std::sqrt(std::pow(PP * third<Real>(), 3) + std::pow(QQ * half<Real>(), 2)));
+            omega_m = std::cbrt(
+                    -QQ * half<Real>() - std::sqrt(std::pow(PP * third<Real>(), 3) + std::pow(QQ * half<Real>(), 2)));
         }
 
-        Real xi0 = omega_p + omega_m - AA / 3;
-        Real z = std::sqrt(xi0 / 2);
+        Real xi0 = omega_p + omega_m - AA * third<Real>();
+        Real z = std::sqrt(xi0 * half<Real>());
 
-        r1 = -z - std::sqrt(-(AA / 2) - z * z + BB / (4 * z));
-        r2 = -z + std::sqrt(-(AA / 2) - z * z + BB / (4 * z));
-        r3 = z - std::sqrt(-(AA / 2) - z * z - BB / (4 * z));
-        r4 = z + std::sqrt(-(AA / 2) - z * z - BB / (4 * z));
+        r1 = -z - std::sqrt(-(AA * half<Real>()) - z * z + BB / (4 * z));
+        r2 = -z + std::sqrt(-(AA * half<Real>()) - z * z + BB / (4 * z));
+        r3 = z - std::sqrt(-(AA * half<Real>()) - z * z - BB / (4 * z));
+        r4 = z + std::sqrt(-(AA * half<Real>()) - z * z - BB / (4 * z));
     }
 
     void init_radial_coeffs() {
@@ -80,7 +87,7 @@ private:
     Real f1(Real alpha, Real curlyPhi, Real j) const {
         Real temp1 = std::sqrt((alpha * alpha - 1) / (j + (1 - j) * alpha * alpha));
         Real temp2 = temp1 * std::sqrt(1 - j * std::sin(curlyPhi) * std::sin(curlyPhi));
-        return temp1 / 2 * log(std::abs((temp2 + std::sin(curlyPhi)) / (temp2 - std::sin(curlyPhi))));
+        return temp1 / 2 * std::log(std::abs((temp2 + std::sin(curlyPhi)) / (temp2 - std::sin(curlyPhi))));
     }
 
     Real R1(Real alpha, Real curlyPhi, Real j) const {
@@ -101,11 +108,11 @@ private:
     }
 
     Real Pi13(Real r) const {
-        return (RCONST(2.0) * (r2 - r1) * std::sqrt(A * B)) / (B * B - A * A) * R1(alpha_0, std::acos(x3(r)), k3);
+        return (2 * (r2 - r1) * std::sqrt(A * B)) / (B * B - A * A) * R1(alpha_0, std::acos(x3(r)), k3);
     }
 
     Real Pi23(Real r) const {
-        return std::pow(((RCONST(2.0) * (r2 - r1) * std::sqrt(A * B)) / (B * B - A * A)), 2) *
+        return std::pow(((2 * (r2 - r1) * std::sqrt(A * B)) / (B * B - A * A)), 2) *
                R2(alpha_0, std::acos(x3(r)), k3);
     }
 
@@ -119,20 +126,20 @@ private:
 
     Real I2(Real r) const {
         return std::pow(((B * r2 + A * r1) / (B + A)), 2) * F3(r) +
-               RCONST(2.0) * ((B * r2 + A * r1) / (B + A)) * Pi13(r) +
+               2 * ((B * r2 + A * r1) / (B + A)) * Pi13(r) +
                std::sqrt(A * B) * Pi23(r);
     }
 
     Real Ip(Real r) const {
         return -1 / (B * (rp - r2) + A * (rp - r1)) * ((B + A) * F3(r) +
-                                                       (RCONST(2.0) * (r2 - r1) * std::sqrt(A * B)) /
+                                                       (2 * (r2 - r1) * std::sqrt(A * B)) /
                                                        (B * (rp - r2) - A * (rp - r1)) *
                                                        R1(alpha_p, std::acos(x3(r)), k3));
     }
 
     Real Im(Real r) const {
         return -1 / (B * (rm - r2) + A * (rm - r1)) * ((B + A) * F3(r) +
-                                                       (RCONST(2.0) * (r2 - r1) * sqrt(A * B)) /
+                                                       (2 * (r2 - r1) * std::sqrt(A * B)) /
                                                        (B * (rm - r2) - A * (rm - r1)) *
                                                        R1(alpha_m, std::acos(x3(r)), k3));
     }
@@ -226,17 +233,17 @@ public:
     }
 
     Real G_theta(Real theta) const {
-        return -1.0 / std::sqrt(-um * a * a) *
+        return -1 / std::sqrt(-um * a * a) *
                boost::math::ellint_1(std::asin(std::cos(theta) / std::sqrt(up)), up / um);
     }
 
     Real G_phi(Real theta) const {
-        return -1.0 / std::sqrt(-um * a * a) *
+        return -1 / std::sqrt(-um * a * a) *
                boost::math::ellint_3(up, std::asin(std::cos(theta) / std::sqrt(up)), up / um);
     }
 
     Real G_t(Real theta) const {
-        return (2.0 * up) / std::sqrt(-um * a * a) / (2 * up / um) *
+        return (2 * up) / std::sqrt(-um * a * a) / (2 * up / um) *
                (boost::math::ellint_2(std::asin(std::cos(theta) / std::sqrt(up)), up / um) -
                 boost::math::ellint_1(theta));
     }
