@@ -1,10 +1,15 @@
 #include "forward.h"
 
 #include <cmath>
+#include <boost/numeric/conversion/converter.hpp>
+#include <boost/math/constants/constants.hpp>
 #include <boost/math/special_functions/ellint_1.hpp>
 #include <boost/math/special_functions/ellint_2.hpp>
 #include <boost/math/special_functions/ellint_3.hpp>
 #include <boost/math/special_functions/jacobi_elliptic.hpp>
+
+using boost::math::constants::half;
+using boost::math::constants::third;
 
 class ForwardRayTracing {
 private:
@@ -19,7 +24,7 @@ private:
 
     // Range of theta: For Type A (eta > 0)
     void init_theta_pm() {
-        delta_theta = RCONST(0.5) * (RCONST(1.0) - (eta + lambda * lambda) / (a * a));
+        delta_theta = half<Real>() * (1 - (eta + lambda * lambda) / (a * a));
         up = delta_theta + std::sqrt(delta_theta * delta_theta + eta / (a * a));
         um = delta_theta - std::sqrt(delta_theta * delta_theta + eta / (a * a));
         theta_p = std::acos(-std::sqrt(up));
@@ -54,8 +59,8 @@ private:
     }
 
     void init_radial_coeffs() {
-        A = sqrt((r3 - r2) * (r4 - r2));
-        B = sqrt((r3 - r1) * (r4 - r1));
+        A = std::sqrt((r3 - r2) * (r4 - r2));
+        B = std::sqrt((r3 - r1) * (r4 - r1));
 
         alpha_0 = (B + A) / (B - A);
         alpha_p = (B * (rp - r2) + A * (rp - r1)) / (B * (rp - r2) - A * (rp - r1));
@@ -73,41 +78,35 @@ private:
     }
 
     Real f1(Real alpha, Real curlyPhi, Real j) const {
-        Real temp1 = sqrt((alpha * alpha - 1) / (j + (1 - j) * alpha * alpha));
-        Real temp2 = temp1 * sqrt(1 - j * sin(curlyPhi) * sin(curlyPhi));
-        return temp1 / 2 * log(fabs((temp2 + sin(curlyPhi)) / (temp2 - sin(curlyPhi))));
-    }
-
-    int H(Real x) const {
-        if (x > 0) {
-            return 1;
-        } else {
-            return 0;
-        }
+        Real temp1 = std::sqrt((alpha * alpha - 1) / (j + (1 - j) * alpha * alpha));
+        Real temp2 = temp1 * std::sqrt(1 - j * std::sin(curlyPhi) * std::sin(curlyPhi));
+        return temp1 / 2 * log(std::abs((temp2 + std::sin(curlyPhi)) / (temp2 - std::sin(curlyPhi))));
     }
 
     Real R1(Real alpha, Real curlyPhi, Real j) const {
-        return 1.0 / (1.0 - alpha * alpha) *
-               (boost::math::ellint_3(alpha * alpha / (alpha * alpha - 1.0), curlyPhi, j) -
+        return 1 / (1 - alpha * alpha) *
+               (boost::math::ellint_3(alpha * alpha / (alpha * alpha - 1), curlyPhi, j) -
                 alpha * f1(alpha, curlyPhi, j));
     }
 
     Real R2(Real alpha, Real curlyPhi, Real j) const {
-        return 1.0 / (alpha * alpha - 1.0) * (boost::math::ellint_1(curlyPhi, j) -
-                                              pow(alpha, 2) / (j + (1.0 - j) * alpha * alpha) *
-                                              (boost::math::ellint_2(curlyPhi, j) -
-                                               (alpha * sin(curlyPhi) * sqrt(1.0 - j * pow(sin(curlyPhi), 2))) /
-                                               (1.0 + alpha * cos(curlyPhi)))) +
-               1.0 / (j + (1.0 - j) * alpha * alpha) * (2.0 * j - pow(alpha, 2) / (alpha * alpha - 1.0)) *
+        return 1 / (alpha * alpha - 1) * (boost::math::ellint_1(curlyPhi, j) -
+                                          std::pow(alpha, 2) / (j + (1 - j) * alpha * alpha) *
+                                          (boost::math::ellint_2(curlyPhi, j) -
+                                           (alpha * std::sin(curlyPhi) *
+                                            std::sqrt(1 - j * std::pow(std::sin(curlyPhi), 2))) /
+                                           (1 + alpha * std::cos(curlyPhi)))) +
+               1 / (j + (1 - j) * alpha * alpha) * (2.0 * j - std::pow(alpha, 2) / (alpha * alpha - 1)) *
                R1(alpha, curlyPhi, j);
     }
 
     Real Pi13(Real r) const {
-        return (RCONST(2.0) * (r2 - r1) * sqrt(A * B)) / (B * B - A * A) * R1(alpha_0, acos(x3(r)), k3);
+        return (RCONST(2.0) * (r2 - r1) * std::sqrt(A * B)) / (B * B - A * A) * R1(alpha_0, std::acos(x3(r)), k3);
     }
 
     Real Pi23(Real r) const {
-        return std::pow(((RCONST(2.0) * (r2 - r1) * sqrt(A * B)) / (B * B - A * A)), 2) * R2(alpha_0, acos(x3(r)), k3);
+        return std::pow(((RCONST(2.0) * (r2 - r1) * std::sqrt(A * B)) / (B * B - A * A)), 2) *
+               R2(alpha_0, std::acos(x3(r)), k3);
     }
 
     Real I0(Real r) const {
@@ -119,22 +118,23 @@ private:
     }
 
     Real I2(Real r) const {
-        return pow(((B * r2 + A * r1) / (B + A)), 2) * F3(r) + RCONST(2.0) * ((B * r2 + A * r1) / (B + A)) * Pi13(r) +
-               sqrt(A * B) * Pi23(r);
+        return std::pow(((B * r2 + A * r1) / (B + A)), 2) * F3(r) +
+               RCONST(2.0) * ((B * r2 + A * r1) / (B + A)) * Pi13(r) +
+               std::sqrt(A * B) * Pi23(r);
     }
 
     Real Ip(Real r) const {
-        return -1.0 / (B * (rp - r2) + A * (rp - r1)) * ((B + A) * F3(r) +
-                                                         (RCONST(2.0) * (r2 - r1) * sqrt(A * B)) /
-                                                         (B * (rp - r2) - A * (rp - r1)) *
-                                                         R1(alpha_p, acos(x3(r)), k3));
+        return -1 / (B * (rp - r2) + A * (rp - r1)) * ((B + A) * F3(r) +
+                                                       (RCONST(2.0) * (r2 - r1) * std::sqrt(A * B)) /
+                                                       (B * (rp - r2) - A * (rp - r1)) *
+                                                       R1(alpha_p, std::acos(x3(r)), k3));
     }
 
     Real Im(Real r) const {
-        return -1.0 / (B * (rm - r2) + A * (rm - r1)) * ((B + A) * F3(r) +
-                                                         (RCONST(2.0) * (r2 - r1) * sqrt(A * B)) /
-                                                         (B * (rm - r2) - A * (rm - r1)) *
-                                                         R1(alpha_m, acos(x3(r)), k3));
+        return -1 / (B * (rm - r2) + A * (rm - r1)) * ((B + A) * F3(r) +
+                                                       (RCONST(2.0) * (r2 - r1) * sqrt(A * B)) /
+                                                       (B * (rm - r2) - A * (rm - r1)) *
+                                                       R1(alpha_m, std::acos(x3(r)), k3));
     }
 
 public:
@@ -236,7 +236,7 @@ public:
     }
 
     Real G_t(Real theta) const {
-        return (2.0 * up) / std::sqrt(-um * a * a) * 1.0 / (2.0 * up / um) *
+        return (2.0 * up) / std::sqrt(-um * a * a) / (2 * up / um) *
                (boost::math::ellint_2(std::asin(std::cos(theta) / std::sqrt(up)), up / um) -
                 boost::math::ellint_1(theta));
     }
@@ -269,21 +269,30 @@ public:
         // Radial integrals
         auto [radial_status, radial_integrals] = calc_I();
 
+        Real G_theta_theta_s = G_theta(theta_s);
+        Real G_theta_theta_p = G_theta(theta_p);
+        Real G_theta_theta_m = G_theta(theta_m);
+
         // Minor time
         Real tau_o = radial_integrals[0];
 
         Real theta_inf = std::acos(-std::sqrt(up) * nu_theta *
                                    boost::math::jacobi_sn(
-                                           std::sqrt(-um * a * a) * (tau_o + nu_theta * G_theta(theta_s)), up / um));
+                                           std::sqrt(-um * a * a) * (tau_o + nu_theta * G_theta_theta_s), up / um));
 
         // Angular integrals
-        Real m = RCONST(1.0) + std::floor(std::real((tau_o - G_theta(theta_p) + nu_theta * G_theta(theta_s)) /
-                                                    (G_theta(theta_p) - G_theta(theta_m))));
+        Real m_Real = 1 + std::floor(std::real((tau_o - G_theta_theta_p + nu_theta * G_theta_theta_s) /
+                                               (G_theta_theta_p - G_theta_theta_m)));
+
+        using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
+                boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
+        // floor
+        int m = RealToInt::convert(m_Real);
 
         std::array<Real, 3> angular_integrals = calc_G(theta_inf, static_cast<int>(m));
 
         // Number of half-orbits
-        Real n_half = tau_o / (G_theta(theta_p) - G_theta(theta_m));
+        Real n_half = tau_o / (G_theta_theta_p - G_theta_theta_m);
 
         // Final values of phi and t
         Real phi_inf = radial_integrals[1] + lambda * angular_integrals[1];
