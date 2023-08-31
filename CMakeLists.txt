@@ -3,16 +3,19 @@ project(forward_ray_tracing)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(HDF5 REQUIRED COMPONENTS C CXX HL)
-find_package(TBB CONFIG REQUIRED)
-find_package(Eigen3 REQUIRED)
+find_package(Boost 1.82 REQUIRED)
+find_package(Catch2 3 REQUIRED)
 
-include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${PROJECT_SOURCE_DIR}/src)
 
-set(LIBRARIES Eigen3::Eigen hdf5::hdf5 hdf5::hdf5_cpp hdf5::hdf5_hl_cpp)
-set(SOURCE_FILES src/main.cpp)
-add_executable(forward_ray_tracing ${SOURCE_FILES})
-target_link_libraries(forward_ray_tracing PUBLIC ${LIBRARIES} TBB::tbb)
+set(LIBRARIES Boost::boost)
+set(SOURCE_FILES src/forward.h src/forward.cpp)
+
+add_executable(forward_ray_tracing src/main.cpp ${SOURCE_FILES})
+target_link_libraries(forward_ray_tracing PRIVATE ${LIBRARIES})
+
+add_executable(tests tests/test.cpp ${SOURCE_FILES})
+target_link_libraries(tests PRIVATE ${LIBRARIES} Catch2::Catch2WithMain)
 
 #find_package(Python REQUIRED COMPONENTS Interpreter Development)
 #find_package(pybind11 CONFIG REQUIRED)
