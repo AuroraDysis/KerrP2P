@@ -3,6 +3,7 @@
 #include <array>
 #include <cmath>
 #include <boost/numeric/conversion/converter.hpp>
+
 #include <boost/math/constants/constants.hpp>
 #include <boost/math/special_functions/ellint_1.hpp>
 #include <boost/math/special_functions/ellint_2.hpp>
@@ -13,8 +14,16 @@ using boost::math::constants::half;
 using boost::math::constants::third;
 using boost::math::constants::sixth;
 
-// using Real = double;
-using Real = long double;
+//using Real = double;
+//using Complex = std::complex<Real>;
+//namespace mp = std;
+// using Real = long double;
+
+#include <boost/multiprecision/float128.hpp>
+#include <boost/multiprecision/complex128.hpp>
+using Real = boost::multiprecision::float128;
+using Complex = boost::multiprecision::complex128;
+namespace mp = boost::multiprecision;
 
 enum class RayStatus {
   NORMAL,
@@ -58,10 +67,10 @@ private:
     // Range of theta: For Type A (eta > 0)
     void init_theta_pm() {
         delta_theta = half<Real>() * (1 - (eta + lambda * lambda) / (a * a));
-        up = delta_theta + std::sqrt(delta_theta * delta_theta + eta / (a * a));
-        um = delta_theta - std::sqrt(delta_theta * delta_theta + eta / (a * a));
-        theta_p = std::acos(-std::sqrt(up));
-        theta_m = std::acos(std::sqrt(up));
+        up = delta_theta + mp::sqrt(delta_theta * delta_theta + eta / (a * a));
+        um = delta_theta - mp::sqrt(delta_theta * delta_theta + eta / (a * a));
+        theta_p = mp::acos(-mp::sqrt(up));
+        theta_m = mp::acos(mp::sqrt(up));
     }
 
     // find roots
@@ -70,33 +79,33 @@ private:
         Real BB = 2 * (eta + (lambda - a) * (lambda - a));
         Real CC = -a * a * eta;
         Real PP = -(AA * AA / 12) - CC;
-        Real QQ = (-2 * std::pow(A, 3) - 27 * std::pow(B, 2) + 72 * A * CC) / 216;
+        Real QQ = (-2 * mp::pow(A, 3) - 27 * mp::pow(B, 2) + 72 * A * CC) / 216;
 
         Real omega_p, omega_m;
 
-        if (std::pow(PP * third<Real>(), 3) + std::pow(QQ * half<Real>(), 2) > 0) {
-            omega_p = std::pow(
-                    -QQ * half<Real>() + std::sqrt(std::pow(PP * third<Real>(), 3) + std::pow(QQ * half<Real>(), 2)),
+        if (mp::pow(PP * third<Real>(), 3) + mp::pow(QQ * half<Real>(), 2) > 0) {
+            omega_p = mp::pow(
+                    -QQ * half<Real>() + mp::sqrt(mp::pow(PP * third<Real>(), 3) + mp::pow(QQ * half<Real>(), 2)),
                     third<Real>());
-            omega_m = std::pow(
-                    -QQ * half<Real>() - std::sqrt(std::pow(PP * third<Real>(), 3) + std::pow(QQ * half<Real>(), 2)),
+            omega_m = mp::pow(
+                    -QQ * half<Real>() - mp::sqrt(mp::pow(PP * third<Real>(), 3) + mp::pow(QQ * half<Real>(), 2)),
                     third<Real>());
         } else {
-            omega_p = std::cbrt(
-                    -QQ * half<Real>() + std::sqrt(std::pow(PP * third<Real>(), 3) + std::pow(QQ * half<Real>(), 2)));
-            omega_m = std::cbrt(
-                    -QQ * half<Real>() - std::sqrt(std::pow(PP * third<Real>(), 3) + std::pow(QQ * half<Real>(), 2)));
+            omega_p = mp::cbrt(
+                    -QQ * half<Real>() + mp::sqrt(mp::pow(PP * third<Real>(), 3) + mp::pow(QQ * half<Real>(), 2)));
+            omega_m = mp::cbrt(
+                    -QQ * half<Real>() - mp::sqrt(mp::pow(PP * third<Real>(), 3) + mp::pow(QQ * half<Real>(), 2)));
         }
 
-        Real z = std::sqrt((omega_p + omega_m - AA * third<Real>()) * half<Real>());
+        Real z = mp::sqrt((omega_p + omega_m - AA * third<Real>()) * half<Real>());
 
         Real sqrt_in_1 = -(AA * half<Real>()) - z * z + BB / (4 * z);
         Real sqrt_in_2 = -(AA * half<Real>()) - z * z - BB / (4 * z);
 
-        std::complex<Real> r1_c = -z - std::sqrt(std::complex<Real>(sqrt_in_1));
-        std::complex<Real> r2_c = -z + std::sqrt(std::complex<Real>(sqrt_in_1));
-        std::complex<Real> r3_c = z - std::sqrt(std::complex<Real>(sqrt_in_2));
-        std::complex<Real> r4_c = z + std::sqrt(std::complex<Real>(sqrt_in_2));
+        Complex r1_c = -z - mp::sqrt(Complex{sqrt_in_1});
+        Complex r2_c = -z + mp::sqrt(Complex{sqrt_in_1});
+        Complex r3_c = z - mp::sqrt(Complex{sqrt_in_2});
+        Complex r4_c = z + mp::sqrt(Complex{sqrt_in_2});
 
         // determine the radial case
         if (sqrt_in_1 < 0) {
@@ -105,8 +114,8 @@ private:
             radial_potential_root_type = RadialPotentialRootType::TYPE_IV;
             r1 = r2 = r3 = r4 = std::numeric_limits<Real>::quiet_NaN();
         } else {
-            r1 = std::real(r1_c);
-            r2 = std::real(r2_c);
+            r1 = mp::real(r1_c);
+            r2 = mp::real(r2_c);
 
             if (sqrt_in_2 < 0) {
                 // case III: two real roots inside horiz.
@@ -114,15 +123,15 @@ private:
                 radial_potential_root_type = RadialPotentialRootType::TYPE_III;
                 r3 = r4 = std::numeric_limits<Real>::quiet_NaN();
             } else {
-                r3 = std::real(r3_c);
-                r4 = std::real(r4_c);
+                r3 = mp::real(r3_c);
+                r4 = mp::real(r4_c);
 
                 if (r4 < rp) {
                     // case II: four real roots inside horiz.
                     // inside critical curve, motion between r4 and infinity with no radial turning
                     radial_potential_root_type = RadialPotentialRootType::TYPE_II;
                 } else {
-                    // std::real(r4) > rp
+                    // mp::real(r4) > rp
                     // case I: four real roots, two outside horiz.
                     // outside critical curve, motion between r4 and infinity with one radial turning
                     radial_potential_root_type = RadialPotentialRootType::TYPE_I;
@@ -132,14 +141,14 @@ private:
     }
 
     void init_radial_coeffs() {
-        A = std::sqrt((r3 - r2) * (r4 - r2));
-        B = std::sqrt((r3 - r1) * (r4 - r1));
+        A = mp::sqrt((r3 - r2) * (r4 - r2));
+        B = mp::sqrt((r3 - r1) * (r4 - r1));
 
         alpha_0 = (B + A) / (B - A);
         alpha_p = (B * (rp - r2) + A * (rp - r1)) / (B * (rp - r2) - A * (rp - r1));
         alpha_m = (B * (rm - r2) + A * (rm - r1)) / (B * (rm - r2) - A * (rm - r1));
 
-        k3 = (std::pow(A + B, 2) - std::pow(r2 - r1, 2)) / (4 * A * B);
+        k3 = (mp::pow(A + B, 2) - mp::pow(r2 - r1, 2)) / (4 * A * B);
     }
 
     Real x3(Real r) const {
@@ -147,13 +156,13 @@ private:
     }
 
     Real F3(Real r) const {
-        return 1 / std::sqrt(A * B) * boost::math::ellint_1(std::acos(x3(r)), k3);
+        return 1 / mp::sqrt(A * B) * boost::math::ellint_1(mp::acos(x3(r)), k3);
     }
 
     Real f1(Real alpha, Real curlyPhi, Real j) const {
-        Real temp1 = std::sqrt((alpha * alpha - 1) / (j + (1 - j) * alpha * alpha));
-        Real temp2 = temp1 * std::sqrt(1 - j * std::sin(curlyPhi) * std::sin(curlyPhi));
-        return temp1 / 2 * std::log(std::abs((temp2 + std::sin(curlyPhi)) / (temp2 - std::sin(curlyPhi))));
+        Real temp1 = mp::sqrt((alpha * alpha - 1) / (j + (1 - j) * alpha * alpha));
+        Real temp2 = temp1 * mp::sqrt(1 - j * mp::sin(curlyPhi) * mp::sin(curlyPhi));
+        return temp1 / 2 * mp::log(mp::abs((temp2 + mp::sin(curlyPhi)) / (temp2 - mp::sin(curlyPhi))));
     }
 
     Real R1(Real alpha, Real curlyPhi, Real j) const {
@@ -164,22 +173,22 @@ private:
 
     Real R2(Real alpha, Real curlyPhi, Real j) const {
         return 1 / (alpha * alpha - 1) * (boost::math::ellint_1(curlyPhi, j) -
-                                          std::pow(alpha, 2) / (j + (1 - j) * alpha * alpha) *
+                                          mp::pow(alpha, 2) / (j + (1 - j) * alpha * alpha) *
                                           (boost::math::ellint_2(curlyPhi, j) -
-                                           (alpha * std::sin(curlyPhi) *
-                                            std::sqrt(1 - j * std::pow(std::sin(curlyPhi), 2))) /
-                                           (1 + alpha * std::cos(curlyPhi)))) +
-               1 / (j + (1 - j) * alpha * alpha) * (2 * j - std::pow(alpha, 2) / (alpha * alpha - 1)) *
+                                           (alpha * mp::sin(curlyPhi) *
+                                            mp::sqrt(1 - j * mp::pow(mp::sin(curlyPhi), 2))) /
+                                           (1 + alpha * mp::cos(curlyPhi)))) +
+               1 / (j + (1 - j) * alpha * alpha) * (2 * j - mp::pow(alpha, 2) / (alpha * alpha - 1)) *
                R1(alpha, curlyPhi, j);
     }
 
     Real Pi13(Real r) const {
-        return (2 * (r2 - r1) * std::sqrt(A * B)) / (B * B - A * A) * R1(alpha_0, std::acos(x3(r)), k3);
+        return (2 * (r2 - r1) * mp::sqrt(A * B)) / (B * B - A * A) * R1(alpha_0, mp::acos(x3(r)), k3);
     }
 
     Real Pi23(Real r) const {
-        return std::pow(((2 * (r2 - r1) * std::sqrt(A * B)) / (B * B - A * A)), 2) *
-               R2(alpha_0, std::acos(x3(r)), k3);
+        return mp::pow(((2 * (r2 - r1) * mp::sqrt(A * B)) / (B * B - A * A)), 2) *
+               R2(alpha_0, mp::acos(x3(r)), k3);
     }
 
     Real I_0(Real r) const {
@@ -191,23 +200,23 @@ private:
     }
 
     Real I_2(Real r) const {
-        return std::pow(((B * r2 + A * r1) / (B + A)), 2) * F3(r) +
+        return mp::pow(((B * r2 + A * r1) / (B + A)), 2) * F3(r) +
                2 * ((B * r2 + A * r1) / (B + A)) * Pi13(r) +
-               std::sqrt(A * B) * Pi23(r);
+               mp::sqrt(A * B) * Pi23(r);
     }
 
     Real I_p(Real r) const {
         return -1 / (B * (rp - r2) + A * (rp - r1)) * ((B + A) * F3(r) +
-                                                       (2 * (r2 - r1) * std::sqrt(A * B)) /
+                                                       (2 * (r2 - r1) * mp::sqrt(A * B)) /
                                                        (B * (rp - r2) - A * (rp - r1)) *
-                                                       R1(alpha_p, std::acos(x3(r)), k3));
+                                                       R1(alpha_p, mp::acos(x3(r)), k3));
     }
 
     Real I_m(Real r) const {
         return -1 / (B * (rm - r2) + A * (rm - r1)) * ((B + A) * F3(r) +
-                                                       (2 * (r2 - r1) * std::sqrt(A * B)) /
+                                                       (2 * (r2 - r1) * mp::sqrt(A * B)) /
                                                        (B * (rm - r2) - A * (rm - r1)) *
-                                                       R1(alpha_m, std::acos(x3(r)), k3));
+                                                       R1(alpha_m, mp::acos(x3(r)), k3));
     }
 
     void init_by_lambda_q(Real lambda_, Real q_) {
@@ -221,23 +230,23 @@ private:
 
     // convert rc, d to lambda, q. Here the vertical distance d is defined on the (lambda, q) plane, q = sqrt(eta)
     void init_by_rc_d(Real rc, Real d) {
-        Real lambda_c = a + (rc * (2 * std::pow(a, 2) + (-3 + rc) * rc)) / (a - a * rc);
-        Real eta_c = -((std::pow(rc, 3) * (-4 * std::pow(a, 2) + std::pow(-3 + rc, 2) * rc)) /
-                       (std::pow(a, 2) * std::pow(-1 + rc, 2)));
-        Real qc = std::sqrt(eta_c);
+        Real lambda_c = a + (rc * (2 * mp::pow(a, 2) + (-3 + rc) * rc)) / (a - a * rc);
+        Real eta_c = -((mp::pow(rc, 3) * (-4 * mp::pow(a, 2) + mp::pow(-3 + rc, 2) * rc)) /
+                       (mp::pow(a, 2) * mp::pow(-1 + rc, 2)));
+        Real qc = mp::sqrt(eta_c);
 
-        Real coeff = std::sqrt(
-                std::pow(-3 + rc, 2) / (std::pow(a, 2) * std::pow(-1 + rc, 2)) + eta_c / std::pow(rc, 4));
+        Real coeff = mp::sqrt(
+                mp::pow(-3 + rc, 2) / (mp::pow(a, 2) * mp::pow(-1 + rc, 2)) + eta_c / mp::pow(rc, 4));
 
         // unit normal vector of the critical curve
         init_by_lambda_q(lambda_c + d * ((3 - rc) / (a * (-1 + rc)) / coeff),
-                         qc + d * (std::sqrt(eta_c) / std::pow(rc, 2) / coeff));
+                         qc + d * (mp::sqrt(eta_c) / mp::pow(rc, 2) / coeff));
     }
 public:
     // 输入参数lambda, q，输出光线到无穷远处的theta、phi、传播时间、角向转折次数m、角向"半轨道"数
     ForwardRayTracing(Real a_, Real r_s_, Real theta_s_, Real r_inf_, Sign nu_r_, Sign nu_theta_)
             : a(a_), r_s(r_s_), theta_s(theta_s_), r_inf(r_inf_), nu_r(nu_r_), nu_theta(nu_theta_),
-              rp(1 + std::sqrt(1 - a_ * a_)), rm(1 - std::sqrt(1 - a_ * a_)) {
+              rp(1 + mp::sqrt(1 - a_ * a_)), rm(1 - mp::sqrt(1 - a_ * a_)) {
     }
 
     Real I_r(Real r) const {
@@ -297,18 +306,18 @@ public:
     }
 
     Real G_theta(Real theta) const {
-        return -1 / std::sqrt(-um * a * a) *
-               boost::math::ellint_1(std::asin(std::cos(theta) / std::sqrt(up)), up / um);
+        return -1 / mp::sqrt(-um * a * a) *
+               boost::math::ellint_1(mp::asin(mp::cos(theta) / mp::sqrt(up)), up / um);
     }
 
     Real G_phi(Real theta) const {
-        return -1 / std::sqrt(-um * a * a) *
-               boost::math::ellint_3(up, std::asin(std::cos(theta) / std::sqrt(up)), up / um);
+        return -1 / mp::sqrt(-um * a * a) *
+               boost::math::ellint_3(up, mp::asin(mp::cos(theta) / mp::sqrt(up)), up / um);
     }
 
     Real G_t(Real theta) const {
-        return (2 * up) / std::sqrt(-um * a * a) / (2 * up / um) *
-               (boost::math::ellint_2(std::asin(std::cos(theta) / std::sqrt(up)), up / um) -
+        return (2 * up) / mp::sqrt(-um * a * a) / (2 * up / um) *
+               (boost::math::ellint_2(mp::asin(mp::cos(theta) / mp::sqrt(up)), up / um) -
                 boost::math::ellint_1(theta));
     }
 
@@ -356,13 +365,13 @@ public:
         // Minor time
         Real tau_o = radial_integrals[0];
 
-        Real theta_inf = std::acos(-std::sqrt(up) * to_integral(nu_theta) *
+        Real theta_inf = mp::acos(-mp::sqrt(up) * to_integral(nu_theta) *
                                    boost::math::jacobi_sn(
-                                           std::sqrt(-um * a * a) * (tau_o + to_integral(nu_theta) * G_theta_theta_s),
+                                           mp::sqrt(-um * a * a) * (tau_o + to_integral(nu_theta) * G_theta_theta_s),
                                            up / um));
 
         // Angular integrals
-        Real m_Real = 1 + std::floor(std::real((tau_o - G_theta_theta_p + to_integral(nu_theta) * G_theta_theta_s) /
+        Real m_Real = 1 + mp::floor(mp::real((tau_o - G_theta_theta_p + to_integral(nu_theta) * G_theta_theta_s) /
                                                (G_theta_theta_p - G_theta_theta_m)));
 
         using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
