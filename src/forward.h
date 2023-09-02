@@ -210,13 +210,6 @@ private:
                                                        R1(alpha_m, std::acos(x3(r)), k3));
     }
 
-public:
-    // 输入参数lambda, q，输出光线到无穷远处的theta、phi、传播时间、角向转折次数m、角向"半轨道"数
-    ForwardRayTracing(Real a_, Real r_s_, Real theta_s_, Real r_inf_, Sign nu_r_, Sign nu_theta_)
-            : a(a_), r_s(r_s_), theta_s(theta_s_), r_inf(r_inf_), nu_r(nu_r_), nu_theta(nu_theta_),
-              rp(1 + std::sqrt(1 - a_ * a_)), rm(1 - std::sqrt(1 - a_ * a_)) {
-    }
-
     void init_by_lambda_q(Real lambda_, Real q_) {
         lambda = lambda_;
         q = q_;
@@ -240,6 +233,12 @@ public:
         init_by_lambda_q(lambda_c + d * ((3 - rc) / (a * (-1 + rc)) / coeff),
                          qc + d * (std::sqrt(eta_c) / std::pow(rc, 2) / coeff));
     }
+public:
+    // 输入参数lambda, q，输出光线到无穷远处的theta、phi、传播时间、角向转折次数m、角向"半轨道"数
+    ForwardRayTracing(Real a_, Real r_s_, Real theta_s_, Real r_inf_, Sign nu_r_, Sign nu_theta_)
+            : a(a_), r_s(r_s_), theta_s(theta_s_), r_inf(r_inf_), nu_r(nu_r_), nu_theta(nu_theta_),
+              rp(1 + std::sqrt(1 - a_ * a_)), rm(1 - std::sqrt(1 - a_ * a_)) {
+    }
 
     Real I_r(Real r) const {
         return I_0(r);
@@ -255,8 +254,6 @@ public:
     }
 
     std::pair<RayStatus, std::array<Real, 3>> calc_I() const {
-        bool radial_turning = r4 > rp; // Assuming roots returns a real number. Otherwise, check for real numbers.
-
         std::array<std::function<Real(Real)>, 3> anti_ders = {
                 [&](Real r) -> Real { return I_r(r); },
                 [&](Real r) -> Real { return I_phi(r); },
@@ -266,6 +263,7 @@ public:
         std::array<Real, 3> results = {};
         std::fill(results.begin(), results.end(), std::numeric_limits<Real>::quiet_NaN());
 
+        bool radial_turning = r4 > rp;
         if (radial_turning) {
             // if there is a radial turning point (i.e. r4 is a real number)
             if (r_s <= r4) {
@@ -325,7 +323,17 @@ public:
         return result;
     }
 
-    RayStatus ray_lambda_q() {
+    RayStatus calc_ray_by_lambda_q(Real lambda_, Real q_) {
+        init_by_lambda_q(lambda_, q_);
+        return calc_ray();
+    }
+
+    RayStatus calc_ray_by_rc_d(Real rc, Real d) {
+        init_by_rc_d(rc, d);
+        return calc_ray();
+    }
+
+    RayStatus calc_ray() {
         if (eta <= 0) {
             return RayStatus::ETA_OUT_OF_RANGE;
         }
@@ -335,7 +343,6 @@ public:
         }
 
         bool radial_turning = r4 > rp;
-
         if (!radial_turning && nu_r == Sign::NEGATIVE) return RayStatus::FALLS_IN;
         if (radial_turning && r_s <= r4) return RayStatus::CONFINED;
 
