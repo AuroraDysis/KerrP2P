@@ -1,6 +1,7 @@
 #include "forward.h"
 
 #define square(x) ((x) * (x))
+#define cube(x) ((x) * (x) * (x))
 
 void IIntegral2::pre_calc() {
   const Real &rp = data.rp;
@@ -212,11 +213,11 @@ void ForwardRayTracing::init_radial_potential_roots() {
   Real BB = 2 * (eta + (lambda - a) * (lambda - a));
   Real CC = -a * a * eta;
   Real PP = -AA * AA / 12 - CC;
-  Real QQ = (-2 * mp::pow(AA, 3) - 27 * mp::pow(BB, 2) + 72 * AA * CC) / 216;
+  Real QQ = (-2 * cube(AA) - 27 * square(BB) + 72 * AA * CC) / 216;
 
   Complex omega_pm;
   Real omega_pm_1 = -QQ * half<Real>();
-  Real omega_pm_2 = mp::pow(PP, 3) / 27 + mp::pow(QQ, 2) / 4;
+  Real omega_pm_2 = cube(PP) / 27 + square(QQ) / 4;
 
   if (omega_pm_2 > 0) {
     omega_pm = mp::cbrt(omega_pm_1 + mp::sqrt(omega_pm_2)) +
@@ -229,8 +230,8 @@ void ForwardRayTracing::init_radial_potential_roots() {
 
   Real z = mp::sqrt((mp::real(omega_pm) - AA * third<Real>()) * half<Real>());
 
-  Complex sqrt_in_1 = -(AA * half<Real>()) - z * z + BB / (4 * z);
-  Complex sqrt_in_2 = -(AA * half<Real>()) - z * z - BB / (4 * z);
+  Complex sqrt_in_1 = -(AA * half<Real>()) - square(z) + BB / (4 * z);
+  Complex sqrt_in_2 = -(AA * half<Real>()) - square(z) - BB / (4 * z);
 
   r1_c = -z - mp::sqrt(sqrt_in_1);
   r2_c = -z + mp::sqrt(sqrt_in_1);
@@ -310,9 +311,11 @@ RayStatus ForwardRayTracing::calc_ray() {
 
   // Final values of phi and t
   phi_f = radial_integrals[1] + lambda * angular_integrals[1];
-  // t_f = radial_integrals[2] + a * a * angular_integrals[1];
+  if (calc_t_f) {
+    t_f = radial_integrals[2] + square(a) * angular_integrals[2];
+  }
 
-  std::cout << "theta_f: " << theta_f << ", phi_f: " << phi_f
+  std::cout << "theta_f: " << theta_f << ", phi_f: " << phi_f << ", t_f: " << t_f
             << ", m: "
             << m << ", nhalf: " << n_half << std::endl;
   return RayStatus::NORMAL;
@@ -351,15 +354,15 @@ void ForwardRayTracing::reset_by_lambda_q(Real lambda_, Real q_, Sign nu_r_, Sig
 
 void ForwardRayTracing::reset_by_rc_d(const Real &rc, const Real &d, Sign nu_r_, Sign nu_theta_) {
   ray_status = RayStatus::NORMAL;
-  Real lambda_c = a + (rc * (2 * mp::pow(a, 2) + (-3 + rc) * rc)) / (a - a * rc);
-  Real eta_c = -((mp::pow(rc, 3) * (-4 * mp::pow(a, 2) + mp::pow(-3 + rc, 2) * rc)) /
-                 (mp::pow(a, 2) * mp::pow(-1 + rc, 2)));
+  Real lambda_c = a + (rc * (2 * square(a) + (-3 + rc) * rc)) / (a - a * rc);
+  Real eta_c = -((cube(rc) * (-4 * square(a) + square(-3 + rc) * rc)) /
+                 (square(a) * square(-1 + rc)));
   Real qc = mp::sqrt(eta_c);
 
   Real coeff = mp::sqrt(
-      mp::pow(-3 + rc, 2) / (mp::pow(a, 2) * mp::pow(-1 + rc, 2)) + eta_c / mp::pow(rc, 4));
+      square(-3 + rc) / (square(a) * square(-1 + rc)) + eta_c / mp::pow(rc, 4));
 
   reset_by_lambda_q(lambda_c + d * ((3 - rc) / (a * (-1 + rc)) / coeff),
-                    qc + d * (mp::sqrt(eta_c) / mp::pow(rc, 2) / coeff), nu_r_, nu_theta_);
+                    qc + d * (mp::sqrt(eta_c) / square(rc) / coeff), nu_r_, nu_theta_);
   reset_variables();
 }
