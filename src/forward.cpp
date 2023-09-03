@@ -9,28 +9,7 @@
 //    return 1 / mp::sqrt(A * B) * boost::math::ellint_1(mp::acos(x3(r)), k3);
 //  }
 //
-//  Real f1(Real alpha, Real curlyPhi, Real j) const {
-//    Real temp1 = mp::sqrt((alpha * alpha - 1) / (j + (1 - j) * alpha * alpha));
-//    Real temp2 = temp1 * mp::sqrt(1 - j * mp::sin(curlyPhi) * mp::sin(curlyPhi));
-//    return temp1 / 2 * mp::log(mp::abs((temp2 + mp::sin(curlyPhi)) / (temp2 - mp::sin(curlyPhi))));
-//  }
-//
-//  Real R1(Real alpha, Real curlyPhi, Real j) const {
-//    return 1 / (1 - alpha * alpha) *
-//           (boost::math::ellint_3(alpha * alpha / (alpha * alpha - 1), curlyPhi, j) -
-//            alpha * f1(alpha, curlyPhi, j));
-//  }
-//
-//  Real R2(Real alpha, Real curlyPhi, Real j) const {
-//    return 1 / (alpha * alpha - 1) * (boost::math::ellint_1(curlyPhi, j) -
-//                                      square(alpha) / (j + (1 - j) * alpha * alpha) *
-//                                      (boost::math::ellint_2(curlyPhi, j) -
-//                                       (alpha * mp::sin(curlyPhi) *
-//                                        mp::sqrt(1 - j * square(mp::sin(curlyPhi)))) /
-//                                       (1 + alpha * mp::cos(curlyPhi)))) +
-//           1 / (j + (1 - j) * alpha * alpha) * (2 * j - square(alpha) / (alpha * alpha - 1)) *
-//           R1(alpha, curlyPhi, j);
-//  }
+
 //
 //  Real Pi13(Real r) const {
 //    return (2 * (r2 - r1) * mp::sqrt(A * B)) / (B * B - A * A) * R1(alpha_0, mp::acos(x3(r)), k3);
@@ -162,14 +141,42 @@ void IIntegral3::pre_calc() {
   A = mp::sqrt(square(r34_im) + square(r34_re - r2));
   B = mp::sqrt(square(r34_im) + square(r34_re - r1));
 
-  alpha_0 = (B + A) / (B - A);
+  k3 = ((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B);
+  // alpha_0 = (B + A) / (B - A);
   alpha_p = (B * (rp - r2) + A * (rp - r1)) / (B * (rp - r2) - A * (rp - r1));
   alpha_m = (B * (rm - r2) + A * (rm - r1)) / (B * (rm - r2) - A * (rm - r1));
 
-  k3 = (square(A + B) - square(r2 - r1)) / (4 * A * B);
+  acos_x3_rs = mp::acos(-1 + (2 * A * (r_s - r1)) / (A * (r_s - r1) + B * (r_s - r2)));
+  acos_x3_inf = mp::acos((A - B) / (A + B));
+}
 
-  asin_x3_rs = -1 + (2 * A * (r_s - r1)) / (A * (r_s - r1) + B * (r_s - r2));
-  asin_x3_inf = (A - B) / (A + B);
+Real IIntegral3::f1(const Real &acos_x3, const Real &alpha, const Real &alpha2) const {
+  return (mp::sqrt((-1 + alpha2) /
+                   (alpha2 + k3 - alpha2 * k3)) *
+          mp::log(mp::abs((mp::sin(acos_x3) +
+                           mp::sqrt((-1 + alpha2) /
+                                    (alpha2 + k3 - alpha2 * k3)) *
+                           mp::sqrt(1 - k3 * square(mp::sin(acos_x3)))) /
+                          (-mp::sin(acos_x3) + mp::sqrt((-1 + alpha2) /
+                                                        (alpha2 + k3 - alpha2 * k3)) *
+                                               mp::sqrt(1 - k3 * square(mp::sin(acos_x3))))))) * half<Real>();
+}
+
+Real R1(const Real &alpha) const {
+  return 1 / (1 - alpha * alpha) *
+         (boost::math::ellint_3(alpha * alpha / (alpha * alpha - 1), curlyPhi, j) -
+          alpha * f1(alpha, curlyPhi, j));
+}
+
+Real R2(const Real &alpha) const {
+  return 1 / (alpha * alpha - 1) * (boost::math::ellint_1(curlyPhi, j) -
+                                    alpha2 / (j + (1 - j) * alpha * alpha) *
+                                    (boost::math::ellint_2(curlyPhi, j) -
+                                     (alpha * mp::sin(curlyPhi) *
+                                      mp::sqrt(1 - j * square(mp::sin(curlyPhi)))) /
+                                     (1 + alpha * mp::cos(curlyPhi)))) +
+         1 / (j + (1 - j) * alpha * alpha) * (2 * j - alpha2 / (alpha * alpha - 1)) *
+         R1(alpha, curlyPhi, j);
 }
 
 void IIntegral3::calc_x(std::array<Real, 3>& integral, const Real &x) {
@@ -178,8 +185,8 @@ void IIntegral3::calc_x(std::array<Real, 3>& integral, const Real &x) {
 
 void IIntegral3::calc(bool is_plus) {
   pre_calc();
-  calc_x(integral_rs, asin_x3_rs);
-  calc_x(integral_inf, asin_x3_inf);
+  calc_x(integral_rs, acos_x3_rs);
+  calc_x(integral_inf, acos_x3_inf);
 
   auto &radial_integrals = data.radial_integrals;
 

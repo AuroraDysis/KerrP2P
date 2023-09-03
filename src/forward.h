@@ -82,12 +82,14 @@ class IIntegral3 {
 private:
   ForwardRayTracing &data;
 
-  Real asin_x3_rs, asin_x3_inf;
+  Real acos_x3_rs, acos_x3_inf;
   Real r34_re, r34_im;
-  Real A, B, alpha_0, alpha_p, alpha_m, k3;
+  Real A, B, alpha_p, alpha_m, k3;
 
   std::array<Real, 3> integral_rs;
   std::array<Real, 3> integral_inf;
+
+  Real IIntegral3::f1(const Real &alpha) const;
 public:
   explicit IIntegral3(ForwardRayTracing &parent) : data(parent) {
   }
