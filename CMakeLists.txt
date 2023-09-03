@@ -4,7 +4,11 @@ project(forward_ray_tracing)
 set(CMAKE_CXX_STANDARD 17)
 
 option(ENABLE_TESTING "Enable Test Builds" ON)
-option(PRECISION "Precision: [FLOAT64, FLOAT128, BIGFLOAT]" BIGFLOAT)
+option(ENABLE_FLOAT64 "Enable float64 precision" ON)
+option(ENABLE_FLOAT128 "Enable float128 precision" OFF)
+option(ENABLE_BIGFLOAT "Enable bigfloat precision" OFF)
+
+message (STATUS "ENABLE_FLOAT64 = ${ENABLE_FLOAT64}")
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -12,12 +16,19 @@ find_package(Boost 1.82 REQUIRED)
 find_package(Catch2 3 REQUIRED)
 set(LIBRARIES Boost::boost)
 
-if (PRECISION STREQUAL "FLOAT64")
+if (ENABLE_FLOAT64)
+    message("Enable float64 features")
     add_definitions(-DFLOAT64)
-elseif (PRECISION STREQUAL "FLOAT128")
+endif()
+
+if (ENABLE_FLOAT128)
+    message("Enable float128 precision")
     set(LIBRARIES ${LIBRARIES} quadmath)
     add_definitions(-DFLOAT128)
-elseif (PRECISION STREQUAL "BIGFLOAT")
+endif()
+
+if (ENABLE_BIGFLOAT)
+    message("Enable bigfloat precision")
     find_package(GMP REQUIRED)
     find_package(MPFR REQUIRED)
     find_package(MPC REQUIRED)

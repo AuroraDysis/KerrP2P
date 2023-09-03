@@ -17,7 +17,7 @@ TEST_CASE("Forward Functions", "[forward]") {
   Sign nu_r = Sign::NEGATIVE;
   Sign nu_theta = Sign::NEGATIVE;
 
-  ForwardRayTracing forward(a, r_s, theta_s, nu_r, nu_theta);
+  ForwardRayTracing forward(a, r_s, theta_s);
 
 //    ForwardRayTracing forward();
 //    SECTION("lamqv2") {

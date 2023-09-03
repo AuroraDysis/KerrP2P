@@ -14,24 +14,27 @@ using boost::math::constants::half;
 using boost::math::constants::third;
 using boost::math::constants::sixth;
 
-//using Real = double;
-//using Complex = std::complex<Real>;
-//namespace mp = std;
-// using Real = long double;
+#ifdef FLOAT64
+using Real = double;
+using Complex = std::complex<Real>;
+namespace mp = std;
+#endif
 
-//#include <boost/multiprecision/float128.hpp>
-//#include <boost/multiprecision/complex128.hpp>
-//using Real = boost::multiprecision::float128;
-//using Complex = boost::multiprecision::complex128;
-//namespace mp = boost::multiprecision;
+#ifdef FLOAT128
+#include <boost/multiprecision/float128.hpp>
+#include <boost/multiprecision/complex128.hpp>
+using Real = boost::multiprecision::float128;
+using Complex = boost::multiprecision::complex128;
+namespace mp = boost::multiprecision;
+#endif
 
+#ifdef BIGFLOAT
 #include <boost/multiprecision/mpfr.hpp>
 #include <boost/multiprecision/mpc.hpp>
-#include <utility>
-
 using Real = boost::multiprecision::mpfr_float_50;
 using Complex = boost::multiprecision::mpc_complex_50;
 namespace mp = boost::multiprecision;
+#endif
 
 enum class RayStatus {
   NORMAL,
@@ -84,12 +87,13 @@ private:
 
   Real acos_x3_rs, acos_x3_inf;
   Real r34_re, r34_im;
-  Real A, B, alpha_p, alpha_m, k3;
+  Real A, B, alpha_p, alpha_p2, alpha_m, alpha_m2, k3;
+  Real F3, R1_alpha_p, R1_alpha_m, Ip, Im;
 
   std::array<Real, 3> integral_rs;
   std::array<Real, 3> integral_inf;
 
-  Real IIntegral3::f1(const Real &alpha) const;
+  Real R1(const Real &acos_x3, const Real &alpha, const Real &alpha2) const;
 public:
   explicit IIntegral3(ForwardRayTracing &parent) : data(parent) {
   }

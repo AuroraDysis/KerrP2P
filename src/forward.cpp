@@ -145,42 +145,48 @@ void IIntegral3::pre_calc() {
   // alpha_0 = (B + A) / (B - A);
   alpha_p = (B * (rp - r2) + A * (rp - r1)) / (B * (rp - r2) - A * (rp - r1));
   alpha_m = (B * (rm - r2) + A * (rm - r1)) / (B * (rm - r2) - A * (rm - r1));
+  alpha_p2 = square(alpha_p);
+  alpha_m2 = square(alpha_m);
 
   acos_x3_rs = mp::acos(-1 + (2 * A * (r_s - r1)) / (A * (r_s - r1) + B * (r_s - r2)));
   acos_x3_inf = mp::acos((A - B) / (A + B));
 }
 
-Real IIntegral3::f1(const Real &acos_x3, const Real &alpha, const Real &alpha2) const {
-  return (mp::sqrt((-1 + alpha2) /
-                   (alpha2 + k3 - alpha2 * k3)) *
-          mp::log(mp::abs((mp::sin(acos_x3) +
-                           mp::sqrt((-1 + alpha2) /
-                                    (alpha2 + k3 - alpha2 * k3)) *
-                           mp::sqrt(1 - k3 * square(mp::sin(acos_x3)))) /
-                          (-mp::sin(acos_x3) + mp::sqrt((-1 + alpha2) /
-                                                        (alpha2 + k3 - alpha2 * k3)) *
-                                               mp::sqrt(1 - k3 * square(mp::sin(acos_x3))))))) * half<Real>();
+
+Real IIntegral3::R1(const Real &acos_x3, const Real &alpha, const Real &alpha2) const {
+  return 1 / (1 - alpha2) *
+         (boost::math::ellint_3(alpha2 / (alpha2 - 1), acos_x3, k3) -
+          alpha * ((mp::sqrt((-1 + alpha2) /
+                             (alpha2 + k3 - alpha2 * k3)) *
+                    mp::log(mp::abs((mp::sin(acos_x3) +
+                                     mp::sqrt((-1 + alpha2) /
+                                              (alpha2 + k3 - alpha2 * k3)) *
+                                     mp::sqrt(1 - k3 * square(mp::sin(acos_x3)))) /
+                                    (-mp::sin(acos_x3) + mp::sqrt((-1 + alpha2) /
+                                                                  (alpha2 + k3 - alpha2 * k3)) *
+                                                         mp::sqrt(1 - k3 * square(mp::sin(acos_x3))))))) *
+                   half<Real>()));
 }
 
-Real R1(const Real &alpha) const {
-  return 1 / (1 - alpha * alpha) *
-         (boost::math::ellint_3(alpha * alpha / (alpha * alpha - 1), curlyPhi, j) -
-          alpha * f1(alpha, curlyPhi, j));
-}
+void IIntegral3::calc_x(std::array<Real, 3>& integral, const Real &acos_x3) {
+  const Real &a = data.a;
+  const Real &lambda = data.lambda;
+  const Real &rp = data.rp;
+  const Real &rm = data.rm;
+  const Real &r1 = data.r1;
+  const Real &r2 = data.r2;
 
-Real R2(const Real &alpha) const {
-  return 1 / (alpha * alpha - 1) * (boost::math::ellint_1(curlyPhi, j) -
-                                    alpha2 / (j + (1 - j) * alpha * alpha) *
-                                    (boost::math::ellint_2(curlyPhi, j) -
-                                     (alpha * mp::sin(curlyPhi) *
-                                      mp::sqrt(1 - j * square(mp::sin(curlyPhi)))) /
-                                     (1 + alpha * mp::cos(curlyPhi)))) +
-         1 / (j + (1 - j) * alpha * alpha) * (2 * j - alpha2 / (alpha * alpha - 1)) *
-         R1(alpha, curlyPhi, j);
-}
-
-void IIntegral3::calc_x(std::array<Real, 3>& integral, const Real &x) {
-
+  R1_alpha_p = R1(acos_x3, alpha_p, alpha_p2);
+  R1_alpha_m = R1(acos_x3, alpha_m, alpha_m2);
+  F3 = boost::math::ellint_1(acos_x3, k3) / mp::sqrt(A * B);
+  Ip = -(((A + B) * F3 + (2 * mp::sqrt(A * B) * R1_alpha_p * (-r1 + r2)) /
+                         (A * (r1 - rp) + B * (-r2 + rp))) /
+         (-(A * r1) - B * r2 + (A + B) * rp));
+  Im = -(((A + B) * F3 + (2 * mp::sqrt(A * B) * R1_alpha_m * (-r1 + r2)) /
+                         (A * (r1 - rm) + B * (-r2 + rm))) /
+         (-(A * r1) - B * r2 + (A + B) * rm));
+  integral[0] = F3;
+  integral[1] = (a * (Im * (-(a * lambda) + 2 * rm) + Ip * (a * lambda - 2 * rp))) / (rm - rp);
 }
 
 void IIntegral3::calc(bool is_plus) {
