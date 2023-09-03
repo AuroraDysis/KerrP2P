@@ -66,6 +66,16 @@ private:
   bool r12_is_real, r34_is_real;
   // radial coeffs
   Real A, B, alpha_0, alpha_p, alpha_m, k3;
+  // minor time
+  Real tau_o;
+  // I_theta, I_phi, I_t
+  std::array<Real, 3> radial_integrals = {std::numeric_limits<Real>::quiet_NaN(),
+                                          std::numeric_limits<Real>::quiet_NaN(),
+                                          std::numeric_limits<Real>::quiet_NaN()};
+  // G_theta, G_phi, G_t
+  std::array<Real, 3> angular_integrals = {std::numeric_limits<Real>::quiet_NaN(),
+                                           std::numeric_limits<Real>::quiet_NaN(),
+                                           std::numeric_limits<Real>::quiet_NaN()};
 
   // Range of theta: For Type A (eta > 0)
   void init_theta_pm() {
@@ -219,6 +229,12 @@ private:
   }
 
 public:
+  Real theta_inf = std::numeric_limits<Real>::quiet_NaN();
+  Real phi_inf = std::numeric_limits<Real>::quiet_NaN();
+  Real t_inf = std::numeric_limits<Real>::quiet_NaN();
+  int m = 0;
+  Real n_half = std::numeric_limits<Real>::quiet_NaN();
+
   // 输入参数lambda, q，输出光线到无穷远处的theta、phi、传播时间、角向转折次数m、角向"半轨道"数
   ForwardRayTracing(Real a_, Real r_s_, Real theta_s_, Sign nu_r_, Sign nu_theta_)
       : a(std::move(a_)), r_s(std::move(r_s_)), theta_s(std::move(theta_s_)), nu_r(nu_r_), nu_theta(nu_theta_),
@@ -303,24 +319,21 @@ public:
                 to_integral(nu_theta) * (pow(-1, m) * G_t(theta_inf) - G_t(theta_s));
 
     G_theta = -1 / mp::sqrt(-um * a * a) *
-           boost::math::ellint_1(mp::asin(mp::cos(theta) / mp::sqrt(up)), up / um);
+              boost::math::ellint_1(mp::asin(mp::cos(theta) / mp::sqrt(up)), up / um);
     G_phi = -1 / mp::sqrt(-um * a * a) *
-           boost::math::ellint_3(up, mp::asin(mp::cos(theta) / mp::sqrt(up)), up / um);
+            boost::math::ellint_3(up, mp::asin(mp::cos(theta) / mp::sqrt(up)), up / um);
     G_t = (2 * up) / mp::sqrt(-um * a * a) / (2 * up / um) *
-           (boost::math::ellint_2(mp::asin(mp::cos(theta) / mp::sqrt(up)), up / um) -
-            boost::math::ellint_1(theta));
+          (boost::math::ellint_2(mp::asin(mp::cos(theta) / mp::sqrt(up)), up / um) -
+           boost::math::ellint_1(theta));
 
     Real G_theta_theta_s = G_theta(theta_s);
     Real G_theta_theta_p = G_theta(theta_p);
     Real G_theta_theta_m = G_theta(theta_m);
 
-    // Minor time
-    Real tau_o = radial_integrals[0];
-
-    Real theta_inf = mp::acos(-mp::sqrt(up) * to_integral(nu_theta) *
-                              boost::math::jacobi_sn(
-                                  mp::sqrt(-um * a * a) * (tau_o + to_integral(nu_theta) * G_theta_theta_s),
-                                  up / um));
+    theta_inf = mp::acos(-mp::sqrt(up) * to_integral(nu_theta) *
+                         boost::math::jacobi_sn(
+                             mp::sqrt(-um * a * a) * (tau_o + to_integral(nu_theta) * G_theta_theta_s),
+                             up / um));
 
     // Angular integrals
     Real m_Real = 1 + mp::floor(mp::real((tau_o - G_theta_theta_p + to_integral(nu_theta) * G_theta_theta_s) /
@@ -331,12 +344,10 @@ public:
     // floor
     int m = RealToInt::convert(m_Real);
 
-    std::array<Real, 3> angular_integrals = calc_G(theta_inf, m);
+    calc_G(theta_inf, m);
 
     // Number of half-orbits
-    Real n_half = tau_o / (G_theta_theta_p - G_theta_theta_m);
-
-    return result;
+    n_half = tau_o / (G_theta_theta_p - G_theta_theta_m);
   }
 
   RayStatus calc_ray_by_lambda_q(Real lambda_, Real q_) {
@@ -361,6 +372,8 @@ public:
     // Radial integrals
     calc_I();
 
+    tau_o = radial_integrals[0];
+
     if (ray_status != RayStatus::NORMAL) {
       return ray_status;
     }
@@ -368,10 +381,10 @@ public:
     calc_G();
 
     // Final values of phi and t
-    Real phi_inf = radial_integrals[1] + lambda * angular_integrals[1];
-    // Real t_inf = radial_integrals[2] + a * a * angular_integrals[1];
+    phi_inf = radial_integrals[1] + lambda * angular_integrals[1];
+    // t_inf = radial_integrals[2] + a * a * angular_integrals[1];
 
-    std::cout << "Theta_inf: " << theta_inf << ", Phi_inf: " << phi_inf << ", tinf-r_inf: " << (t_inf - r_inf)
+    std::cout << "theta_inf: " << theta_inf << ", phi_inf: " << phi_inf
               << ", m: "
               << m << ", nhalf: " << n_half << std::endl;
     return RayStatus::NORMAL;
