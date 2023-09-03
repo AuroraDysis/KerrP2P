@@ -23,12 +23,12 @@
 //
 //  Real R2(Real alpha, Real curlyPhi, Real j) const {
 //    return 1 / (alpha * alpha - 1) * (boost::math::ellint_1(curlyPhi, j) -
-//                                      mp::pow(alpha, 2) / (j + (1 - j) * alpha * alpha) *
+//                                      square(alpha) / (j + (1 - j) * alpha * alpha) *
 //                                      (boost::math::ellint_2(curlyPhi, j) -
 //                                       (alpha * mp::sin(curlyPhi) *
-//                                        mp::sqrt(1 - j * mp::pow(mp::sin(curlyPhi), 2))) /
+//                                        mp::sqrt(1 - j * square(mp::sin(curlyPhi)))) /
 //                                       (1 + alpha * mp::cos(curlyPhi)))) +
-//           1 / (j + (1 - j) * alpha * alpha) * (2 * j - mp::pow(alpha, 2) / (alpha * alpha - 1)) *
+//           1 / (j + (1 - j) * alpha * alpha) * (2 * j - square(alpha) / (alpha * alpha - 1)) *
 //           R1(alpha, curlyPhi, j);
 //  }
 //
@@ -37,7 +37,7 @@
 //  }
 //
 //  Real Pi23(Real r) const {
-//    return mp::pow(((2 * (r2 - r1) * mp::sqrt(A * B)) / (B * B - A * A)), 2) *
+//    return square(((2 * (r2 - r1) * mp::sqrt(A * B)) / (B * B - A * A))) *
 //           R2(alpha_0, mp::acos(x3(r)), k3);
 //  }
 //
@@ -50,7 +50,7 @@
 //  }
 //
 //  Real I_2(Real r) const {
-//    return mp::pow(((B * r2 + A * r1) / (B + A)), 2) * F3(r) +
+//    return square(((B * r2 + A * r1) / (B + A))) * F3(r) +
 //           2 * ((B * r2 + A * r1) / (B + A)) * Pi13(r) +
 //           mp::sqrt(A * B) * Pi23(r);
 //  }
@@ -84,69 +84,113 @@
 //           + 4 * I_0(r) + 2 * I_1(r) + I_2(r);
 //  }
 
-void IIntegral::calc() {
-  RayStatus &ray_status = data.ray_status;
-  const Real &a = data.a;
+#define square(x) ((x) * (x))
+
+void IIntegral2::pre_calc() {
+  const Real &rp = data.rp;
+  const Real &rm = data.rm;
+
+  const Real &r1 = data.r1;
+  const Real &r2 = data.r2;
+  const Real &r3 = data.r3;
+  const Real &r4 = data.r4;
   const Real &r_s = data.r_s;
-  const Real &theta_s = data.theta_s;
-  Sign nu_r = data.nu_r;
+
+  asin_x2_rs = mp::sqrt(((r1 - r3) * (r_s - r4)) / ((r_s - r3) * (r1 - r4)));
+  asin_x2_inf = mp::sqrt((r1 - r3) / (r1 - r4));
+  k = ((-r2 + r3) * (-r1 + r4)) / ((r1 - r3) * (r2 - r4));
+
+  E2_Numerator = mp::sqrt((r1 - r3) * (r2 - r4));
+  F2_Denominator = 1 / E2_Numerator;
+  Pi_p2_T1 = ((r1 - r4) * (r3 - rp)) / ((r1 - r3) * (r4 - rp));
+  Pi_m2_T1 = ((r1 - r4) * (r3 - rm)) / ((r1 - r3) * (r4 - rm));
+  Pi_p2_m2_Numerator = 2 * (-r3 + r4);
+  Pi_p2_Denominator = 1 / (E2_Numerator * (-r3 + rp) * (-r4 + rp));
+  Pi_m2_Denominator = 1 / (E2_Numerator * (-r3 + rm) * (-r4 + rm));
+}
+
+void IIntegral2::calc_x(std::array<Real, 3>& integral, const Real &asin_x2) {
+  const Real &a = data.a;
+  const Real &lambda = data.lambda;
+  const Real &rp = data.rp;
+  const Real &rm = data.rm;
+  const Real &r3 = data.r3;
+
+  F2 = (2 * boost::math::ellint_1(asin_x2, k)) * F2_Denominator;
+  E2 = E2_Numerator * boost::math::ellint_2(asin_x2, k);
+  Pi_p2 = (Pi_p2_m2_Numerator * boost::math::ellint_3(Pi_p2_T1, asin_x2, k)) * Pi_p2_Denominator;
+  Pi_m2 = (Pi_p2_m2_Numerator * boost::math::ellint_3(Pi_m2_T1, asin_x2, k)) * Pi_m2_Denominator;
+  I_p = F2 / (r3 - rp) - Pi_p2;
+  I_m = F2 / (r3 - rm) - Pi_m2;
+
+  // I_r
+  integral[0] = F2;
+  // I_phi
+  integral[1] = (a * (-2 * rp * I_p + a * I_p * lambda + (2 * rm - a * lambda) * I_m)) / (rm - rp);
+}
+
+void IIntegral2::calc(bool is_plus) {
+  pre_calc();
+  calc_x(integral_rs, asin_x2_rs);
+  calc_x(integral_inf, asin_x2_inf);
+
+  auto &radial_integrals = data.radial_integrals;
+
+  for (int i = 0; i < 2; ++i) {
+    if (is_plus) {
+      radial_integrals[i] = integral_inf[i] + integral_rs[i];
+    } else {
+      radial_integrals[i] = integral_inf[i] - integral_rs[i];
+    }
+  }
+}
+
+void IIntegral3::pre_calc() {
+  const Real &rp = data.rp;
+  const Real &rm = data.rm;
+  const Real &r_s = data.r_s;
+  // two real roots, both inside horizon, r_1 < r_2 < r_- < r_+ and r_3 = conj(r_4)
+  const Real &r1 = data.r1;
+  const Real &r2 = data.r2;
+  const Complex &r3 = data.r3_c;
+  // const Complex &r4 = data.r4_c;
+
+  r34_re = mp::real(r3);
+  r34_im = mp::imag(r3);
 
   // radial coeffs
-  Real A, B, alpha_0, alpha_p, alpha_m, k3;
-  A = mp::sqrt((r3 - r2) * (r4 - r2));
-  B = mp::sqrt((r3 - r1) * (r4 - r1));
+  A = mp::sqrt(square(r34_im) + square(r34_re - r2));
+  B = mp::sqrt(square(r34_im) + square(r34_re - r1));
 
   alpha_0 = (B + A) / (B - A);
   alpha_p = (B * (rp - r2) + A * (rp - r1)) / (B * (rp - r2) - A * (rp - r1));
   alpha_m = (B * (rm - r2) + A * (rm - r1)) / (B * (rm - r2) - A * (rm - r1));
 
-  k3 = (mp::pow(A + B, 2) - mp::pow(r2 - r1, 2)) / (4 * A * B);
+  k3 = (square(A + B) - square(r2 - r1)) / (4 * A * B);
 
-  std::array<std::function<Real(Real)>, 3> anti_ders = {
-      [&](Real r) -> Real { return I_r(r); },
-      [&](Real r) -> Real { return I_phi(r); },
-      [&](Real r) -> Real { return I_t(r); }
-  };
-
-  std::array<Real, 3> results = {};
-  std::fill(results.begin(), results.end(), std::numeric_limits<Real>::quiet_NaN());
-  bool radial_turning = r34_is_real && r4 > rp;
-
-  // if there is a radial turning point (i.e. r4 is a real number)
-  if (radial_turning && r_s <= r4) {
-    ray_status = RayStatus::CONFINED;
-    return;
-  }
-
-  if (radial_turning && r_s > r4 && nu_r == Sign::POSITIVE) {
-    for (int i = 0; i < 3; i++) {
-      results[i] = anti_ders[i](std::numeric_limits<Real>::infinity()) - anti_ders[i](r_s);
-    }
-    return;
-  }
-
-  if (radial_turning && r_s > r4 && nu_r == Sign::NEGATIVE) {
-    for (int i = 0; i < 3; i++) {
-      results[i] = anti_ders[i](std::numeric_limits<Real>::infinity()) + anti_ders[i](r_s) - 2 * anti_ders[i](r4);
-    }
-    return;
-  }
-
-  if (!radial_turning && nu_r == Sign::NEGATIVE) {
-    ray_status = RayStatus::FALLS_IN;
-    return;
-  }
-
-  if (!radial_turning && nu_r == Sign::POSITIVE) {
-    for (int i = 0; i < 3; i++) {
-      results[i] = anti_ders[i](std::numeric_limits<Real>::infinity()) - anti_ders[i](r_s);
-    }
-    return;
-  }
-
-  ray_status = RayStatus::UNKOWN_ERROR;
+  asin_x3_rs = -1 + (2 * A * (r_s - r1)) / (A * (r_s - r1) + B * (r_s - r2));
+  asin_x3_inf = (A - B) / (A + B);
 }
 
+void IIntegral3::calc_x(std::array<Real, 3>& integral, const Real &x) {
+
+}
+
+void IIntegral3::calc(bool is_plus) {
+  pre_calc();
+  calc_x(integral_rs, asin_x3_rs);
+  calc_x(integral_inf, asin_x3_inf);
+
+  auto &radial_integrals = data.radial_integrals;
+
+  for (int i = 0; i < 2; ++i) {
+    if (is_plus) {
+      radial_integrals[i] = integral_inf[i] + integral_rs[i];
+    } else {
+      radial_integrals[i] = integral_inf[i] - integral_rs[i];
+    }
+  }
+}
 
 void GIntegral::reinit() {
   const Real &a = data.a;

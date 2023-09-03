@@ -54,16 +54,49 @@ constexpr auto to_integral(E e) -> typename std::underlying_type<E>::type {
 
 class ForwardRayTracing;
 
-class IIntegral {
+// Radial Antiderivatives for case (2)
+class IIntegral2 {
 private:
   ForwardRayTracing &data;
+
+  Real asin_x2_rs, asin_x2_inf, k;
+  Real E2_Numerator, F2_Denominator, Pi_p2_T1, Pi_m2_T1, Pi_p2_m2_Numerator, Pi_p2_Denominator, Pi_m2_Denominator;
+
+  Real F2, E2, Pi_p2, Pi_m2, I_p, I_m;
+
+  std::array<Real, 3> integral_rs;
+  std::array<Real, 3> integral_inf;
 public:
-  explicit IIntegral(ForwardRayTracing &parent) : data(parent) {
+  explicit IIntegral2(ForwardRayTracing &parent) : data(parent) {
   }
 
-  void reinit();
+  void pre_calc();
 
-  void calc();
+  void calc_x(std::array<Real, 3>& integral, const Real &x);
+
+  void calc(bool is_plus);
+};
+
+// // Radial Antiderivatives for case (3)
+class IIntegral3 {
+private:
+  ForwardRayTracing &data;
+
+  Real asin_x3_rs, asin_x3_inf;
+  Real r34_re, r34_im;
+  Real A, B, alpha_0, alpha_p, alpha_m, k3;
+
+  std::array<Real, 3> integral_rs;
+  std::array<Real, 3> integral_inf;
+public:
+  explicit IIntegral3(ForwardRayTracing &parent) : data(parent) {
+  }
+
+  void pre_calc();
+
+  void calc_x(std::array<Real, 3> &integral, const Real &x);
+
+  void calc(bool is_plus);
 };
 
 class GIntegral {
@@ -78,17 +111,23 @@ private:
   Real asin_up_cos_theta; // ArcCsc[Sqrt[up] Sec[\[Theta]]]
 
   ForwardRayTracing &data;
+
   void G_theta_phi_t(std::array<Real, 3> &G_arr, const Real &theta);
+
 public:
   explicit GIntegral(ForwardRayTracing &parent) : data(parent) {
   }
 
   void reinit();
+
   void calc();
 };
 
 class ForwardRayTracing {
-  friend class IIntegral;
+  friend class IIntegral2;
+
+  friend class IIntegral3;
+
   friend class GIntegral;
 
 private:
@@ -114,6 +153,11 @@ private:
 
   void reset_variables() {
     tau_o = std::numeric_limits<Real>::quiet_NaN();
+    theta_inf = std::numeric_limits<Real>::quiet_NaN();
+    phi_inf = std::numeric_limits<Real>::quiet_NaN();
+    t_inf = std::numeric_limits<Real>::quiet_NaN();
+    m = std::numeric_limits<int>::max();
+    n_half = std::numeric_limits<Real>::quiet_NaN();
     std::fill(radial_integrals.begin(), radial_integrals.end(), std::numeric_limits<Real>::quiet_NaN());
     std::fill(angular_integrals.begin(), angular_integrals.end(), std::numeric_limits<Real>::quiet_NaN());
   }
@@ -187,7 +231,6 @@ private:
     init_radial_potential_roots();
     init_theta_pm();
     reset_variables();
-    I_integral->reinit();
     G_integral->reinit();
   }
 
@@ -207,22 +250,56 @@ private:
     reset_variables();
   }
 
+  void calcI() {
+    bool radial_turning = r34_is_real && r4 > rp;
+
+    // if there is a radial turning point (i.e. r4 is a real number)
+    if (radial_turning && r_s <= r4) {
+      ray_status = RayStatus::CONFINED;
+      return;
+    }
+
+    if (radial_turning && r_s > r4 && nu_r == Sign::POSITIVE) {
+      I_integral_2->calc(false);
+      return;
+    }
+
+    if (radial_turning && r_s > r4 && nu_r == Sign::NEGATIVE) {
+      I_integral_2->calc(true);
+      return;
+    }
+
+    if (!radial_turning && nu_r == Sign::NEGATIVE) {
+      ray_status = RayStatus::FALLS_IN;
+      return;
+    }
+
+    if (!radial_turning && nu_r == Sign::POSITIVE) {
+      I_integral_3->calc(false);
+      return;
+    }
+
+    ray_status = RayStatus::UNKOWN_ERROR;
+  }
+
 public:
-  Real theta_inf = std::numeric_limits<Real>::quiet_NaN();
-  Real phi_inf = std::numeric_limits<Real>::quiet_NaN();
-  Real t_inf = std::numeric_limits<Real>::quiet_NaN();
-  int m = 0;
-  Real n_half = std::numeric_limits<Real>::quiet_NaN();
+  Real theta_inf;
+  Real phi_inf;
+  Real t_inf;
+  int m;
+  Real n_half;
 
   // 输入参数lambda, q，输出光线到无穷远处的theta、phi、传播时间、角向转折次数m、角向"半轨道"数
   ForwardRayTracing(Real a_, Real r_s_, Real theta_s_)
       : a(std::move(a_)), r_s(std::move(r_s_)), theta_s(std::move(theta_s_)),
         rp(1 + mp::sqrt(1 - a * a)), rm(1 - mp::sqrt(1 - a * a)) {
-    I_integral = std::make_shared<IIntegral>(*this);
+    reset_variables();
+    I_integral_3 = std::make_shared<IIntegral3>(*this);
     G_integral = std::make_shared<GIntegral>(*this);
   }
 
-  std::shared_ptr<IIntegral> I_integral;
+  std::shared_ptr<IIntegral2> I_integral_2;
+  std::shared_ptr<IIntegral3> I_integral_3;
   std::shared_ptr<GIntegral> G_integral;
 
   RayStatus calc_ray_by_lambda_q(Real lambda_, Real q_, Sign nu_r_, Sign nu_theta_) {
@@ -245,7 +322,7 @@ public:
     }
 
     // Radial integrals
-    I_integral->calc();
+    calcI();
 
     tau_o = radial_integrals[0];
 
