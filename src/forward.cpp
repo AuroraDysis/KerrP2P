@@ -44,6 +44,12 @@ void IIntegral2::calc_x(std::array<Real, 3>& integral, const Real &asin_x2) {
   integral[0] = F2;
   // I_phi
   integral[1] = (a * (-2 * rp * I_p + a * I_p * lambda + (2 * rm - a * lambda) * I_m)) / (rm - rp);
+  if (data.calc_t_f) {
+    // I_t
+    // integral[2] = (a * a * (I_p * (a * lambda - 2 * rp) + I_m * (2 * rm - a * lambda))) / (rm - rp);
+  } else {
+    integral[2] = std::numeric_limits<Real>::quiet_NaN();
+  }
 }
 
 void IIntegral2::calc(bool is_plus) {
@@ -154,7 +160,11 @@ void GIntegral::pre_calc() {
 
   G_theta_p[0] = -boost::math::ellint_1(up_over_um) * one_over_umaa_sqrt;
   G_theta_p[1] = -boost::math::ellint_3(up, up_over_um) * one_over_umaa_sqrt;
-  G_theta_p[2] = um * (-boost::math::ellint_2(up_over_um) * one_over_umaa_sqrt + G_theta_p[0]);
+  if (data.calc_t_f) {
+    G_theta_p[2] = um * (-boost::math::ellint_2(up_over_um) * one_over_umaa_sqrt + G_theta_p[0]);
+  } else {
+    G_theta_p[2] = std::numeric_limits<Real>::quiet_NaN();
+  }
 }
 
 void GIntegral::G_theta_phi_t(std::array<Real, 3> &G_arr, const Real &theta) {
