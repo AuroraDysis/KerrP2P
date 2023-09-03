@@ -1,68 +1,5 @@
 #include "forward.h"
 
-
-//  Real x3(Real r) const {
-//    return (A * (r - r1) - B * (r - r2)) / (A * (r - r1) + B * (r - r2));
-//  }
-//
-//  Real F3(Real r) const {
-//    return 1 / mp::sqrt(A * B) * boost::math::ellint_1(mp::acos(x3(r)), k3);
-//  }
-//
-
-//
-//  Real Pi13(Real r) const {
-//    return (2 * (r2 - r1) * mp::sqrt(A * B)) / (B * B - A * A) * R1(alpha_0, mp::acos(x3(r)), k3);
-//  }
-//
-//  Real Pi23(Real r) const {
-//    return square(((2 * (r2 - r1) * mp::sqrt(A * B)) / (B * B - A * A))) *
-//           R2(alpha_0, mp::acos(x3(r)), k3);
-//  }
-//
-//  Real I_0(Real r) const {
-//    return F3(r);
-//  }
-//
-//  Real I_1(Real r) const {
-//    return ((B * r2 + A * r1) / (B + A)) * F3(r) + Pi13(r);
-//  }
-//
-//  Real I_2(Real r) const {
-//    return square(((B * r2 + A * r1) / (B + A))) * F3(r) +
-//           2 * ((B * r2 + A * r1) / (B + A)) * Pi13(r) +
-//           mp::sqrt(A * B) * Pi23(r);
-//  }
-//
-//  Real I_p(Real r) const {
-//    return -1 / (B * (rp - r2) + A * (rp - r1)) * ((B + A) * F3(r) +
-//                                                   (2 * (r2 - r1) * mp::sqrt(A * B)) /
-//                                                   (B * (rp - r2) - A * (rp - r1)) *
-//                                                   R1(alpha_p, mp::acos(x3(r)), k3));
-//  }
-//
-//  Real I_m(Real r) const {
-//    return -1 / (B * (rm - r2) + A * (rm - r1)) * ((B + A) * F3(r) +
-//                                                   (2 * (r2 - r1) * mp::sqrt(A * B)) /
-//                                                   (B * (rm - r2) - A * (rm - r1)) *
-//                                                   R1(alpha_m, mp::acos(x3(r)), k3));
-//  }
-
-
-//
-//  Real I_r(Real r) const {
-//    return I_0(r);
-//  }
-//
-//  Real I_phi(Real r) const {
-//    return (2 * a) / (rp - rm) * ((rp - (a * lambda) / 2) * I_p(r) - (rm - (a * lambda) / 2) * I_m(r));
-//  }
-//
-//  Real I_t(Real r) const {
-//    return 4 / (rp - rm) * (rp * (rp - (a * lambda) / 2) * I_p(r) - rm * (rm - (a * lambda) / 2) * I_m(r))
-//           + 4 * I_0(r) + 2 * I_1(r) + I_2(r);
-//  }
-
 #define square(x) ((x) * (x))
 
 void IIntegral2::pre_calc() {
@@ -268,4 +205,162 @@ void GIntegral::calc() {
     angular_integrals[i] =
         (2 * data.m) * G_theta_p[i] + to_integral(nu_theta) * (m1_m * G_theta_inf[i] - G_theta_s[i]);
   }
+}
+
+void ForwardRayTracing::init_radial_potential_roots() {
+  Real AA = a * a - eta - lambda * lambda;
+  Real BB = 2 * (eta + (lambda - a) * (lambda - a));
+  Real CC = -a * a * eta;
+  Real PP = -AA * AA / 12 - CC;
+  Real QQ = (-2 * mp::pow(AA, 3) - 27 * mp::pow(BB, 2) + 72 * AA * CC) / 216;
+
+  Complex omega_pm;
+  Real omega_pm_1 = -QQ * half<Real>();
+  Real omega_pm_2 = mp::pow(PP, 3) / 27 + mp::pow(QQ, 2) / 4;
+
+  if (omega_pm_2 > 0) {
+    omega_pm = mp::cbrt(omega_pm_1 + mp::sqrt(omega_pm_2)) +
+               mp::cbrt(omega_pm_1 - mp::sqrt(omega_pm_2));
+  } else {
+    Complex omega_pm_2_c = Complex{omega_pm_2};
+    omega_pm = mp::pow(omega_pm_1 + mp::sqrt(omega_pm_2_c), third<Real>()) +
+               mp::pow(omega_pm_1 - mp::sqrt(omega_pm_2_c), third<Real>());
+  }
+
+  Real z = mp::sqrt((mp::real(omega_pm) - AA * third<Real>()) * half<Real>());
+
+  Complex sqrt_in_1 = -(AA * half<Real>()) - z * z + BB / (4 * z);
+  Complex sqrt_in_2 = -(AA * half<Real>()) - z * z - BB / (4 * z);
+
+  r1_c = -z - mp::sqrt(sqrt_in_1);
+  r2_c = -z + mp::sqrt(sqrt_in_1);
+  r3_c = z - mp::sqrt(sqrt_in_2);
+  r4_c = z + mp::sqrt(sqrt_in_2);
+
+  if (mp::real(sqrt_in_1) < 0) {
+    r12_is_real = false;
+    r1 = r2 = std::numeric_limits<Real>::quiet_NaN();
+  } else {
+    r12_is_real = true;
+    r1 = mp::real(r1_c);
+    r2 = mp::real(r2_c);
+  }
+
+  if (mp::real(sqrt_in_2) < 0) {
+    r34_is_real = false;
+    r3 = r4 = std::numeric_limits<Real>::quiet_NaN();
+  } else {
+    r34_is_real = true;
+    r3 = mp::real(r3_c);
+    r4 = mp::real(r4_c);
+  }
+}
+
+void ForwardRayTracing::calcI() {
+  bool radial_turning = r34_is_real && r4 > rp;
+
+  // if there is a radial turning point (i.e. r4 is a real number)
+  if (radial_turning && r_s <= r4) {
+    ray_status = RayStatus::CONFINED;
+    return;
+  }
+
+  if (radial_turning && r_s > r4 && nu_r == Sign::POSITIVE) {
+    I_integral_2->calc(false);
+    return;
+  }
+
+  if (radial_turning && r_s > r4 && nu_r == Sign::NEGATIVE) {
+    I_integral_2->calc(true);
+    return;
+  }
+
+  if (!radial_turning && nu_r == Sign::NEGATIVE) {
+    ray_status = RayStatus::FALLS_IN;
+    return;
+  }
+
+  if (!radial_turning && nu_r == Sign::POSITIVE) {
+    I_integral_3->calc(false);
+    return;
+  }
+
+  ray_status = RayStatus::UNKOWN_ERROR;
+}
+
+RayStatus ForwardRayTracing::calc_ray() {
+  if (eta <= 0) {
+    return RayStatus::ETA_OUT_OF_RANGE;
+  }
+
+  if (theta_s < theta_m || theta_s > theta_p) {
+    return RayStatus::THETA_OUT_OF_RANGE;
+  }
+
+  // Radial integrals
+  calcI();
+
+  tau_o = radial_integrals[0];
+
+  if (ray_status != RayStatus::NORMAL) {
+    return ray_status;
+  }
+
+  G_integral->calc();
+
+  // Final values of phi and t
+  phi_inf = radial_integrals[1] + lambda * angular_integrals[1];
+  // t_inf = radial_integrals[2] + a * a * angular_integrals[1];
+
+  std::cout << "theta_inf: " << theta_inf << ", phi_inf: " << phi_inf
+            << ", m: "
+            << m << ", nhalf: " << n_half << std::endl;
+  return RayStatus::NORMAL;
+}
+
+void ForwardRayTracing::reset_variables() {
+  tau_o = std::numeric_limits<Real>::quiet_NaN();
+  theta_inf = std::numeric_limits<Real>::quiet_NaN();
+  phi_inf = std::numeric_limits<Real>::quiet_NaN();
+  t_inf = std::numeric_limits<Real>::quiet_NaN();
+  m = std::numeric_limits<int>::max();
+  n_half = std::numeric_limits<Real>::quiet_NaN();
+  std::fill(radial_integrals.begin(), radial_integrals.end(), std::numeric_limits<Real>::quiet_NaN());
+  std::fill(angular_integrals.begin(), angular_integrals.end(), std::numeric_limits<Real>::quiet_NaN());
+}
+
+void ForwardRayTracing::init_theta_pm() {
+  delta_theta = half<Real>() * (1 - (eta + lambda * lambda) / (a * a));
+  up = delta_theta + mp::sqrt(delta_theta * delta_theta + eta / (a * a));
+  um = delta_theta - mp::sqrt(delta_theta * delta_theta + eta / (a * a));
+  theta_p = mp::acos(-mp::sqrt(up));
+  theta_m = mp::acos(mp::sqrt(up));
+}
+
+void ForwardRayTracing::reset_by_lambda_q(Real lambda_, Real q_, Sign nu_r_, Sign nu_theta_) {
+  ray_status = RayStatus::NORMAL;
+  lambda = std::move(lambda_);
+  q = std::move(q_);
+  eta = q * q;
+  nu_r = nu_r_;
+  nu_theta = nu_theta_;
+  init_radial_potential_roots();
+  init_theta_pm();
+  reset_variables();
+  G_integral->reinit();
+}
+
+void ForwardRayTracing::reset_by_rc_d(const Real &rc, const Real &d, Sign nu_r_, Sign nu_theta_) {
+  ray_status = RayStatus::NORMAL;
+  Real lambda_c = a + (rc * (2 * mp::pow(a, 2) + (-3 + rc) * rc)) / (a - a * rc);
+  Real eta_c = -((mp::pow(rc, 3) * (-4 * mp::pow(a, 2) + mp::pow(-3 + rc, 2) * rc)) /
+                 (mp::pow(a, 2) * mp::pow(-1 + rc, 2)));
+  Real qc = mp::sqrt(eta_c);
+
+  Real coeff = mp::sqrt(
+      mp::pow(-3 + rc, 2) / (mp::pow(a, 2) * mp::pow(-1 + rc, 2)) + eta_c / mp::pow(rc, 4));
+
+  reset_by_lambda_q(lambda_c + d * ((3 - rc) / (a * (-1 + rc)) / coeff),
+                    qc + d * (mp::sqrt(eta_c) / mp::pow(rc, 2) / coeff), nu_r_, nu_theta_);
+  reset_variables();
 }
