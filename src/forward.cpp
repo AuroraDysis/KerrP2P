@@ -142,7 +142,7 @@ void IIntegral3::calc(bool is_plus) {
   }
 }
 
-void GIntegral::reinit() {
+void GIntegral::pre_calc() {
   const Real &a = data.a;
   const Real &up = data.up;
   const Real &um = data.um;
@@ -178,8 +178,8 @@ void GIntegral::calc() {
   const Real &G_theta_theta_s = G_theta_s[0];
   const Real &G_theta_theta_p = G_theta_p[0];
 
-  data.theta_inf = mp::acos(-mp::sqrt(up) * to_integral(nu_theta) *
-                            boost::math::jacobi_sn(
+  data.theta_f = mp::acos(-mp::sqrt(up) * to_integral(nu_theta) *
+                          boost::math::jacobi_sn(
                                 (tau_o + to_integral(nu_theta) * G_theta_theta_s) / one_over_umaa_sqrt, up_over_um));
 
   // Angular integrals
@@ -195,7 +195,7 @@ void GIntegral::calc() {
   // Number of half-orbits
   data.n_half = tau_o / (2 * G_theta_theta_p);
 
-  G_theta_phi_t(G_theta_inf, data.theta_inf);
+  G_theta_phi_t(G_theta_inf, data.theta_f);
 
   auto &angular_integrals = data.angular_integrals;
   // (-1)^m
@@ -309,10 +309,10 @@ RayStatus ForwardRayTracing::calc_ray() {
   G_integral->calc();
 
   // Final values of phi and t
-  phi_inf = radial_integrals[1] + lambda * angular_integrals[1];
-  // t_inf = radial_integrals[2] + a * a * angular_integrals[1];
+  phi_f = radial_integrals[1] + lambda * angular_integrals[1];
+  // t_f = radial_integrals[2] + a * a * angular_integrals[1];
 
-  std::cout << "theta_inf: " << theta_inf << ", phi_inf: " << phi_inf
+  std::cout << "theta_f: " << theta_f << ", phi_f: " << phi_f
             << ", m: "
             << m << ", nhalf: " << n_half << std::endl;
   return RayStatus::NORMAL;
@@ -320,9 +320,9 @@ RayStatus ForwardRayTracing::calc_ray() {
 
 void ForwardRayTracing::reset_variables() {
   tau_o = std::numeric_limits<Real>::quiet_NaN();
-  theta_inf = std::numeric_limits<Real>::quiet_NaN();
-  phi_inf = std::numeric_limits<Real>::quiet_NaN();
-  t_inf = std::numeric_limits<Real>::quiet_NaN();
+  theta_f = std::numeric_limits<Real>::quiet_NaN();
+  phi_f = std::numeric_limits<Real>::quiet_NaN();
+  t_f = std::numeric_limits<Real>::quiet_NaN();
   m = std::numeric_limits<int>::max();
   n_half = std::numeric_limits<Real>::quiet_NaN();
   std::fill(radial_integrals.begin(), radial_integrals.end(), std::numeric_limits<Real>::quiet_NaN());
@@ -347,7 +347,6 @@ void ForwardRayTracing::reset_by_lambda_q(Real lambda_, Real q_, Sign nu_r_, Sig
   init_radial_potential_roots();
   init_theta_pm();
   reset_variables();
-  G_integral->reinit();
 }
 
 void ForwardRayTracing::reset_by_rc_d(const Real &rc, const Real &d, Sign nu_r_, Sign nu_theta_) {

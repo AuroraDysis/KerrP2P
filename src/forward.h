@@ -124,7 +124,7 @@ public:
   explicit GIntegral(ForwardRayTracing &parent) : data(parent) {
   }
 
-  void reinit();
+  void pre_calc();
 
   void calc();
 };
@@ -173,17 +173,19 @@ private:
   void calcI();
 
 public:
-  Real theta_inf;
-  Real phi_inf;
-  Real t_inf;
+  Real theta_f;
+  Real phi_f;
+  Real t_f;
   int m;
   Real n_half;
+  bool calc_t_f = false;
 
   // 输入参数lambda, q，输出光线到无穷远处的theta、phi、传播时间、角向转折次数m、角向"半轨道"数
   ForwardRayTracing(Real a_, Real r_s_, Real theta_s_)
       : a(std::move(a_)), r_s(std::move(r_s_)), theta_s(std::move(theta_s_)),
         rp(1 + mp::sqrt(1 - a * a)), rm(1 - mp::sqrt(1 - a * a)) {
     reset_variables();
+    I_integral_2 = std::make_shared<IIntegral2>(*this);
     I_integral_3 = std::make_shared<IIntegral3>(*this);
     G_integral = std::make_shared<GIntegral>(*this);
   }

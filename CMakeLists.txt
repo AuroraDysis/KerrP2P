@@ -4,9 +4,9 @@ project(forward_ray_tracing)
 set(CMAKE_CXX_STANDARD 17)
 
 option(ENABLE_TESTING "Enable Test Builds" ON)
-option(ENABLE_FLOAT64 "Enable float64 precision" ON)
+option(ENABLE_FLOAT64 "Enable float64 precision" OFF)
 option(ENABLE_FLOAT128 "Enable float128 precision" OFF)
-option(ENABLE_BIGFLOAT "Enable bigfloat precision" OFF)
+option(ENABLE_BIGFLOAT "Enable bigfloat precision" ON)
 
 message (STATUS "ENABLE_FLOAT64 = ${ENABLE_FLOAT64}")
 
