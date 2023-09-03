@@ -88,6 +88,7 @@ public:
 };
 
 class ForwardRayTracing {
+  friend class IIntegral;
   friend class GIntegral;
 
 private:

@@ -84,62 +84,68 @@
 //           + 4 * I_0(r) + 2 * I_1(r) + I_2(r);
 //  }
 
-//void calc_I() {
-//  // radial coeffs
-//  Real A, B, alpha_0, alpha_p, alpha_m, k3;
-//  A = mp::sqrt((r3 - r2) * (r4 - r2));
-//  B = mp::sqrt((r3 - r1) * (r4 - r1));
-//
-//  alpha_0 = (B + A) / (B - A);
-//  alpha_p = (B * (rp - r2) + A * (rp - r1)) / (B * (rp - r2) - A * (rp - r1));
-//  alpha_m = (B * (rm - r2) + A * (rm - r1)) / (B * (rm - r2) - A * (rm - r1));
-//
-//  k3 = (mp::pow(A + B, 2) - mp::pow(r2 - r1, 2)) / (4 * A * B);
-//
-//  std::array<std::function<Real(Real)>, 3> anti_ders = {
-//      [&](Real r) -> Real { return I_r(r); },
-//      [&](Real r) -> Real { return I_phi(r); },
-//      [&](Real r) -> Real { return I_t(r); }
-//  };
-//
-//  std::array<Real, 3> results = {};
-//  std::fill(results.begin(), results.end(), std::numeric_limits<Real>::quiet_NaN());
-//  bool radial_turning = r34_is_real && r4 > rp;
-//
-//  // if there is a radial turning point (i.e. r4 is a real number)
-//  if (radial_turning && r_s <= r4) {
-//    ray_status = RayStatus::CONFINED;
-//    return;
-//  }
-//
-//  if (radial_turning && r_s > r4 && nu_r == Sign::POSITIVE) {
-//    for (int i = 0; i < 3; i++) {
-//      results[i] = anti_ders[i](std::numeric_limits<Real>::infinity()) - anti_ders[i](r_s);
-//    }
-//    return;
-//  }
-//
-//  if (radial_turning && r_s > r4 && nu_r == Sign::NEGATIVE) {
-//    for (int i = 0; i < 3; i++) {
-//      results[i] = anti_ders[i](std::numeric_limits<Real>::infinity()) + anti_ders[i](r_s) - 2 * anti_ders[i](r4);
-//    }
-//    return;
-//  }
-//
-//  if (!radial_turning && nu_r == Sign::NEGATIVE) {
-//    ray_status = RayStatus::FALLS_IN;
-//    return;
-//  }
-//
-//  if (!radial_turning && nu_r == Sign::POSITIVE) {
-//    for (int i = 0; i < 3; i++) {
-//      results[i] = anti_ders[i](std::numeric_limits<Real>::infinity()) - anti_ders[i](r_s);
-//    }
-//    return;
-//  }
-//
-//  ray_status = RayStatus::UNKOWN_ERROR;
-//}
+void IIntegral::calc() {
+  RayStatus &ray_status = data.ray_status;
+  const Real &a = data.a;
+  const Real &r_s = data.r_s;
+  const Real &theta_s = data.theta_s;
+  Sign nu_r = data.nu_r;
+
+  // radial coeffs
+  Real A, B, alpha_0, alpha_p, alpha_m, k3;
+  A = mp::sqrt((r3 - r2) * (r4 - r2));
+  B = mp::sqrt((r3 - r1) * (r4 - r1));
+
+  alpha_0 = (B + A) / (B - A);
+  alpha_p = (B * (rp - r2) + A * (rp - r1)) / (B * (rp - r2) - A * (rp - r1));
+  alpha_m = (B * (rm - r2) + A * (rm - r1)) / (B * (rm - r2) - A * (rm - r1));
+
+  k3 = (mp::pow(A + B, 2) - mp::pow(r2 - r1, 2)) / (4 * A * B);
+
+  std::array<std::function<Real(Real)>, 3> anti_ders = {
+      [&](Real r) -> Real { return I_r(r); },
+      [&](Real r) -> Real { return I_phi(r); },
+      [&](Real r) -> Real { return I_t(r); }
+  };
+
+  std::array<Real, 3> results = {};
+  std::fill(results.begin(), results.end(), std::numeric_limits<Real>::quiet_NaN());
+  bool radial_turning = r34_is_real && r4 > rp;
+
+  // if there is a radial turning point (i.e. r4 is a real number)
+  if (radial_turning && r_s <= r4) {
+    ray_status = RayStatus::CONFINED;
+    return;
+  }
+
+  if (radial_turning && r_s > r4 && nu_r == Sign::POSITIVE) {
+    for (int i = 0; i < 3; i++) {
+      results[i] = anti_ders[i](std::numeric_limits<Real>::infinity()) - anti_ders[i](r_s);
+    }
+    return;
+  }
+
+  if (radial_turning && r_s > r4 && nu_r == Sign::NEGATIVE) {
+    for (int i = 0; i < 3; i++) {
+      results[i] = anti_ders[i](std::numeric_limits<Real>::infinity()) + anti_ders[i](r_s) - 2 * anti_ders[i](r4);
+    }
+    return;
+  }
+
+  if (!radial_turning && nu_r == Sign::NEGATIVE) {
+    ray_status = RayStatus::FALLS_IN;
+    return;
+  }
+
+  if (!radial_turning && nu_r == Sign::POSITIVE) {
+    for (int i = 0; i < 3; i++) {
+      results[i] = anti_ders[i](std::numeric_limits<Real>::infinity()) - anti_ders[i](r_s);
+    }
+    return;
+  }
+
+  ray_status = RayStatus::UNKOWN_ERROR;
+}
 
 
 void GIntegral::reinit() {
