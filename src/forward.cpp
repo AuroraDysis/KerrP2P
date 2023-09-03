@@ -146,57 +146,63 @@ void GIntegral::reinit() {
   const Real &a = data.a;
   const Real &up = data.up;
   const Real &um = data.um;
-  const Real &up_over_um = data.up_over_um;
 
-  ellint_1_up_over_um = boost::math::ellint_1(up_over_um);
-  ellint_2_up_over_um = boost::math::ellint_2(up_over_um);
-  ellint_3_up_up_over_um = boost::math::ellint_3(up, up_over_um);
-  umaa_sqrt = mp::sqrt(-um * a * a);
+  up_over_um = up / um;
+  one_over_sqrt_up = mp::sqrt(up);
+  one_over_umaa_sqrt = 1 / mp::sqrt(-um * a * a);
 
-  G_theta_p[0] = -ellint_1_up_over_um / umaa_sqrt;
-  G_theta_p[1] = -ellint_3_up_up_over_um / umaa_sqrt;
-  G_theta_p[2] = um * (-ellint_2_up_over_um + ellint_1_up_over_um) / umaa_sqrt;
+  G_theta_p[0] = -boost::math::ellint_1(up_over_um) * one_over_umaa_sqrt;
+  G_theta_p[1] = -boost::math::ellint_3(up, up_over_um) * one_over_umaa_sqrt;
+  G_theta_p[2] = um * (-boost::math::ellint_2(up_over_um) * one_over_umaa_sqrt + G_theta_p[0]);
+}
+
+void GIntegral::G_theta_phi_t(std::array<Real, 3> &G_arr, const Real &theta) {
+  const Real &up = data.up;
+  const Real &um = data.um;
+  asin_up_cos_theta = mp::asin(mp::cos(theta) * one_over_sqrt_up);
+  G_arr[0] = -boost::math::ellint_1(asin_up_cos_theta, up_over_um) * one_over_umaa_sqrt;
+  G_arr[1] = -boost::math::ellint_3(up, asin_up_cos_theta, up_over_um) * one_over_umaa_sqrt;
+  G_arr[2] = um * (boost::math::ellint_2(asin_up_cos_theta, up_over_um) * one_over_umaa_sqrt + G_arr[0]);
 }
 
 void GIntegral::calc() {
   const Real &a = data.a;
   const Real &up = data.up;
   const Real &um = data.um;
-  const Real &up_over_um = data.up_over_um;
   auto &tau_o = data.tau_o;
   const Real &theta_s = data.theta_s;
   Sign nu_theta = data.nu_theta;
 
   G_theta_phi_t(G_theta_s, theta_s);
 
+  const Real &G_theta_theta_s = G_theta_s[0];
+  const Real &G_theta_theta_p = G_theta_p[0];
+
   data.theta_inf = mp::acos(-mp::sqrt(up) * to_integral(nu_theta) *
-                       boost::math::jacobi_sn(umaa_sqrt * (tau_o + to_integral(nu_theta) * G_theta_theta_s), up_over_um));
+                            boost::math::jacobi_sn(
+                                (tau_o + to_integral(nu_theta) * G_theta_theta_s) / one_over_umaa_sqrt, up_over_um));
 
   // Angular integrals
   Real m_Real = 1 + mp::floor(mp::real((tau_o - G_theta_theta_p + to_integral(nu_theta) * G_theta_theta_s) /
-                                       (G_theta_theta_p - G_theta_theta_m)));
+                                       (2 * G_theta_theta_p)));
 
   using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
       boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
+
   // floor
   data.m = RealToInt::convert(m_Real);
 
   // Number of half-orbits
-  data.n_half = tau_o / (G_theta_theta_p - G_theta_theta_m);
+  data.n_half = tau_o / (2 * G_theta_theta_p);
 
-  //    result[0] = m * (G_theta(theta_p) - G_theta(theta_m)) +
-  //                to_integral(nu_theta) * (pow(-1, m) * G_theta(theta_inf) - G_theta(theta_s));
-  //    result[1] = m * (G_phi(theta_p) - G_phi(theta_m)) +
-  //                to_integral(nu_theta) * (pow(-1, m) * G_phi(theta_inf) - G_phi(theta_s));
-  //    result[2] = m * (G_t(theta_p) - G_t(theta_m)) +
-  //                to_integral(nu_theta) * (pow(-1, m) * G_t(theta_inf) - G_t(theta_s));
-}
+  G_theta_phi_t(G_theta_inf, data.theta_inf);
 
-void GIntegral::G_theta_phi_t(std::array<Real, 3> &G_arr, const Real &theta) const {
-  G_arr[0] = -boost::math::ellint_1(mp::asin(mp::cos(theta) / mp::sqrt(data.up)), data.up / data.um);
-  G_arr[1] = -1 / mp::sqrt(-data.um * data.a * data.a) *
-             boost::math::ellint_3(data.up, mp::asin(mp::cos(theta) / mp::sqrt(data.up)), data.up / data.um);
-  G_arr[2] = (2 * data.up) / mp::sqrt(-data.um * data.a * data.a) / (2 * data.up / data.um) *
-             (boost::math::ellint_2(mp::asin(mp::cos(theta) / mp::sqrt(data.up)), data.up / data.um) -
-              boost::math::ellint_1(theta));
+  auto &angular_integrals = data.angular_integrals;
+  // (-1)^m
+  int m1_m = 1 - ((data.m & 1) << 1);
+
+  for (int i = 0; i < 3; ++i) {
+    angular_integrals[i] =
+        (2 * data.m) * G_theta_p[i] + to_integral(nu_theta) * (m1_m * G_theta_inf[i] - G_theta_s[i]);
+  }
 }

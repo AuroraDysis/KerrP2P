@@ -56,9 +56,9 @@ class ForwardRayTracing;
 
 class IIntegral {
 private:
-  const ForwardRayTracing &data;
+  ForwardRayTracing &data;
 public:
-  explicit IIntegral(const ForwardRayTracing &parent) : data(parent) {
+  explicit IIntegral(ForwardRayTracing &parent) : data(parent) {
   }
 
   void reinit();
@@ -70,18 +70,17 @@ class GIntegral {
 private:
   std::array<Real, 3> G_theta_p = {};
   std::array<Real, 3> G_theta_s = {};
-  Real ellint_1_up_over_um;
-  Real ellint_2_up_over_um;
-  Real ellint_3_up_up_over_um;
-  Real umaa_sqrt;
-  Real G_theta_theta_s;
-  Real G_theta_theta_p;
-  Real G_theta_theta_m;
+  std::array<Real, 3> G_theta_inf = {};
 
-  const ForwardRayTracing &data;
-  void G_theta_phi_t(std::array<Real, 3> &G_arr, const Real &theta) const;
+  Real one_over_sqrt_up;
+  Real up_over_um;
+  Real one_over_umaa_sqrt;
+  Real asin_up_cos_theta; // ArcCsc[Sqrt[up] Sec[\[Theta]]]
+
+  ForwardRayTracing &data;
+  void G_theta_phi_t(std::array<Real, 3> &G_arr, const Real &theta);
 public:
-  explicit GIntegral(const ForwardRayTracing &parent) : data(parent) {
+  explicit GIntegral(ForwardRayTracing &parent) : data(parent) {
   }
 
   void reinit();
@@ -100,7 +99,7 @@ private:
 
   // auto initialized
   RayStatus ray_status = RayStatus::NORMAL;
-  Real delta_theta, up, um, up_over_um, theta_p, theta_m;
+  Real delta_theta, up, um, theta_p, theta_m;
   Complex r1_c, r2_c, r3_c, r4_c;
   Real r1, r2, r3, r4;
   bool r12_is_real, r34_is_real;
@@ -123,7 +122,6 @@ private:
     delta_theta = half<Real>() * (1 - (eta + lambda * lambda) / (a * a));
     up = delta_theta + mp::sqrt(delta_theta * delta_theta + eta / (a * a));
     um = delta_theta - mp::sqrt(delta_theta * delta_theta + eta / (a * a));
-    up_over_um = up / um;
     theta_p = mp::acos(-mp::sqrt(up));
     theta_m = mp::acos(mp::sqrt(up));
   }
@@ -219,6 +217,7 @@ public:
   ForwardRayTracing(Real a_, Real r_s_, Real theta_s_)
       : a(std::move(a_)), r_s(std::move(r_s_)), theta_s(std::move(theta_s_)),
         rp(1 + mp::sqrt(1 - a * a)), rm(1 - mp::sqrt(1 - a * a)) {
+    I_integral = std::make_shared<IIntegral>(*this);
     G_integral = std::make_shared<GIntegral>(*this);
   }
 
