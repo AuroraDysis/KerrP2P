@@ -16,23 +16,10 @@ class ForwardRayTracing {
   friend class GIntegral<Real, Complex>;
 
 #ifdef TESTS
-public:
+  public:
 #else
 private:
 #endif
-
-  const Real a, rp, rm, r_s, theta_s, r_o;
-
-  // need to set before using other method
-  Sign nu_r, nu_theta;
-  Real lambda, q, eta;
-
-  // auto initialized
-  RayStatus ray_status = RayStatus::NORMAL;
-  Real delta_theta, up, um, theta_p, theta_m;
-  Complex r1_c, r2_c, r3_c, r4_c;
-  Real r1, r2, r3, r4;
-  bool r12_is_real, r34_is_real;
 
   void reset_variables() {
     tau_o = std::numeric_limits<Real>::quiet_NaN();
@@ -169,6 +156,19 @@ private:
   }
 
 public:
+  Real a, rp, rm, r_s, theta_s, r_o;
+
+  // need to set before using other method
+  Sign nu_r, nu_theta;
+  Real lambda, q, eta;
+
+  // auto initialized
+  RayStatus ray_status = RayStatus::NORMAL;
+  Real delta_theta, up, um, theta_p, theta_m;
+  Complex r1_c, r2_c, r3_c, r4_c;
+  Real r1, r2, r3, r4;
+  bool r12_is_real, r34_is_real;
+
   // minor time
   Real tau_o;
   // I_theta, I_phi, I_t
@@ -183,29 +183,39 @@ public:
   Real n_half;
   bool calc_t_f = false;
 
-  // 输入参数lambda, q，输出光线到无穷远处的theta、phi、传播时间、角向转折次数m、角向"半轨道"数
-  ForwardRayTracing<Real, Complex>(Real a_, Real r_s_, Real theta_s_, Real r_o_)
-      : a(std::move(a_)), r_s(std::move(r_s_)), theta_s(std::move(theta_s_)), r_o(std::move(r_o_)),
-        rp(1 + sqrt(1 - a * a)), rm(1 - sqrt(1 - a * a)) {
+  ForwardRayTracing<Real, Complex>() {
     reset_variables();
     I_integral_2 = std::make_shared<IIntegral2<Real, Complex>>(*this);
     I_integral_3 = std::make_shared<IIntegral3<Real, Complex>>(*this);
     G_integral = std::make_shared<GIntegral<Real, Complex>>(*this);
-#ifdef PRINT_DEBUG
-    fmt::println("a: {}, r_s: {}, theta_s: {}, r_o: {}, rp: {}, rm: {}", a, r_s, theta_s, r_o, rp, rm);
-#endif
   }
 
   std::shared_ptr<IIntegral2<Real, Complex>> I_integral_2;
   std::shared_ptr<IIntegral3<Real, Complex>> I_integral_3;
   std::shared_ptr<GIntegral<Real, Complex>> G_integral;
 
-  RayStatus calc_ray_by_lambda_q(Real lambda_, Real q_, Sign nu_r_, Sign nu_theta_) {
+  RayStatus calc_ray_by_lambda_q(Real a_, Real r_s_, Real theta_s_, Real r_o_, Sign nu_r_, Sign nu_theta_, Real lambda_,
+                                 Real q_) {
+    a = std::move(a_);
+    r_s = std::move(r_s_);
+    theta_s = std::move(theta_s_);
+    r_o = std::move(r_o_);
+    rp = 1 + sqrt(1 - a * a);
+    rm = 1 - sqrt(1 - a * a);
+
     reset_by_lambda_q(std::move(lambda_), std::move(q_), nu_r_, nu_theta_);
     return calc_ray();
   }
 
-  RayStatus calc_ray_by_rc_d(const Real &rc, const Real &d, Sign nu_r_, Sign nu_theta_) {
+  RayStatus calc_ray_by_rc_d(Real a_, Real r_s_, Real theta_s_, Real r_o_, Sign nu_r_, Sign nu_theta_, const Real &rc,
+                             const Real &d) {
+    a = std::move(a_);
+    r_s = std::move(r_s_);
+    theta_s = std::move(theta_s_);
+    r_o = std::move(r_o_);
+    rp = 1 + sqrt(1 - a * a);
+    rm = 1 - sqrt(1 - a * a);
+
     reset_by_rc_d(rc, d, nu_r_, nu_theta_);
     return calc_ray();
   }

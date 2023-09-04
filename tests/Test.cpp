@@ -1,4 +1,4 @@
-#include "Forward.h"
+#include "ForwardRayTracing.h"
 
 #include <tuple>
 #include <boost/lexical_cast.hpp>
@@ -6,7 +6,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include "data/test_data.h"
+#include "data/TestData.h"
 
 using std::string;
 using Float64 = std::tuple<double, std::complex<double>>;
@@ -14,12 +14,22 @@ constexpr double FLOAT64_ERROR_LIMIT = 1e-12;
 
 #ifdef FLOAT128
 using Float128 = std::tuple<boost::multiprecision::float128, boost::multiprecision::complex128>;
-constexpr boost::multiprecision::float128 FLOAT128_ERROR_LIMIT{"1e-30"};
+const boost::multiprecision::float128 FLOAT128_ERROR_LIMIT{"1e-30"};
 #endif
 
 #ifdef BIGFLOAT
 using BigFloat = std::tuple<boost::multiprecision::mpfr_float_50, boost::multiprecision::mpc_complex_50>;
 const boost::multiprecision::mpfr_float_50 BIGFLOAT_ERROR_LIMIT{"1e-45"};
+#endif
+
+#if defined(FLOAT128) || defined(BIGFLOAT)
+#define TEST_TYPES Float64, Float128, BigFloat
+#elif defined(FLOAT128) && !defined(BIGFLOAT)
+#define TEST_TYPES Float64, Float128
+#elif !defined(FLOAT128) && defined(BIGFLOAT)
+#define TEST_TYPES Float64, BigFloat
+#else
+#define TEST_TYPES Float64
 #endif
 
 template <typename T>
@@ -30,7 +40,7 @@ std::vector<T> as_vector(boost::property_tree::ptree const& pt, boost::property_
   return r;
 }
 
-TEMPLATE_TEST_CASE("Forward Function", "[forward]", Float64, BigFloat) {
+TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
   using Real = std::tuple_element_t<0u, TestType>;
   using Complex = std::tuple_element_t<1u, TestType>;
 
