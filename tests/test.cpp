@@ -1,23 +1,40 @@
-#include "forward.h"
+#include "Forward.h"
 
-#include <cmath>
+#include <tuple>
 #include <boost/lexical_cast.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <boost/math/constants/constants.hpp>
 
-//bool compare(Real expected) {
-//  return Catch::Matchers::WithinRel(expected, 1e-15) || Catch::Matchers::WithinAbs(expected, 1e-15)
-//}
+using Float64 = std::tuple<double, std::complex<double>>;
 
-TEST_CASE("Forward Functions", "[forward]") {
-  Real a = boost::lexical_cast<Real>("0.9");
-  Real rc = boost::lexical_cast<Real>("3");
+#ifdef FLOAT128
+using Float128 = std::tuple<boost::multiprecision::float128, boost::multiprecision::complex128>;
+#endif
+
+#ifdef BIGFLOAT
+using BigFloat = std::tuple<boost::multiprecision::mpfr_float_50, boost::multiprecision::mpc_complex_50>;
+#endif
+
+TEMPLATE_TEST_CASE("Forward Function", "[forward]", BigFloat) {
+  using Real = std::tuple_element_t<0u, TestType>;
+  using Complex = std::tuple_element_t<1u, TestType>;
+  Real a = boost::lexical_cast<Real>("0.8");
   Real r_s = boost::lexical_cast<Real>("10");
-  Real theta_s = boost::lexical_cast<Real>("0.1");
+  Real theta_s = boost::math::constants::half_pi<Real>();
+  Real r_o = boost::lexical_cast<Real>("1000");
   Sign nu_r = Sign::NEGATIVE;
   Sign nu_theta = Sign::NEGATIVE;
+  Real lambda = boost::lexical_cast<Real>("-0.751131614119698035182184635438749173900590136995321237367912291363607606735312");
+  Real eta = boost::lexical_cast<Real>("26.57242896970946927251987627934469966678305414295689726675509814044032238307038");
 
-  ForwardRayTracing forward(a, r_s, theta_s);
+  ForwardRayTracing<Real, Complex> forward(a, r_s, theta_s, r_o);
+  forward.calc_ray_by_lambda_q(lambda, sqrt(eta), nu_r, nu_theta);
+
+  Real theta_o = 17 * boost::math::constants::pi<Real>() / 180;
+  Real phi_o = boost::math::constants::pi<Real>() / 4;
+  REQUIRE_THAT((forward.theta_f - theta_o).template convert_to<double>(), Catch::Matchers::WithinAbs(0, 1e-15));
 
 //    ForwardRayTracing forward();
 //    SECTION("lamqv2") {

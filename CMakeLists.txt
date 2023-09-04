@@ -16,11 +16,6 @@ find_package(Boost 1.82 REQUIRED)
 find_package(Catch2 3 REQUIRED)
 set(LIBRARIES Boost::boost)
 
-if (ENABLE_FLOAT64)
-    message("Enable float64 features")
-    add_definitions(-DFLOAT64)
-endif()
-
 if (ENABLE_FLOAT128)
     message("Enable float128 precision")
     set(LIBRARIES ${LIBRARIES} quadmath)
@@ -39,7 +34,7 @@ endif ()
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
-set(SOURCE_FILES src/forward.h src/forward.cpp)
+set(SOURCE_FILES src/Common.h src/Forward.h)
 
 add_executable(forward_ray_tracing src/main.cpp ${SOURCE_FILES})
 target_link_libraries(forward_ray_tracing PRIVATE ${LIBRARIES})
