@@ -34,13 +34,14 @@ endif ()
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
-set(SOURCE_FILES src/Common.h src/Forward.h)
+set(SOURCE_FILES src/Common.h src/Forward.h src/GIntegral.h src/IIntegral2.h src/IIntegral3.h)
 
 add_executable(forward_ray_tracing src/main.cpp ${SOURCE_FILES})
 target_link_libraries(forward_ray_tracing PRIVATE ${LIBRARIES})
 
 if (ENABLE_TESTING)
-add_executable(tests tests/test.cpp ${SOURCE_FILES})
+add_executable(tests tests/test.cpp ${SOURCE_FILES}
+        tests/data/test_data.cpp)
 target_compile_definitions(tests PRIVATE TESTS)
 target_link_libraries(tests PRIVATE ${LIBRARIES} Catch2::Catch2WithMain)
 endif()

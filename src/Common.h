@@ -41,6 +41,9 @@ constexpr auto to_integral(E e) -> typename std::underlying_type<E>::type {
 template<typename Real, typename Complex>
 class ForwardRayTracing;
 
+using std::real;
+using std::isinf;
+
 #ifdef FLOAT128
 #include <boost/multiprecision/float128.hpp>
 #include <boost/multiprecision/complex128.hpp>
@@ -52,6 +55,9 @@ class ForwardRayTracing;
 #endif
 
 #if defined(FLOAT128) || defined(BIGFLOAT)
+using boost::multiprecision::isinf;
+using boost::multiprecision::real;
+
 template <typename T>
 struct fmt::formatter<boost::multiprecision::number<T>> : fmt::ostream_formatter {};
 #endif
