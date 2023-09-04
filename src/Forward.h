@@ -225,9 +225,9 @@ public:
       t_f = radial_integrals[2] + square(a) * angular_integrals[2];
     }
 
-    std::cout << "theta_f: " << theta_f << ", phi_f: " << phi_f << ", t_f: " << t_f
-              << ", m: "
-              << m << ", nhalf: " << n_half << std::endl;
+#ifdef PRINT_DEBUG
+    fmt::println("theta_f, phi_f, t_f, m, nhalf: {}, {}, {}, {}, {}", theta_f, phi_f, t_f, m, n_half);
+#endif
     return RayStatus::NORMAL;
   }
 };
