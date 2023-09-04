@@ -41,6 +41,7 @@ target_link_libraries(forward_ray_tracing PRIVATE ${LIBRARIES})
 
 if (ENABLE_TESTING)
 add_executable(tests tests/test.cpp ${SOURCE_FILES})
+target_compile_definitions(tests PRIVATE TESTS)
 target_link_libraries(tests PRIVATE ${LIBRARIES} Catch2::Catch2WithMain)
 endif()
 

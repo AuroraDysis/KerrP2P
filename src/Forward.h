@@ -15,7 +15,12 @@ class ForwardRayTracing {
 
   friend class GIntegral<Real, Complex>;
 
+#ifdef TESTS
+public:
+#else
 private:
+#endif
+
   const Real a, rp, rm, r_s, theta_s, r_o;
 
   // need to set before using other method

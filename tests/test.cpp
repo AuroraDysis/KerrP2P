@@ -37,6 +37,15 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", BigFloat) {
   Real theta_o = 17 * boost::math::constants::pi<Real>() / 180;
   Real phi_o = boost::math::constants::pi<Real>() / 4;
 
+  Real theta_p = boost::lexical_cast<Real>("2.9985518355994681536309291170519418436073346589646787992134998289189995970210");
+  Real theta_m = boost::lexical_cast<Real>("0.1430408179903250848317142662275610405898347404104270217614447633888168092652");
+
+  std::array<Real, 4> roots;
+  roots[0] = boost::lexical_cast<Real>("-6.04554712682791059270545496104354043954963104736789124638940696078511224064853");
+  roots[1] = boost::lexical_cast<Real>("0.34879526738182106177469924796129008021560836001128897506011363946876926002638");
+  roots[2] = boost::lexical_cast<Real>("2.6287554985438575540617137085633051458252662759101877664658559650903208248025");
+  roots[3] = boost::lexical_cast<Real>("3.0679963609022319768690420045189452135087564114464145048634373562260221558196");
+
   std::array<Real, 3> radial_integral;
   radial_integral[0] = boost::lexical_cast<Real>("1.449918724448707783003361604770409888333642555992048976602177112826476986925901542332371494798805");
   radial_integral[1] = boost::lexical_cast<Real>("1.288507079276017729837985995399653209220514835403767425334993622951859438005362259829818057986322");
@@ -56,6 +65,13 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", BigFloat) {
 #endif
 #ifdef BIGFLOAT
   if constexpr (std::is_same_v<TestType, BigFloat>) {
+    CHECK(abs(forward.r1 - roots[0]) < BIGFLOAT_ERROR_LIMIT);
+    CHECK(abs(forward.r2 - roots[1]) < BIGFLOAT_ERROR_LIMIT);
+    CHECK(abs(forward.r3 - roots[2]) < BIGFLOAT_ERROR_LIMIT);
+    CHECK(abs(forward.r4 - roots[3]) < BIGFLOAT_ERROR_LIMIT);
+    CHECK(abs(forward.theta_p - theta_p) < BIGFLOAT_ERROR_LIMIT);
+    CHECK(abs(forward.theta_m - theta_m) < BIGFLOAT_ERROR_LIMIT);
+    CHECK(abs(forward.radial_integrals[0] - radial_integral[0]) < BIGFLOAT_ERROR_LIMIT);
     CHECK(abs(forward.radial_integrals[0] - radial_integral[0]) < BIGFLOAT_ERROR_LIMIT);
     CHECK(abs(forward.radial_integrals[1] - radial_integral[1]) < BIGFLOAT_ERROR_LIMIT);
     CHECK(abs(forward.radial_integrals[2] - radial_integral[2]) < BIGFLOAT_ERROR_LIMIT);
