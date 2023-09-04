@@ -60,10 +60,14 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
     auto status = forward.calc_ray_by_lambda_q(a, r_s, theta_s, r_o, nu_r, nu_theta, lambda, sqrt(eta));
     REQUIRE(status == RayStatus::NORMAL);
 
-    Real r1 = boost::lexical_cast<Real>(data.get<string>("r1"));
-    Real r2 = boost::lexical_cast<Real>(data.get<string>("r2"));
-    Real r3 = boost::lexical_cast<Real>(data.get<string>("r3"));
-    Real r4 = boost::lexical_cast<Real>(data.get<string>("r4"));
+    auto r1_vec = as_vector<string>(data, "r1");
+    Complex r1 = Complex(boost::lexical_cast<Real>(r1_vec[0]), boost::lexical_cast<Real>(r1_vec[1]));
+    auto r2_vec = as_vector<string>(data, "r2");
+    Complex r2 = Complex(boost::lexical_cast<Real>(r2_vec[0]), boost::lexical_cast<Real>(r2_vec[1]));
+    auto r3_vec = as_vector<string>(data, "r3");
+    Complex r3 = Complex(boost::lexical_cast<Real>(r3_vec[0]), boost::lexical_cast<Real>(r3_vec[1]));
+    auto r4_vec = as_vector<string>(data, "r4");
+    Complex r4 = Complex(boost::lexical_cast<Real>(r4_vec[0]), boost::lexical_cast<Real>(r4_vec[1]));
 
     std::vector<Real> radial_integrals;
     radial_integrals.reserve(3);
@@ -95,10 +99,10 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
       ERROR_LIMIT = BIGFLOAT_ERROR_LIMIT;
     }
 #endif
-    CHECK(abs(forward.r1 - r1) < ERROR_LIMIT);
-    CHECK(abs(forward.r2 - r2) < ERROR_LIMIT);
-    CHECK(abs(forward.r3 - r3) < ERROR_LIMIT);
-    CHECK(abs(forward.r4 - r4) < ERROR_LIMIT);
+    CHECK(abs(forward.r1_c - r1) < ERROR_LIMIT);
+    CHECK(abs(forward.r2_c - r2) < ERROR_LIMIT);
+    CHECK(abs(forward.r3_c - r3) < ERROR_LIMIT);
+    CHECK(abs(forward.r4_c - r4) < ERROR_LIMIT);
     CHECK(abs(forward.radial_integrals[0] - radial_integrals[0]) < ERROR_LIMIT);
     CHECK(abs(forward.radial_integrals[0] - radial_integrals[0]) < ERROR_LIMIT);
     CHECK(abs(forward.radial_integrals[1] - radial_integrals[1]) < ERROR_LIMIT);
