@@ -15,7 +15,7 @@ public:
 
   Real one_over_sqrt_up;
   Real ellint_m, ellint_k;
-  Real ellint_kappa, ellint_kappa_prime, ellint_one_over_kappa_prime, ellint3_n, ellint_alpha1_2;
+  Real ellint_kappa, ellint_kappa2, ellint_kappa_prime, ellint_one_over_kappa_prime, ellint3_n, ellint_alpha1_2;
   Real jacobi_sn_k1, jacobi_sn_k1_prime;
   Real one_over_umaa_sqrt;
   Real ellint_phi; // ArcCsc[sqrt[up] Sec[\[Theta]]]
@@ -32,11 +32,11 @@ public:
     G_arr[0] = -one_over_umaa_sqrt * ellint_kappa_prime * boost::math::ellint_1(ellint_kappa, ellint_theta);
     G_arr[1] = -one_over_umaa_sqrt * ellint_kappa_prime / ellint_alpha1_2 *
                (square(ellint_kappa_prime) * up * boost::math::ellint_3(ellint_kappa, ellint_alpha1_2, ellint_theta) +
-                square(ellint_kappa) * boost::math::ellint_1(ellint_kappa, ellint_theta));
+                ellint_kappa2 * boost::math::ellint_1(ellint_kappa, ellint_theta));
     G_arr[2] = um *
                (one_over_umaa_sqrt * ellint_one_over_kappa_prime * (boost::math::ellint_2(ellint_kappa, ellint_theta) -
-                                                                    square(ellint_kappa) * sin(ellint_theta) *
-                                                                    cos(ellint_theta) / sqrt(1 - square(ellint_kappa) *
+                                                                    ellint_kappa2 * sin(ellint_theta) *
+                                                                    cos(ellint_theta) / sqrt(1 - ellint_kappa2 *
                                                                                                  square(
                                                                                                      sin(ellint_theta)))) +
                 G_arr[0]);
@@ -59,6 +59,7 @@ public:
     ellint_m = -up / um;
     ellint_k = sqrt(ellint_m);
     ellint_kappa = sqrt(ellint_m / (ellint_m + 1));
+    ellint_kappa2 = ellint_m / (ellint_m + 1);
     ellint_one_over_kappa_prime = sqrt(ellint_m + 1);
     ellint_kappa_prime = 1 / ellint_one_over_kappa_prime;
     ellint3_n = up / (up - 1);
