@@ -28,7 +28,7 @@ public:
     const Real &um = data.um;
     ellint_phi = asin(cos(theta) * one_over_sqrt_up);
     ellint_theta = asin(
-        (sqrt(1 + square(ellint_k)) * sin(ellint_phi)) / sqrt(1 + square(ellint_k) * square(sin(ellint_phi))));
+        (sqrt(1 + ellint_m) * sin(ellint_phi)) / sqrt(1 + ellint_m * square(sin(ellint_phi))));
     G_arr[0] = -one_over_umaa_sqrt * ellint1_coeff * boost::math::ellint_1(ellint_k, ellint_theta);
     G_arr[1] = -one_over_umaa_sqrt * ellint3_coeff * boost::math::ellint_3(ellint_k, ellint3_n, ellint_theta);
     G_arr[2] = um * (-one_over_umaa_sqrt * ellint2_coeff * boost::math::ellint_2(ellint_k, ellint_theta) + G_arr[0]);
@@ -55,7 +55,7 @@ public:
     ellint3_coeff = ellint1_coeff / (1 - up);
     ellint3_n = up / (up - 1);
 
-    one_over_sqrt_up = sqrt(up);
+    one_over_sqrt_up = 1 / sqrt(up);
     one_over_umaa_sqrt = 1 / sqrt(-um * a * a);
 
     G_theta_p[0] = ellint1_coeff * boost::math::ellint_1(ellint_k) * one_over_umaa_sqrt;
