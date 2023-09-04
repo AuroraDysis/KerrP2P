@@ -12,26 +12,26 @@ public:
 #endif
   ForwardRayTracing<Real, Complex> &data;
 
-  Real acos_x3_rs, acos_x3_rf;
+  Real ellint_phi_rs, ellint_phi_rf;
   Real r34_re, r34_im;
-  Real A, B, alpha_p, alpha_p2, alpha_m, alpha_m2, ellint_k;
+  Real A, B, alpha_p, alpha_p2, alpha_m, alpha_m2, k3;
   Real F3, R1_alpha_p, R1_alpha_m, Ip, Im;
 
   std::array<Real, 3> integral_rs;
   std::array<Real, 3> integral_rf;
 
-  Real R1(const Real &acos_x3, const Real &alpha, const Real &alpha2) const {
+  Real R1(const Real &ellint_phi, const Real &alpha, const Real &alpha2) const {
     return 1 / (1 - alpha2) *
-           (boost::math::ellint_3(ellint_k, alpha2 / (alpha2 - 1), acos_x3) -
+           (boost::math::ellint_3(k3, alpha2 / (alpha2 - 1), ellint_phi) -
             alpha * ((sqrt((-1 + alpha2) /
-                           (alpha2 + ellint_k - alpha2 * ellint_k)) *
-                      log(abs((sin(acos_x3) +
+                           (alpha2 + k3 - alpha2 * k3)) *
+                      log(abs((sin(ellint_phi) +
                                sqrt((-1 + alpha2) /
-                                    (alpha2 + ellint_k - alpha2 * ellint_k)) *
-                               sqrt(1 - ellint_k * square(sin(acos_x3)))) /
-                              (-sin(acos_x3) + sqrt((-1 + alpha2) /
-                                                    (alpha2 + ellint_k - alpha2 * ellint_k)) *
-                                               sqrt(1 - ellint_k * square(sin(acos_x3))))))) *
+                                    (alpha2 + k3 - alpha2 * k3)) *
+                               sqrt(1 - k3 * square(sin(ellint_phi)))) /
+                              (-sin(ellint_phi) + sqrt((-1 + alpha2) /
+                                                    (alpha2 + k3 - alpha2 * k3)) *
+                                               sqrt(1 - k3 * square(sin(ellint_phi))))))) *
                      half<Real>()));
   }
 public:
@@ -55,18 +55,18 @@ public:
     A = sqrt(square(r34_im) + square(r34_re - r2));
     B = sqrt(square(r34_im) + square(r34_re - r1));
 
-    ellint_k = sqrt(((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B));
+    k3 = sqrt(((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B));
     // alpha_0 = (B + A) / (B - A);
     alpha_p = (B * (rp - r2) + A * (rp - r1)) / (B * (rp - r2) - A * (rp - r1));
     alpha_m = (B * (rm - r2) + A * (rm - r1)) / (B * (rm - r2) - A * (rm - r1));
     alpha_p2 = square(alpha_p);
     alpha_m2 = square(alpha_m);
 
-    acos_x3_rs = acos(-1 + (2 * A * (r_s - r1)) / (A * (r_s - r1) + B * (r_s - r2)));
-    acos_x3_rf = acos((A - B) / (A + B));
+    ellint_phi_rs = acos(-1 + (2 * A * (r_s - r1)) / (A * (r_s - r1) + B * (r_s - r2)));
+    ellint_phi_rf = acos((A - B) / (A + B));
   }
 
-  void calc_x(std::array<Real, 3> &integral, const Real &acos_x3) {
+  void calc_x(std::array<Real, 3> &integral, const Real &ellint_phi) {
     const Real &a = data.a;
     const Real &lambda = data.lambda;
     const Real &rp = data.rp;
@@ -74,9 +74,9 @@ public:
     const Real &r1 = data.r1;
     const Real &r2 = data.r2;
 
-    R1_alpha_p = R1(acos_x3, alpha_p, alpha_p2);
-    R1_alpha_m = R1(acos_x3, alpha_m, alpha_m2);
-    F3 = boost::math::ellint_1(ellint_k, acos_x3) / sqrt(A * B);
+    R1_alpha_p = R1(ellint_phi, alpha_p, alpha_p2);
+    R1_alpha_m = R1(ellint_phi, alpha_m, alpha_m2);
+    F3 = boost::math::ellint_1(k3, ellint_phi) / sqrt(A * B);
     Ip = -(((A + B) * F3 + (2 * sqrt(A * B) * R1_alpha_p * (-r1 + r2)) /
                            (A * (r1 - rp) + B * (-r2 + rp))) /
            (-(A * r1) - B * r2 + (A + B) * rp));
@@ -89,8 +89,8 @@ public:
 
   void calc(bool is_plus) {
     pre_calc();
-    calc_x(integral_rs, acos_x3_rs);
-    calc_x(integral_rf, acos_x3_rf);
+    calc_x(integral_rs, ellint_phi_rs);
+    calc_x(integral_rf, ellint_phi_rf);
 
     auto &radial_integrals = data.radial_integrals;
 
