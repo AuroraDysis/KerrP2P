@@ -14,7 +14,7 @@ public:
 
   Real ellint_phi_rs, ellint_phi_rf;
   Real r34_re, r34_im;
-  Real A, B, alpha_p, alpha_p2, alpha_m, alpha_m2, k3;
+  Real A, B, alpha_p, alpha_p2, alpha_m, alpha_m2, ellint_k;
   Real F3, R1_alpha_p, R1_alpha_m, Ip, Im;
 
   std::array<Real, 3> integral_rs;
@@ -22,16 +22,16 @@ public:
 
   Real R1(const Real &ellint_phi, const Real &alpha, const Real &alpha2) const {
     return 1 / (1 - alpha2) *
-           (boost::math::ellint_3(k3, alpha2 / (alpha2 - 1), ellint_phi) -
+           (boost::math::ellint_3(ellint_k, alpha2 / (alpha2 - 1), ellint_phi) -
             alpha * ((sqrt((-1 + alpha2) /
-                           (alpha2 + k3 - alpha2 * k3)) *
+                           (alpha2 + ellint_k - alpha2 * ellint_k)) *
                       log(abs((sin(ellint_phi) +
                                sqrt((-1 + alpha2) /
-                                    (alpha2 + k3 - alpha2 * k3)) *
-                               sqrt(1 - k3 * square(sin(ellint_phi)))) /
+                                    (alpha2 + ellint_k - alpha2 * ellint_k)) *
+                               sqrt(1 - ellint_k * square(sin(ellint_phi)))) /
                               (-sin(ellint_phi) + sqrt((-1 + alpha2) /
-                                                    (alpha2 + k3 - alpha2 * k3)) *
-                                               sqrt(1 - k3 * square(sin(ellint_phi))))))) *
+                                                    (alpha2 + ellint_k - alpha2 * ellint_k)) *
+                                               sqrt(1 - ellint_k * square(sin(ellint_phi))))))) *
                      half<Real>()));
   }
 public:
@@ -55,7 +55,7 @@ public:
     A = sqrt(square(r34_im) + square(r34_re - r2));
     B = sqrt(square(r34_im) + square(r34_re - r1));
 
-    k3 = sqrt(((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B));
+    ellint_k = sqrt(((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B));
     // alpha_0 = (B + A) / (B - A);
     alpha_p = (B * (rp - r2) + A * (rp - r1)) / (B * (rp - r2) - A * (rp - r1));
     alpha_m = (B * (rm - r2) + A * (rm - r1)) / (B * (rm - r2) - A * (rm - r1));
@@ -76,7 +76,7 @@ public:
 
     R1_alpha_p = R1(ellint_phi, alpha_p, alpha_p2);
     R1_alpha_m = R1(ellint_phi, alpha_m, alpha_m2);
-    F3 = boost::math::ellint_1(k3, ellint_phi) / sqrt(A * B);
+    F3 = boost::math::ellint_1(ellint_k, ellint_phi) / sqrt(A * B);
     Ip = -(((A + B) * F3 + (2 * sqrt(A * B) * R1_alpha_p * (-r1 + r2)) /
                            (A * (r1 - rp) + B * (-r2 + rp))) /
            (-(A * r1) - B * r2 + (A + B) * rp));
