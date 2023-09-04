@@ -31,6 +31,7 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", BigFloat) {
   Real eta = boost::lexical_cast<Real>("26.57242896970946927251987627934469966678305414295689726675509814044032238307038");
 
   ForwardRayTracing<Real, Complex> forward(a, r_s, theta_s, r_o);
+  forward.calc_t_f = true;
   auto status = forward.calc_ray_by_lambda_q(lambda, sqrt(eta), nu_r, nu_theta);
   REQUIRE(status == RayStatus::NORMAL);
 
