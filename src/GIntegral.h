@@ -83,10 +83,11 @@ public:
     const Real &G_theta_theta_p = G_theta_p[0];
 
     // https://dlmf.nist.gov/22.17
-    jacobi_sn_k1 = ellint_k / sqrt(1 + ellint_m);
-    jacobi_sn_k1_prime = ellint_k / (1 + ellint_m) / jacobi_sn_k1;
+    jacobi_sn_k1_prime = 1 / sqrt(1 + ellint_m);
+    jacobi_sn_k1 = ellint_k * jacobi_sn_k1_prime;
     data.theta_f = acos(-sqrt(up) * to_integral(nu_theta) *
-                            jacobi_sn_k1_prime * boost::math::jacobi_sd(jacobi_sn_k1, (tau_o + to_integral(nu_theta) * G_theta_theta_s) *
+                        jacobi_sn_k1_prime *
+                        boost::math::jacobi_sd(jacobi_sn_k1, (tau_o + to_integral(nu_theta) * G_theta_theta_s) *
                                                              sqrt(-square(a) * um) / jacobi_sn_k1_prime));
 
     // Angular integrals
