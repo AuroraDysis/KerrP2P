@@ -4,17 +4,17 @@ project(forward_ray_tracing)
 set(CMAKE_CXX_STANDARD 17)
 
 option(ENABLE_TESTING "Enable Test Builds" ON)
-option(ENABLE_FLOAT64 "Enable float64 precision" OFF)
 option(ENABLE_FLOAT128 "Enable float128 precision" OFF)
 option(ENABLE_BIGFLOAT "Enable bigfloat precision" ON)
 
-message (STATUS "ENABLE_FLOAT64 = ${ENABLE_FLOAT64}")
-
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+find_package(fmt REQUIRED)
 find_package(Boost 1.82 REQUIRED)
 find_package(Catch2 3 REQUIRED)
-set(LIBRARIES Boost::boost)
+set(LIBRARIES Boost::boost fmt::fmt)
+
+add_definitions(-DPRINT_DEBUG)
 
 if (ENABLE_FLOAT128)
     message("Enable float128 precision")

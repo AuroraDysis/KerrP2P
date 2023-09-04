@@ -94,6 +94,10 @@ private:
       r3 = real(r3_c);
       r4 = real(r4_c);
     }
+
+#ifdef PRINT_DEBUG
+    fmt::println("r1: {}, r2: {}, r3: {}, r4: {}", r1, r2, r3, r4);
+#endif
   }
 
   void init_theta_pm() {

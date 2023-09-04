@@ -3,6 +3,8 @@
 #include <cmath>
 #include <array>
 #include <complex>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 
 #include <boost/math/constants/constants.hpp>
 #include <boost/math/special_functions/ellint_1.hpp>
@@ -47,4 +49,9 @@ class ForwardRayTracing;
 #ifdef BIGFLOAT
 #include <boost/multiprecision/mpfr.hpp>
 #include <boost/multiprecision/mpc.hpp>
+#endif
+
+#if defined(FLOAT128) || defined(BIGFLOAT)
+template <typename T>
+struct fmt::formatter<boost::multiprecision::number<T>> : fmt::ostream_formatter {};
 #endif
