@@ -87,5 +87,9 @@ public:
       angular_integrals[i] =
           (2 * data.m) * G_theta_p[i] + to_integral(nu_theta) * (m1_m * G_theta_inf[i] - G_theta_s[i]);
     }
+
+#ifdef PRINT_DEBUG
+    fmt::println("G: {}, {}, {}", angular_integrals[0], angular_integrals[1], angular_integrals[2]);
+#endif
   }
 };
