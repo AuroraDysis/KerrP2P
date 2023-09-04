@@ -29,13 +29,6 @@ private:
   Real r1, r2, r3, r4;
   bool r12_is_real, r34_is_real;
 
-  // minor time
-  Real tau_o;
-  // I_theta, I_phi, I_t
-  std::array<Real, 3> radial_integrals;
-  // G_theta, G_phi, G_t
-  std::array<Real, 3> angular_integrals;
-
   void reset_variables() {
     tau_o = std::numeric_limits<Real>::quiet_NaN();
     theta_f = std::numeric_limits<Real>::quiet_NaN();
@@ -168,6 +161,13 @@ private:
   }
 
 public:
+  // minor time
+  Real tau_o;
+  // I_theta, I_phi, I_t
+  std::array<Real, 3> radial_integrals;
+  // G_theta, G_phi, G_t
+  std::array<Real, 3> angular_integrals;
+
   Real theta_f;
   Real phi_f;
   Real t_f;

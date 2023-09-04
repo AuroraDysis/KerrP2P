@@ -15,6 +15,7 @@ using Float128 = std::tuple<boost::multiprecision::float128, boost::multiprecisi
 
 #ifdef BIGFLOAT
 using BigFloat = std::tuple<boost::multiprecision::mpfr_float_50, boost::multiprecision::mpc_complex_50>;
+const boost::multiprecision::mpfr_float_50 ERROR_LIMIT{"1e-45"};
 #endif
 
 TEMPLATE_TEST_CASE("Forward Function", "[forward]", BigFloat) {
@@ -35,7 +36,26 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", BigFloat) {
 
   Real theta_o = 17 * boost::math::constants::pi<Real>() / 180;
   Real phi_o = boost::math::constants::pi<Real>() / 4;
-  REQUIRE_THAT((forward.theta_f - theta_o).template convert_to<double>(), Catch::Matchers::WithinAbs(0, 1e-15));
+
+  std::array<Real, 3> radial_integral;
+  radial_integral[0] = boost::lexical_cast<Real>("1.449918724448707783003361604770409888333642555992048976602177112826476986925901542332371494798805");
+  radial_integral[1] = boost::lexical_cast<Real>("1.288507079276017729837985995399653209220514835403767425334993622951859438005362259829818057986322");
+  radial_integral[2] = boost::lexical_cast<Real>("1050.230729556838727739610680482910331549495652276193749581856090200250574410573699314114422714724239");
+  // is big float
+#ifdef FLOAT128
+  if constexpr (std::is_same_v<TestType, FLOAT128>) {
+
+  }
+#endif
+#ifdef BIGFLOAT
+  if constexpr (std::is_same_v<TestType, BigFloat>) {
+    CHECK(abs(forward.radial_integrals[0] - radial_integral[0]) < ERROR_LIMIT);
+    CHECK(abs(forward.radial_integrals[1] - radial_integral[1]) < ERROR_LIMIT);
+    CHECK(abs(forward.radial_integrals[2] - radial_integral[2]) < ERROR_LIMIT);
+    CHECK(abs(forward.theta_f - theta_o) < ERROR_LIMIT);
+    CHECK(abs(forward.phi_f - phi_o) < ERROR_LIMIT);
+  }
+#endif
 
 //    ForwardRayTracing forward();
 //    SECTION("lamqv2") {
