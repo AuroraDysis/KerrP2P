@@ -6,7 +6,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include "data/TestData.h"
+#include "TestData.h"
 
 using std::string;
 using Float64 = std::tuple<double, std::complex<double>>;
@@ -44,9 +44,7 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
   using Real = std::tuple_element_t<0u, TestType>;
   using Complex = std::tuple_element_t<1u, TestType>;
 
-  auto test_cases = get_test_data();
-
-  for (const auto &data : test_cases) {
+  for (const auto &data : TEST_DATA) {
     Real a = boost::lexical_cast<Real>(data.get<string>("a"));
     Real r_s = boost::lexical_cast<Real>(data.get<string>("r_s"));
     Real theta_s = boost::lexical_cast<Real>(data.get<string>("theta_s"));
@@ -57,9 +55,9 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
     Real lambda = boost::lexical_cast<Real>(data.get<string>("lambda"));
     Real eta = boost::lexical_cast<Real>(data.get<string>("eta"));
 
-    ForwardRayTracing<Real, Complex> forward(a, r_s, theta_s, r_o);
+    ForwardRayTracing<Real, Complex> forward;
     forward.calc_t_f = true;
-    auto status = forward.calc_ray_by_lambda_q(lambda, sqrt(eta), nu_r, nu_theta);
+    auto status = forward.calc_ray_by_lambda_q(a, r_s, theta_s, r_o, nu_r, nu_theta, lambda, sqrt(eta));
     REQUIRE(status == RayStatus::NORMAL);
 
     Real r1 = boost::lexical_cast<Real>(data.get<string>("r1"));

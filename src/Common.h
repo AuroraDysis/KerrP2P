@@ -47,6 +47,9 @@ using std::isinf;
 #ifdef FLOAT128
 #include <boost/multiprecision/float128.hpp>
 #include <boost/multiprecision/complex128.hpp>
+
+template <>
+struct fmt::formatter<boost::multiprecision::float128> : fmt::ostream_formatter {};
 #endif
 
 #ifdef BIGFLOAT

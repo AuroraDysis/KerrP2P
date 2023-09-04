@@ -10,11 +10,11 @@ option(ENABLE_BIGFLOAT "Enable bigfloat precision" ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 find_package(fmt REQUIRED)
-find_package(Boost 1.82 REQUIRED)
+find_package(Boost 1.83.0 COMPONENTS filesystem REQUIRED)
 find_package(Catch2 3 REQUIRED)
-set(LIBRARIES Boost::boost fmt::fmt)
+set(LIBRARIES Boost::boost Boost::filesystem fmt::fmt)
 
-add_definitions(-DPRINT_DEBUG)
+# add_definitions(-DPRINT_DEBUG)
 
 if (ENABLE_FLOAT128)
     message("Enable float128 precision")
@@ -41,11 +41,12 @@ target_link_libraries(forward_ray_tracing PRIVATE ${LIBRARIES})
 
 if (ENABLE_TESTING)
 add_executable(tests tests/Test.cpp
-        tests/data/TestData.h
-        tests/data/TestData.cpp
-        ${SOURCE_FILES})
+        tests/TestData.h
+        tests/TestData.cpp
+        ${SOURCE_FILES}
+        tests/Main.cpp)
 target_compile_definitions(tests PRIVATE TESTS)
-target_link_libraries(tests PRIVATE ${LIBRARIES} Catch2::Catch2WithMain)
+target_link_libraries(tests PRIVATE ${LIBRARIES} Catch2::Catch2)
 endif()
 
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
