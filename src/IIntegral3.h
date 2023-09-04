@@ -5,7 +5,11 @@
 // Radial Antiderivatives for case (3)
 template<typename Real, typename Complex>
 class IIntegral3 {
-private:
+#ifdef TESTS
+public:
+#else
+  private:
+#endif
   ForwardRayTracing<Real, Complex> &data;
 
   Real acos_x3_rs, acos_x3_inf;
@@ -19,7 +23,7 @@ private:
 
   Real R1(const Real &acos_x3, const Real &alpha, const Real &alpha2) const {
     return 1 / (1 - alpha2) *
-           (boost::math::ellint_3(alpha2 / (alpha2 - 1), acos_x3, k3) -
+           (boost::math::ellint_3(k3, alpha2 / (alpha2 - 1), acos_x3) -
             alpha * ((sqrt((-1 + alpha2) /
                            (alpha2 + k3 - alpha2 * k3)) *
                       log(abs((sin(acos_x3) +
@@ -52,7 +56,7 @@ public:
     A = sqrt(square(r34_im) + square(r34_re - r2));
     B = sqrt(square(r34_im) + square(r34_re - r1));
 
-    k3 = ((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B);
+    k3 = sqrt(((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B));
     // alpha_0 = (B + A) / (B - A);
     alpha_p = (B * (rp - r2) + A * (rp - r1)) / (B * (rp - r2) - A * (rp - r1));
     alpha_m = (B * (rm - r2) + A * (rm - r1)) / (B * (rm - r2) - A * (rm - r1));
@@ -73,7 +77,7 @@ public:
 
     R1_alpha_p = R1(acos_x3, alpha_p, alpha_p2);
     R1_alpha_m = R1(acos_x3, alpha_m, alpha_m2);
-    F3 = boost::math::ellint_1(acos_x3, k3) / sqrt(A * B);
+    F3 = boost::math::ellint_1(k3, acos_x3) / sqrt(A * B);
     Ip = -(((A + B) * F3 + (2 * sqrt(A * B) * R1_alpha_p * (-r1 + r2)) /
                            (A * (r1 - rp) + B * (-r2 + rp))) /
            (-(A * r1) - B * r2 + (A + B) * rp));

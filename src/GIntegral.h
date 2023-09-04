@@ -4,7 +4,11 @@
 
 template<typename Real, typename Complex>
 class GIntegral {
-private:
+#ifdef TESTS
+public:
+#else
+  private:
+#endif
   std::array<Real, 3> G_theta_p = {};
   std::array<Real, 3> G_theta_s = {};
   std::array<Real, 3> G_theta_inf = {};
@@ -20,9 +24,9 @@ private:
     const Real &up = data.up;
     const Real &um = data.um;
     asin_up_cos_theta = asin(cos(theta) * one_over_sqrt_up);
-    G_arr[0] = -boost::math::ellint_1(asin_up_cos_theta, up_over_um) * one_over_umaa_sqrt;
-    G_arr[1] = -boost::math::ellint_3(up, asin_up_cos_theta, up_over_um) * one_over_umaa_sqrt;
-    G_arr[2] = um * (boost::math::ellint_2(asin_up_cos_theta, up_over_um) * one_over_umaa_sqrt + G_arr[0]);
+    G_arr[0] = -boost::math::ellint_1(up_over_um, asin_up_cos_theta) * one_over_umaa_sqrt;
+    G_arr[1] = -boost::math::ellint_3(up_over_um, up, asin_up_cos_theta) * one_over_umaa_sqrt;
+    G_arr[2] = um * (boost::math::ellint_2(up_over_um, asin_up_cos_theta) * one_over_umaa_sqrt + G_arr[0]);
   }
 
 public:
@@ -42,7 +46,7 @@ public:
     one_over_umaa_sqrt = 1 / sqrt(-um * a * a);
 
     G_theta_p[0] = -boost::math::ellint_1(up_over_um) * one_over_umaa_sqrt;
-    G_theta_p[1] = -boost::math::ellint_3(up, up_over_um) * one_over_umaa_sqrt;
+    G_theta_p[1] = -boost::math::ellint_3(up_over_um, up) * one_over_umaa_sqrt;
     if (data.calc_t_f) {
       G_theta_p[2] = um * (-boost::math::ellint_2(up_over_um) * one_over_umaa_sqrt + G_theta_p[0]);
     } else {

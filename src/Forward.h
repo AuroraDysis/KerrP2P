@@ -116,6 +116,9 @@ private:
     init_radial_potential_roots();
     init_theta_pm();
     reset_variables();
+#ifdef PRINT_DEBUG
+    fmt::println("lambda: {}, q: {}, nu_r: {}, nu_theta: {}", lambda, q, to_integral(nu_r), to_integral(nu_theta));
+#endif
   }
 
   void reset_by_rc_d(const Real &rc, const Real &d, Sign nu_r_, Sign nu_theta_) {
@@ -188,6 +191,9 @@ public:
     I_integral_2 = std::make_shared<IIntegral2<Real, Complex>>(*this);
     I_integral_3 = std::make_shared<IIntegral3<Real, Complex>>(*this);
     G_integral = std::make_shared<GIntegral<Real, Complex>>(*this);
+#ifdef PRINT_DEBUG
+    fmt::println("a: {}, r_s: {}, theta_s: {}, r_o: {}, rp: {}, rm: {}", a, r_s, theta_s, r_o, rp, rm);
+#endif
   }
 
   std::shared_ptr<IIntegral2<Real, Complex>> I_integral_2;
