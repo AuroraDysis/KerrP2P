@@ -29,10 +29,13 @@ public:
   explicit GIntegral(ForwardRayTracing<Real, Complex> &parent) : data(parent) {
   }
 
-  void pre_calc() {
+  void calc() {
     const Real &a = data.a;
     const Real &up = data.up;
     const Real &um = data.um;
+    auto &tau_o = data.tau_o;
+    const Real &theta_s = data.theta_s;
+    Sign nu_theta = data.nu_theta;
 
     up_over_um = up / um;
     one_over_sqrt_up = sqrt(up);
@@ -45,15 +48,6 @@ public:
     } else {
       G_theta_p[2] = std::numeric_limits<Real>::quiet_NaN();
     }
-  }
-
-  void calc() {
-    const Real &a = data.a;
-    const Real &up = data.up;
-    const Real &um = data.um;
-    auto &tau_o = data.tau_o;
-    const Real &theta_s = data.theta_s;
-    Sign nu_theta = data.nu_theta;
 
     G_theta_phi_t(G_theta_s, theta_s);
 
