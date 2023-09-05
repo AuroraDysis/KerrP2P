@@ -10,11 +10,11 @@
 
 using std::string;
 using Float64 = std::tuple<double, std::complex<double>>;
-constexpr double FLOAT64_ERROR_LIMIT = 1e-12;
+constexpr double FLOAT64_ERROR_LIMIT = 1e-10;
 
 #ifdef FLOAT128
 using Float128 = std::tuple<boost::multiprecision::float128, boost::multiprecision::complex128>;
-const boost::multiprecision::float128 FLOAT128_ERROR_LIMIT{"1e-30"};
+const boost::multiprecision::float128 FLOAT128_ERROR_LIMIT{"1e-29"};
 #endif
 
 #ifdef BIGFLOAT

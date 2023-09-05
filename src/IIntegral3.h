@@ -17,8 +17,8 @@ public:
   Real ellint_phi, ellint_cos_phi, ellint_sin_phi;
   Real r34_re, r34_im;
   Real A, B, alpha_p, alpha_m, ellint_k, ellint_m, alpha2;
-  Real alpha_0, alpha_02, R1_alpha_0, R2_alpha_0, Pi_13, Pi_23, I_1, I_2;
-  Real ellint3_n, ellint3_n_new, ellint_c, ellint_3_tmp, f1, ellint_omega2;
+  Real alpha_0, R1_alpha_0, R2_alpha_0, Pi_13, Pi_23, I_1, I_2;
+  Real ellint3_n, ellint_c, ellint_3_tmp, f1, ellint3_n1;
   Real F3, R1_alpha_p, R1_alpha_m, I_p, I_m;
 
   std::array<Real, 3> integral_rs;
@@ -27,8 +27,7 @@ public:
   Real R1(const Real &alpha) {
     alpha2 = square(alpha);
     ellint3_n = alpha2 / (alpha2 - 1);
-    ellint3_n_new = ellint_m / ellint3_n;
-    ellint_omega2 = ellint_m / ellint3_n;
+    ellint3_n1 = ellint_m / ellint3_n;
 
     // \Pi\left(\phi, \alpha^2, k\right)-F(\phi, k)=\frac{1}{3} \alpha^2 R_J\left(c-1, c-k^2, c, c-\alpha^2\right)
     using boost::math::ellint_rc;
@@ -38,9 +37,9 @@ public:
     // https://dlmf.nist.gov/19.25.E16
     using boost::math::constants::half_pi;
     using boost::math::constants::two_thirds;
-    ellint_3_tmp = -third<Real>() * ellint_omega2 * ellint_rj(ellint_c - 1, ellint_c - ellint_m, ellint_c, ellint_c - ellint_omega2)
-                   + sqrt((ellint_c - 1) * (ellint_c - ellint_m) / ((ellint3_n - 1) * (1 - ellint_omega2))) *
-                     ellint_rc(ellint_c * (ellint3_n - 1) * (1 - ellint_omega2), (ellint3_n - ellint_c) * (ellint_c - ellint_omega2));
+    ellint_3_tmp = -third<Real>() * ellint3_n1 * ellint_rj(ellint_c - 1, ellint_c - ellint_m, ellint_c, ellint_c - ellint3_n1)
+                   + sqrt((ellint_c - 1) * (ellint_c - ellint_m) / ((ellint3_n - 1) * (1 - ellint3_n1))) *
+                     ellint_rc(ellint_c * (ellint3_n - 1) * (1 - ellint3_n1), (ellint3_n - ellint_c) * (ellint_c - ellint3_n1));
     if (ellint_phi >= half_pi<Real>()) {
       ellint_3_tmp +=
           two_thirds<Real>() * ellint_m / ellint3_n * ellint_rj(0, 1 - ellint_m, 1, 1 - ellint_m / ellint3_n);
@@ -54,7 +53,7 @@ public:
                                           (alpha2 + ellint_m - alpha2 * ellint_m)) *
                                      sqrt(1 - ellint_m * square(ellint_sin_phi)))));
 #ifdef PRINT_DEBUG
-    fmt::println("R1 - k: {}, n: {}, n1: {}, phi: {}", ellint_k, ellint3_n, ellint3_n_new, ellint_phi);
+    fmt::println("R1 - k: {}, n: {}, n1: {}, phi: {}", ellint_k, ellint3_n, ellint_phi);
     fmt::println("R1 - ellint_3: {}, f1: {}", ellint_3_tmp, f1);
 #endif
     // sign is different from Mathematica
@@ -85,7 +84,8 @@ public:
 
     ellint_m = ((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B);
     ellint_k = sqrt(ellint_m);
-    // alpha_0 = (B + A) / (B - A);
+
+    alpha_0 = (B + A) / (B - A);
     alpha_p = (B * (rp - r2) + A * (rp - r1)) / (B * (rp - r2) - A * (rp - r1));
     alpha_m = (B * (rm - r2) + A * (rm - r1)) / (B * (rm - r2) - A * (rm - r1));
 
@@ -120,7 +120,6 @@ public:
     integral[0] = F3;
     integral[1] = (a * (I_m * (-(a * lambda) + 2 * rm) + I_p * (a * lambda - 2 * rp))) / (rm - rp);
     if (data.calc_t_f && !isinf(data.r_o)) {
-      alpha_0 = (B + A) / (B - A);
       alpha2 = square(alpha_0);
       R1_alpha_0 = R1(alpha_0);
       using boost::math::ellint_rd;
