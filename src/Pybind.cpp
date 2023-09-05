@@ -2,12 +2,14 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <oneapi/tbb.h>
+
 #include "ObjectPool.h"
 #include "ForwardRayTracing.h"
 
 namespace py = pybind11;
 
-template <typename Real, typename Complex>
+template<typename Real, typename Complex>
 void define_forward_ray_tracing(pybind11::module_ &mod, const char *name) {
   using RayTracing = ForwardRayTracing<Real, Complex>;
   py::class_<RayTracing, std::shared_ptr<RayTracing>>(mod, name)
@@ -36,17 +38,51 @@ void define_forward_ray_tracing(pybind11::module_ &mod, const char *name) {
 template<typename Real, typename Complex>
 struct PyForwardRayTracing {
   static std::shared_ptr<ForwardRayTracing<Real, Complex>>
-  ray_tracing_rc_d(Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta, const Real &rc, const Real &d) {
+  ray_tracing_rc_d(Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta, Real rc, Real d) {
     auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
     ray_tracing->calc_ray_by_rc_d(a, r_s, theta_s, r_o, nu_r, nu_theta, rc, d);
     return ray_tracing;
   }
 
   static std::shared_ptr<ForwardRayTracing<Real, Complex>> ray_tracing_lambda_q(
-      Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta, const Real &lambda, const Real &q) {
+      Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta, Real lambda, Real q) {
     auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
     ray_tracing->calc_ray_by_lambda_q(a, r_s, theta_s, r_o, nu_r, nu_theta, lambda, q);
     return ray_tracing;
+  }
+
+  static std::vector<Real>
+  ray_tracing_rc_d_area(Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta,
+                        const std::vector<Real> &rc_list, const std::vector<Real> &d_list) {
+    size_t rc_size = rc_list.size();
+    size_t d_size = d_list.size();
+    size_t total_size = rc_size * d_size;
+    std::vector<Real> data(2 * total_size);
+    // d_size rows, rc_size cols
+    Real *theta_mat = data.data();
+    Real *delta_mat = data.data() + total_size;
+
+#define MAT_IND(i, j) ((i) * rc_size + (j))
+    // rc and d
+    oneapi::tbb::parallel_for(oneapi::tbb::blocked_range2d<size_t>(0u, d_size, 0u, rc_size),
+                              [&](const oneapi::tbb::blocked_range2d<size_t, size_t> &r) {
+                                auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
+                                for (size_t i = r.rows().begin(); i != r.rows().end(); ++i) {
+                                  for (size_t j = r.cols().begin(); j != r.cols().end(); ++j) {
+                                    ray_tracing->calc_ray_by_rc_d(a, r_s, theta_s, r_o, nu_r, nu_theta, rc_list[j],
+                                                                  d_list[i]);
+                                    if (ray_tracing->ray_status == RayStatus::NORMAL) {
+                                      theta_mat[MAT_IND(i, j)] = ray_tracing->theta_f;
+                                      delta_mat[MAT_IND(i, j)] = ray_tracing->phi_f;
+                                    } else {
+                                      theta_mat[MAT_IND(i, j)] = std::numeric_limits<Real>::quiet_NaN();
+                                      delta_mat[MAT_IND(i, j)] = std::numeric_limits<Real>::quiet_NaN();
+                                    }
+                                  }
+                                }
+                              });
+#undef MAT_IND
+    return data;
   }
 };
 
@@ -67,6 +103,8 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
   mod.def("ray_tracing_rc_d", &PyForwardRayTracing<double, std::complex<double>>::ray_tracing_rc_d,
           py::call_guard<py::gil_scoped_release>());
   mod.def("ray_tracing_lambda_q", &PyForwardRayTracing<double, std::complex<double>>::ray_tracing_lambda_q,
+          py::call_guard<py::gil_scoped_release>());
+  mod.def("ray_tracing_rc_d_area", &PyForwardRayTracing<double, std::complex<double>>::ray_tracing_rc_d_area,
           py::call_guard<py::gil_scoped_release>());
   mod.def("clean_cache", ForwardRayTracing<double, std::complex<double>>::clear_cache);
 
