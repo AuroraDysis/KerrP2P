@@ -60,9 +60,9 @@ public:
     const Real &r3 = data.r3;
 
     // ellint_k, phi
-    F2 = F2_coeff * boost::math::ellint_1(ellint_k, ellint_phi);
-    Pi_p2 = Pi_p2_coeff * boost::math::ellint_3(ellint_k, Pi_p2_ellint_n, ellint_phi);
-    Pi_m2 = Pi_m2_coeff * boost::math::ellint_3(ellint_k, Pi_m2_ellint_n, ellint_phi);
+    F2 = F2_coeff * ellint_1(ellint_k, ellint_phi);
+    Pi_p2 = Pi_p2_coeff * ellint_3(ellint_k, Pi_p2_ellint_n, ellint_phi);
+    Pi_m2 = Pi_m2_coeff * ellint_3(ellint_k, Pi_m2_ellint_n, ellint_phi);
     I_p = F2 / (r3 - rp) - Pi_p2;
     I_m = F2 / (r3 - rm) - Pi_m2;
 
