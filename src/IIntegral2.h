@@ -117,7 +117,6 @@ public:
         radial_integrals[i] = integral_ro[i] - integral_rs[i];
       }
     }
-
 #ifdef PRINT_DEBUG
     fmt::println("I2: {}, {}, {}", radial_integrals[0], radial_integrals[1], radial_integrals[2]);
 #endif

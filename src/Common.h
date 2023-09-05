@@ -12,6 +12,10 @@
 #include <boost/math/special_functions/ellint_3.hpp>
 #include <boost/math/special_functions/jacobi_elliptic.hpp>
 
+
+using boost::math::ellint_1;
+using boost::math::ellint_2;
+using boost::math::ellint_3;
 using boost::math::constants::half;
 using boost::math::constants::third;
 using boost::math::constants::sixth;

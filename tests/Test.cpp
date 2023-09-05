@@ -22,7 +22,7 @@ using BigFloat = std::tuple<boost::multiprecision::mpfr_float_50, boost::multipr
 const boost::multiprecision::mpfr_float_50 BIGFLOAT_ERROR_LIMIT{"1e-45"};
 #endif
 
-#if defined(FLOAT128) || defined(BIGFLOAT)
+#if defined(FLOAT128) && defined(BIGFLOAT)
 #define TEST_TYPES Float64, Float128, BigFloat
 #elif defined(FLOAT128) && !defined(BIGFLOAT)
 #define TEST_TYPES Float64, Float128
@@ -103,7 +103,6 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
     CHECK(abs(forward.r2_c - r2) < ERROR_LIMIT);
     CHECK(abs(forward.r3_c - r3) < ERROR_LIMIT);
     CHECK(abs(forward.r4_c - r4) < ERROR_LIMIT);
-    CHECK(abs(forward.radial_integrals[0] - radial_integrals[0]) < ERROR_LIMIT);
     CHECK(abs(forward.radial_integrals[0] - radial_integrals[0]) < ERROR_LIMIT);
     CHECK(abs(forward.radial_integrals[1] - radial_integrals[1]) < ERROR_LIMIT);
     CHECK(abs(forward.radial_integrals[2] - radial_integrals[2]) < ERROR_LIMIT);
