@@ -4,6 +4,7 @@
 #include "IIntegral2.h"
 #include "IIntegral3.h"
 #include "GIntegral.h"
+#include "ObjectPool.h"
 
 #include <boost/numeric/conversion/converter.hpp>
 
@@ -16,10 +17,11 @@ class ForwardRayTracing {
   friend class GIntegral<Real, Complex>;
 
 #ifdef TESTS
-  public:
+public:
 #else
-private:
+  private:
 #endif
+  inline static ObjectPool<ForwardRayTracing<Real, Complex>> pool;
 
   void reset_variables() {
     tau_o = std::numeric_limits<Real>::quiet_NaN();
@@ -188,6 +190,14 @@ public:
     I_integral_2 = std::make_shared<IIntegral2<Real, Complex>>(*this);
     I_integral_3 = std::make_shared<IIntegral3<Real, Complex>>(*this);
     G_integral = std::make_shared<GIntegral<Real, Complex>>(*this);
+  }
+
+  static std::shared_ptr<ForwardRayTracing<Real, Complex>> get_from_cache() {
+    return pool.create();
+  }
+
+  static void clear_cache() {
+    pool.clear();
   }
 
   std::shared_ptr<IIntegral2<Real, Complex>> I_integral_2;

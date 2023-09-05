@@ -3,11 +3,11 @@
 #include <oneapi/tbb/concurrent_queue.h>
 
 template<typename T>
-class object_pool {
+class ObjectPool {
   std::shared_ptr<tbb::concurrent_bounded_queue<std::shared_ptr<T>>>
       pool;
 public:
-  explicit object_pool()
+  explicit ObjectPool()
       : pool(new tbb::concurrent_bounded_queue<std::shared_ptr<T>>()) {
   }
 
