@@ -2,6 +2,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include "ObjectPool.h"
 #include "ForwardRayTracing.h"
 
 namespace py = pybind11;
@@ -9,8 +10,7 @@ namespace py = pybind11;
 template <typename Real, typename Complex>
 void define_forward_ray_tracing(pybind11::module_ &mod, const char *name) {
   using RayTracing = ForwardRayTracing<Real, Complex>;
-  py::class_<RayTracing>(mod, name)
-      .def(py::init<>())
+  py::class_<RayTracing, std::shared_ptr<RayTracing>>(mod, name)
       .def_readonly("a", &RayTracing::a)
       .def_readonly("rp", &RayTracing::rp)
       .def_readonly("rm", &RayTracing::rm)
@@ -30,10 +30,31 @@ void define_forward_ray_tracing(pybind11::module_ &mod, const char *name) {
       .def_readonly("phi_f", &RayTracing::phi_f)
       .def_readonly("m", &RayTracing::m)
       .def_readonly("n_half", &RayTracing::n_half)
-      .def_readonly("ray_status", &RayTracing::ray_status)
-      .def("calc_ray_by_lambda_q", &RayTracing::calc_ray_by_lambda_q)
-      .def("calc_ray_by_rc_d", &RayTracing::calc_ray_by_rc_d);
+      .def_readonly("ray_status", &RayTracing::ray_status);
 }
+
+template<typename Real, typename Complex>
+struct PyForwardRayTracing {
+  inline static object_pool<ForwardRayTracing<Real, Complex>> pool;
+
+  static std::shared_ptr<ForwardRayTracing<Real, Complex>>
+  ray_tracing_rc_d(Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta, const Real &rc, const Real &d) {
+    auto ray_tracing = pool.create();
+    ray_tracing->calc_ray_by_rc_d(a, r_s, theta_s, r_o, nu_r, nu_theta, rc, d);
+    return ray_tracing;
+  }
+
+  static std::shared_ptr<ForwardRayTracing<Real, Complex>> ray_tracing_lambda_q(
+      Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta, const Real &lambda, const Real &q) {
+    auto ray_tracing = pool.create();
+    ray_tracing->calc_ray_by_lambda_q(a, r_s, theta_s, r_o, nu_r, nu_theta, lambda, q);
+    return ray_tracing;
+  }
+
+  static void clean_cache() {
+    pool.clear();
+  }
+};
 
 PYBIND11_MODULE(py_forward_ray_tracing, mod) {
   py::enum_<RayStatus>(mod, "RayStatus")
@@ -48,6 +69,12 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
       .value("POSITIVE", Sign::POSITIVE)
       .value("NEGATIVE", Sign::NEGATIVE)
       .export_values();
+
+  mod.def("ray_tracing_rc_d", &PyForwardRayTracing<double, std::complex<double>>::ray_tracing_rc_d,
+          py::call_guard<py::gil_scoped_release>());
+  mod.def("ray_tracing_lambda_q", &PyForwardRayTracing<double, std::complex<double>>::ray_tracing_lambda_q,
+          py::call_guard<py::gil_scoped_release>());
+  mod.def("clean_cache", &PyForwardRayTracing<double, std::complex<double>>::clean_cache);
 
   define_forward_ray_tracing<double, std::complex<double>>(mod, "ForwardRayTracingFloat64");
   define_forward_ray_tracing<long double, std::complex<long double>>(mod, "ForwardRayTracingLongDouble");

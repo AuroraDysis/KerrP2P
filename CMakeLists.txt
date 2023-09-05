@@ -10,9 +10,10 @@ option(ENABLE_BIGFLOAT "Enable bigfloat precision" ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 find_package(fmt REQUIRED)
+find_package(TBB CONFIG REQUIRED)
 find_package(Boost 1.82.0 COMPONENTS filesystem REQUIRED)
 find_package(Catch2 3 REQUIRED)
-set(LIBRARIES Boost::boost Boost::filesystem fmt::fmt)
+set(LIBRARIES Boost::boost Boost::filesystem fmt::fmt TBB::tbb)
 
 # add_definitions(-DPRINT_DEBUG)
 
@@ -34,7 +35,7 @@ endif ()
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
-set(SOURCE_FILES src/Common.h src/ForwardRayTracing.h src/GIntegral.h src/IIntegral2.h src/IIntegral3.h)
+set(SOURCE_FILES src/Common.h src/ForwardRayTracing.h src/GIntegral.h src/IIntegral2.h src/IIntegral3.h src/ObjectPool.h)
 
 add_executable(forward_ray_tracing src/Main.cpp ${SOURCE_FILES})
 target_link_libraries(forward_ray_tracing PRIVATE ${LIBRARIES})
