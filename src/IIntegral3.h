@@ -38,15 +38,17 @@ public:
                                                                                                ellint3_n) *
                                                                                               (ellint3_c -
                                                                                                ellint3_n_new));
-    fmt::println("R1 - k: {}, n: {}, n1: {}, phi: {}", ellint_k, ellint3_n, ellint3_n_new, ellint_phi);
-    fmt::println("R1 - ellint_3: {}", ellint_3_tmp);
-    f1 = sqrt((-1 + alpha2) / (alpha2 + ellint_m - alpha2 * ellint_m)) *
+    f1 = half<Real>() * sqrt((-1 + alpha2) / (alpha2 + ellint_m - alpha2 * ellint_m)) *
          log(abs((sin(ellint_phi) + sqrt((-1 + alpha2) /
                                          (alpha2 + ellint_m - alpha2 * ellint_m)) *
                                     sqrt(1 - ellint_m * square(sin(ellint_phi)))) /
                  (-sin(ellint_phi) + sqrt((-1 + alpha2) /
                                           (alpha2 + ellint_m - alpha2 * ellint_m)) *
                                      sqrt(1 - ellint_m * square(sin(ellint_phi))))));
+#ifdef PRINT_DEBUG
+    fmt::println("R1 - k: {}, n: {}, n1: {}, phi: {}", ellint_k, ellint3_n, ellint3_n_new, ellint_phi);
+    fmt::println("R1 - ellint_3: {}, f1: {}", ellint_3_tmp, f1);
+#endif
     return -ellint_3_tmp + alpha * f1;
   }
 
