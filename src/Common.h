@@ -34,8 +34,8 @@ enum class Sign : int {
   NEGATIVE = -1,
 };
 
-#define square(x) ((x) * (x))
-#define cube(x) ((x) * (x) * (x))
+#define MY_SQUARE(x) ((x) * (x))
+#define MY_CUBE(x) ((x) * (x) * (x))
 
 template<typename E>
 constexpr auto to_integral(E e) -> typename std::underlying_type<E>::type {

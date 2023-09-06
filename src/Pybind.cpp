@@ -2,20 +2,24 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <oneapi/tbb.h>
-
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/point.hpp>
-#include <boost/geometry/geometries/box.hpp>
-#include <boost/geometry/index/rtree.hpp>
-
 #include "ObjectPool.h"
 #include "ForwardRayTracing.h"
+#include "Utils.h"
 
 namespace py = pybind11;
 
-namespace bg = boost::geometry;
-namespace bgi = boost::geometry::index;
+template<typename Real>
+void define_sweep_result(pybind11::module_ &mod, const char *name) {
+  using SweepR = SweepResult<Real>;
+  py::class_<SweepR>(mod, name)
+      .def_readonly("theta", &SweepR::theta)
+      .def_readonly("phi", &SweepR::phi)
+      .def_readonly("delta_theta", &SweepR::delta_theta)
+      .def_readonly("delta_phi", &SweepR::delta_phi)
+      .def_readonly("theta_roots", &SweepR::theta_roots)
+      .def_readonly("phi_roots", &SweepR::phi_roots)
+      .def_readonly("theta_roots_closest", &SweepR::theta_roots_closest);
+}
 
 template<typename Real, typename Complex>
 void define_forward_ray_tracing(pybind11::module_ &mod, const char *name) {
@@ -43,132 +47,6 @@ void define_forward_ray_tracing(pybind11::module_ &mod, const char *name) {
       .def_readonly("ray_status", &RayTracing::ray_status);
 }
 
-template <typename Real>
-Real my_mod(Real x, Real y) {
-  if (y == 0.0) {
-    // Handle division by zero, maybe throw an exception or return a special value.
-    std::cerr << "Division by zero!" << std::endl;
-    return std::numeric_limits<Real>::quiet_NaN();
-  }
-
-  Real result = fmod(x, y);
-  if ((result < 0 && y > 0) || (result > 0 && y < 0)) {
-    result += y;
-  }
-  return result;
-}
-
-template<typename Real, typename Complex>
-struct PyForwardRayTracing {
-  static std::shared_ptr<ForwardRayTracing<Real, Complex>>
-  ray_tracing_rc_d(Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta, Real rc, Real d) {
-    auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
-    ray_tracing->calc_ray_by_rc_d(a, r_s, theta_s, r_o, nu_r, nu_theta, rc, d);
-    return ray_tracing;
-  }
-
-  static std::shared_ptr<ForwardRayTracing<Real, Complex>> ray_tracing_lambda_q(
-      Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta, Real lambda, Real q) {
-    auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
-    ray_tracing->calc_ray_by_lambda_q(a, r_s, theta_s, r_o, nu_r, nu_theta, lambda, q);
-    return ray_tracing;
-  }
-
-  static std::tuple<py::array_t<Real>, py::array_t<Real>, py::array_t<Real>, py::array_t<Real>, py::array_t<Real>>
-  ray_tracing_rc_d_area(Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta, Real theta_o, Real phi_o,
-                        const std::vector<Real> &rc_list, const std::vector<Real> &d_list) {
-    size_t rc_size = rc_list.size();
-    size_t d_size = d_list.size();
-
-    // d_size rows, rc_size cols
-    py::array_t<Real> theta_mat({d_size, rc_size});
-    py::array_t<Real> phi_mat({d_size, rc_size});
-
-    auto theta_data = theta_mat.template mutable_unchecked<2>();
-    auto phi_data = phi_mat.template mutable_unchecked<2>();
-
-    // rc and d
-    oneapi::tbb::parallel_for(oneapi::tbb::blocked_range2d<size_t>(0u, d_size, 0u, rc_size),
-                              [&](const oneapi::tbb::blocked_range2d<size_t, size_t> &r) {
-                                auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
-                                Real two_pi = boost::math::constants::two_pi<Real>();
-                                for (size_t i = r.rows().begin(); i != r.rows().end(); ++i) {
-                                  for (size_t j = r.cols().begin(); j != r.cols().end(); ++j) {
-                                    ray_tracing->calc_ray_by_rc_d(a, r_s, theta_s, r_o, nu_r, nu_theta, rc_list[j],
-                                                                  d_list[i]);
-                                    if (ray_tracing->ray_status == RayStatus::NORMAL) {
-                                      theta_data(i, j) = ray_tracing->theta_f - theta_o;
-                                      phi_data(i, j) = my_mod(ray_tracing->phi_f, two_pi) - phi_o;
-                                    } else {
-                                      theta_data(i, j) = std::numeric_limits<Real>::quiet_NaN();
-                                      phi_data(i, j) = std::numeric_limits<Real>::quiet_NaN();
-                                    }
-                                  }
-                                }
-                              });
-
-    using Point = bg::model::point<int, 2, bg::cs::cartesian>;
-    std::vector<Point> theta_roots_index;
-    std::vector<Point> phi_roots_index;
-    Real d_row, d_col;
-    for (py::ssize_t i = 1; i < d_size; i++) {
-      for (py::ssize_t j = 1; j < rc_size; j++) {
-        d_row = theta_data(i, j) * theta_data(i, j - 1);
-        d_col = theta_data(i, j) * theta_data(i - 1, j);
-        if (!isnan(d_row) && !isnan(d_col) && (d_row <= 0 || d_col <= 0)) {
-          theta_roots_index.emplace_back(i, j);
-        }
-        d_row = phi_data(i, j) * phi_data(i, j - 1);
-        d_col = phi_data(i, j) * phi_data(i - 1, j);
-        if (!isnan(d_row) && !isnan(d_col) && (d_row <= 0 || d_col <= 0)) {
-          phi_roots_index.emplace_back(i, j);
-        }
-      }
-    }
-
-    std::array<py::ssize_t, 2> shape{static_cast<py::ssize_t>(theta_roots_index.size()), 2u};
-    py::array_t<Real> theta_roots(shape);
-    py::array_t<Real> theta_roots_closest(shape);
-    shape[0] = static_cast<py::ssize_t>(phi_roots_index.size());
-    py::array_t<Real> phi_roots(shape);
-
-    auto theta_roots_data = theta_roots.template mutable_unchecked<2>();
-    auto phi_roots_data = phi_roots.template mutable_unchecked<2>();
-
-    for (py::ssize_t i = 0; i < theta_roots_index.size(); i++) {
-      theta_roots_data(i, 0) = rc_list[theta_roots_index[i].template get<1>()];
-      theta_roots_data(i, 1) = d_list[theta_roots_index[i].template get<0>()];
-    }
-    for (py::ssize_t i = 0; i < phi_roots_index.size(); i++) {
-      phi_roots_data(i, 0) = rc_list[phi_roots_index[i].template get<1>()];
-      phi_roots_data(i, 1) = d_list[phi_roots_index[i].template get<0>()];
-    }
-
-    std::vector<Point> theta_roots_closest_index;
-    theta_roots_closest_index.reserve(theta_roots_index.size());
-    std::vector<double> distances(theta_roots_index.size());
-    bgi::rtree<Point, bgi::quadratic<16>> rtree(phi_roots_index);
-    for (py::ssize_t i = 0; i < theta_roots_index.size(); i++) {
-      Point p = theta_roots_index[i];
-      rtree.query(bgi::nearest(p, 1), std::back_inserter(theta_roots_closest_index));
-      distances[i] = bg::distance(p, theta_roots_closest_index.back());
-    }
-
-    // sort rows of theta_roots_closest_index by distances
-    std::vector<size_t> indices(theta_roots_index.size());
-    std::iota(indices.begin(), indices.end(), 0);
-    std::sort(indices.begin(), indices.end(), [&distances](size_t i1, size_t i2) { return distances[i1] < distances[i2]; });
-
-    auto theta_roots_closest_data = theta_roots_closest.template mutable_unchecked<2>();
-    for (py::ssize_t i = 0; i < theta_roots_index.size(); i++) {
-      theta_roots_closest_data(i, 0) = rc_list[theta_roots_closest_index[indices[i]].template get<1>()];
-      theta_roots_closest_data(i, 1) = d_list[theta_roots_closest_index[indices[i]].template get<0>()];
-    }
-
-    return {theta_mat, phi_mat, theta_roots, phi_roots, theta_roots_closest};
-  }
-};
-
 PYBIND11_MODULE(py_forward_ray_tracing, mod) {
   py::enum_<RayStatus>(mod, "RayStatus")
       .value("NORMAL", RayStatus::NORMAL)
@@ -183,20 +61,24 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
       .value("NEGATIVE", Sign::NEGATIVE)
       .export_values();
 
-  mod.def("ray_tracing_rc_d", &PyForwardRayTracing<double, std::complex<double>>::ray_tracing_rc_d,
+  mod.def("calc_rc_d", &ForwardRayTracingUtils<double, std::complex<double>>::calc_rc_d,
           py::call_guard<py::gil_scoped_release>());
-  mod.def("ray_tracing_lambda_q", &PyForwardRayTracing<double, std::complex<double>>::ray_tracing_lambda_q,
+  mod.def("calc_lambda_q", &ForwardRayTracingUtils<double, std::complex<double>>::calc_lambda_q,
           py::call_guard<py::gil_scoped_release>());
-  mod.def("ray_tracing_rc_d_area", &PyForwardRayTracing<double, std::complex<double>>::ray_tracing_rc_d_area,
+  mod.def("sweep_rc_d", &ForwardRayTracingUtils<double, std::complex<double>>::sweep_rc_d,
           py::return_value_policy::move);
   mod.def("clean_cache", ForwardRayTracing<double, std::complex<double>>::clear_cache);
 
   define_forward_ray_tracing<double, std::complex<double>>(mod, "ForwardRayTracingFloat64");
   define_forward_ray_tracing<long double, std::complex<long double>>(mod, "ForwardRayTracingLongDouble");
+  define_sweep_result<double>(mod, "SweepResultFloat64");
+  define_sweep_result<long double>(mod, "SweepResultLongDouble");
 #ifdef FLOAT128
   // define_forward_ray_tracing<boost::multiprecision::float128, boost::multiprecision::complex128>(mod, "ForwardRayTracingFloat128");
+  // define_sweep_result<boost::multiprecision::float128>(mod, "SweepResultFloat128");
 #endif
 #ifdef BIGFLOAT
   // define_forward_ray_tracing<BigFloat, BigComplex>(mod, "ForwardRayTracingBigFloat");
+  // define_sweep_result<BigFloat>(mod, "SweepResultBigFloat");
 #endif
 }

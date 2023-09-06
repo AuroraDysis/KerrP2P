@@ -37,11 +37,11 @@ public:
     Real BB = 2 * (eta + (lambda - a) * (lambda - a));
     Real CC = -a * a * eta;
     Real PP = -AA * AA / 12 - CC;
-    Real QQ = (-2 * cube(AA) - 27 * square(BB) + 72 * AA * CC) / 216;
+    Real QQ = (-2 * MY_CUBE(AA) - 27 * MY_SQUARE(BB) + 72 * AA * CC) / 216;
 
     Complex omega_pm;
     Real omega_pm_1 = -QQ * half<Real>();
-    Real omega_pm_2 = cube(PP) / 27 + square(QQ) / 4;
+    Real omega_pm_2 = MY_CUBE(PP) / 27 + MY_SQUARE(QQ) / 4;
 
     if (omega_pm_2 > 0) {
       omega_pm = cbrt(omega_pm_1 + sqrt(omega_pm_2)) +
@@ -54,8 +54,8 @@ public:
 
     Real z = sqrt((real(omega_pm) - AA * third<Real>()) * half<Real>());
 
-    Complex sqrt_in_1 = -(AA * half<Real>()) - square(z) + BB / (4 * z);
-    Complex sqrt_in_2 = -(AA * half<Real>()) - square(z) - BB / (4 * z);
+    Complex sqrt_in_1 = -(AA * half<Real>()) - MY_SQUARE(z) + BB / (4 * z);
+    Complex sqrt_in_2 = -(AA * half<Real>()) - MY_SQUARE(z) - BB / (4 * z);
 
     r1_c = -z - sqrt(sqrt_in_1);
     r2_c = -z + sqrt(sqrt_in_1);
@@ -110,16 +110,16 @@ public:
 
   void reset_by_rc_d(const Real &rc, const Real &d, Sign nu_r_, Sign nu_theta_) {
     ray_status = RayStatus::NORMAL;
-    Real lambda_c = a + (rc * (2 * square(a) + (-3 + rc) * rc)) / (a - a * rc);
-    Real eta_c = -((cube(rc) * (-4 * square(a) + square(-3 + rc) * rc)) /
-                   (square(a) * square(-1 + rc)));
+    Real lambda_c = a + (rc * (2 * MY_SQUARE(a) + (-3 + rc) * rc)) / (a - a * rc);
+    Real eta_c = -((MY_CUBE(rc) * (-4 * MY_SQUARE(a) + MY_SQUARE(-3 + rc) * rc)) /
+                   (MY_SQUARE(a) * MY_SQUARE(-1 + rc)));
     Real qc = sqrt(eta_c);
 
     Real coeff = sqrt(
-        square(-3 + rc) / (square(a) * square(-1 + rc)) + eta_c / pow(rc, 4));
+        MY_SQUARE(-3 + rc) / (MY_SQUARE(a) * MY_SQUARE(-1 + rc)) + eta_c / pow(rc, 4));
 
     reset_by_lambda_q(lambda_c + d * ((3 - rc) / (a * (-1 + rc)) / coeff),
-                      qc + d * (sqrt(eta_c) / square(rc) / coeff), nu_r_, nu_theta_);
+                      qc + d * (sqrt(eta_c) / MY_SQUARE(rc) / coeff), nu_r_, nu_theta_);
     reset_variables();
   }
 
@@ -251,7 +251,7 @@ public:
     // Final values of phi and t
     phi_f = radial_integrals[1] + lambda * angular_integrals[1];
     if (calc_t_f) {
-      t_f = radial_integrals[2] + square(a) * angular_integrals[2];
+      t_f = radial_integrals[2] + MY_SQUARE(a) * angular_integrals[2];
     }
 
 #ifdef PRINT_DEBUG

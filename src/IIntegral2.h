@@ -85,11 +85,11 @@ public:
       E2 = E2_coeff * boost::math::ellint_2(ellint_k, ellint_phi);
       Pi_12 = F2_coeff * boost::math::ellint_3(ellint_k, Pi_12_ellint_n, ellint_phi);
       I1 = r3 * F2 + (r4 - r3) * Pi_12;
-      I2 = -E2 + sqrt(-((eta + square(a - lambda)) * (square(a) + (-2 + r) * r)) +
-                      square(square(a) - a * lambda + square(r))) / (r - r3) -
+      I2 = -E2 + sqrt(-((eta + MY_SQUARE(a - lambda)) * (MY_SQUARE(a) + (-2 + r) * r)) +
+                      MY_SQUARE(MY_SQUARE(a) - a * lambda + MY_SQUARE(r))) / (r - r3) -
            (F2 * (r2 * r3 + r1 * r4)) * half<Real>();
       integral[2] = 4 * F2 + 2 * I1 + I2 +
-                    (-2 * a * I_m * lambda * rm + 4 * I_m * square(rm) + 2 * I_p * (a * lambda - 2 * rp) * rp) /
+                    (-2 * a * I_m * lambda * rm + 4 * I_m * MY_SQUARE(rm) + 2 * I_p * (a * lambda - 2 * rp) * rp) /
                     (rm - rp);
 #ifdef PRINT_DEBUG
       fmt::println("I2 - E2: {}, Pi_12: {}, I1: {}, I2: {}", E2, Pi_12, I1, I2);

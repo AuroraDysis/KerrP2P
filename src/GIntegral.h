@@ -30,16 +30,16 @@ public:
     const Real &um = data.um;
     ellint_phi = asin(cos(theta) * one_over_sqrt_up);
     ellint_theta = asin(
-        (sqrt(1 + ellint_m) * sin(ellint_phi)) / sqrt(1 + ellint_m * square(sin(ellint_phi))));
+        (sqrt(1 + ellint_m) * sin(ellint_phi)) / sqrt(1 + ellint_m * MY_SQUARE(sin(ellint_phi))));
     G_arr[0] = -one_over_umaa_sqrt * ellint_kappa_prime * boost::math::ellint_1(ellint_kappa, ellint_theta);
     G_arr[1] = -one_over_umaa_sqrt * ellint_kappa_prime / ellint_alpha1_2 *
-               (square(ellint_kappa_prime) * up * boost::math::ellint_3(ellint_kappa, ellint_alpha1_2, ellint_theta) +
+               (MY_SQUARE(ellint_kappa_prime) * up * boost::math::ellint_3(ellint_kappa, ellint_alpha1_2, ellint_theta) +
                 ellint_kappa2 * boost::math::ellint_1(ellint_kappa, ellint_theta));
     G_arr[2] = um *
                (one_over_umaa_sqrt * ellint_one_over_kappa_prime * (boost::math::ellint_2(ellint_kappa, ellint_theta) -
                                                                     ellint_kappa2 * sin(ellint_theta) *
                                                                     cos(ellint_theta) / sqrt(1 - ellint_kappa2 *
-                                                                                                 square(
+                                                                                                 MY_SQUARE(
                                                                                                      sin(ellint_theta)))) +
                 G_arr[0]);
   }
@@ -91,7 +91,7 @@ public:
     data.theta_f = acos(-sqrt(up) * to_integral(nu_theta) *
                         jacobi_sn_k1_prime *
                         boost::math::jacobi_sd(jacobi_sn_k1, (tau_o + to_integral(nu_theta) * G_theta_theta_s) *
-                                                             sqrt(-square(a) * um) / jacobi_sn_k1_prime));
+                                                             sqrt(-MY_SQUARE(a) * um) / jacobi_sn_k1_prime));
 
     // Angular integrals
     Real m_Real = 1 + floor(real((tau_o - G_theta_theta_p + to_integral(nu_theta) * G_theta_theta_s) /

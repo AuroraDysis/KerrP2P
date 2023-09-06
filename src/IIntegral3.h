@@ -25,7 +25,7 @@ public:
   std::array<Real, 3> integral_ro;
 
   Real R1(const Real &alpha) {
-    alpha2 = square(alpha);
+    alpha2 = MY_SQUARE(alpha);
     ellint3_n = alpha2 / (alpha2 - 1);
     ellint3_n1 = ellint_m / ellint3_n;
 
@@ -48,10 +48,10 @@ public:
     f1 = half<Real>() * sqrt((-1 + alpha2) / (alpha2 + ellint_m - alpha2 * ellint_m)) *
          log(abs((ellint_sin_phi + sqrt((-1 + alpha2) /
                                          (alpha2 + ellint_m - alpha2 * ellint_m)) *
-                                    sqrt(1 - ellint_m * square(ellint_sin_phi))) /
+                                    sqrt(1 - ellint_m * MY_SQUARE(ellint_sin_phi))) /
                  (-ellint_sin_phi + sqrt((-1 + alpha2) /
                                           (alpha2 + ellint_m - alpha2 * ellint_m)) *
-                                     sqrt(1 - ellint_m * square(ellint_sin_phi)))));
+                                     sqrt(1 - ellint_m * MY_SQUARE(ellint_sin_phi)))));
 #ifdef PRINT_DEBUG
     fmt::println("R1 - k: {}, n: {}, n1: {}, phi: {}", ellint_k, ellint3_n, ellint_phi);
     fmt::println("R1 - ellint_3: {}, f1: {}", ellint_3_tmp, f1);
@@ -79,8 +79,8 @@ public:
     r34_im = imag(r3);
 
     // radial coeffs
-    A = sqrt(square(r34_im) + square(r34_re - r2));
-    B = sqrt(square(r34_im) + square(r34_re - r1));
+    A = sqrt(MY_SQUARE(r34_im) + MY_SQUARE(r34_re - r2));
+    B = sqrt(MY_SQUARE(r34_im) + MY_SQUARE(r34_re - r1));
 
     ellint_m = ((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B);
     ellint_k = sqrt(ellint_m);
@@ -104,9 +104,9 @@ public:
     const Real &r1 = data.r1;
     const Real &r2 = data.r2;
     ellint_cos_phi = -1 + (2 * A * (r - r1)) / (A * (r - r1) + B * (r - r2));
-    ellint_sin_phi = sqrt(1 - square(ellint_cos_phi));
+    ellint_sin_phi = sqrt(1 - MY_SQUARE(ellint_cos_phi));
     ellint_phi = acos(ellint_cos_phi);
-    ellint_c = 1 / square(ellint_sin_phi);
+    ellint_c = 1 / MY_SQUARE(ellint_sin_phi);
 
     R1_alpha_p = R1(alpha_p);
     R1_alpha_m = R1(alpha_m);
@@ -120,21 +120,21 @@ public:
     integral[0] = F3;
     integral[1] = (a * (I_m * (-(a * lambda) + 2 * rm) + I_p * (a * lambda - 2 * rp))) / (rm - rp);
     if (data.calc_t_f && !isinf(data.r_o)) {
-      alpha2 = square(alpha_0);
+      alpha2 = MY_SQUARE(alpha_0);
       R1_alpha_0 = R1(alpha_0);
       using boost::math::ellint_rd;
       R2_alpha_0 = ((-1 + alpha2) * ellint_m * (1 + alpha_0 * ellint_cos_phi) *
                     (ellint_1(ellint_k, ellint_phi) - 2 * R1_alpha_0) +
                     alpha2 * (1 + alpha_0 * ellint_cos_phi) *
                     (third<Real>() * ellint_m * ellint_rd(ellint_c - 1, ellint_c - ellint_m, ellint_c) + R1_alpha_0) -
-                    cube(alpha_0) * ellint_sin_phi * sqrt(1 - ellint_m * square(ellint_sin_phi))) /
+                    MY_CUBE(alpha_0) * ellint_sin_phi * sqrt(1 - ellint_m * MY_SQUARE(ellint_sin_phi))) /
                    ((-1 + alpha2) * (alpha2 * (-1 + ellint_m) - ellint_m) *
                     (1 + alpha_0 * ellint_cos_phi));
       Pi_13 = (2 * sqrt(A * B) * R1_alpha_0 * (r1 - r2)) / ((A - B) * (A + B));
-      Pi_23 = (4 * (A * B) * R2_alpha_0 * square(r1 - r2)) / square((A - B) * (A + B));
+      Pi_23 = (4 * (A * B) * R2_alpha_0 * MY_SQUARE(r1 - r2)) / MY_SQUARE((A - B) * (A + B));
       I_1 = (A * r1 + B * r2) * F3 / (A + B) + Pi_13;
       I_2 =
-          sqrt(A * B) * Pi_23 + ((A * r1 + B * r2) * (2 * (A + B) * Pi_13 + F3 * (A * r1 + B * r2))) / square(A + B);
+          sqrt(A * B) * Pi_23 + ((A * r1 + B * r2) * (2 * (A + B) * Pi_13 + F3 * (A * r1 + B * r2))) / MY_SQUARE(A + B);
       integral[2] =
           4 * F3 + I_2 + (2 * I_m * rm * (-(a * lambda) + 2 * rm) + 2 * I_p * (a * lambda - 2 * rp) * rp) / (rm - rp) +
           2 * I_1;
