@@ -17,19 +17,13 @@ using Float128 = std::tuple<boost::multiprecision::float128, boost::multiprecisi
 const boost::multiprecision::float128 FLOAT128_ERROR_LIMIT{"1e-29"};
 #endif
 
-#ifdef BIGFLOAT
-using BigFloat = std::tuple<boost::multiprecision::mpfr_float_50, boost::multiprecision::mpc_complex_50>;
-const boost::multiprecision::mpfr_float_50 BIGFLOAT_ERROR_LIMIT{"1e-45"};
-#endif
+using BigFloat = std::tuple<BigFloatReal , BigFloatComplex>;
+const BigFloatReal BIGFLOAT_ERROR_LIMIT{"1e-45"};
 
-#if defined(FLOAT128) && defined(BIGFLOAT)
+#if defined(FLOAT128)
 #define TEST_TYPES Float64, Float128, BigFloat
-#elif defined(FLOAT128) && !defined(BIGFLOAT)
-#define TEST_TYPES Float64, Float128
-#elif !defined(FLOAT128) && defined(BIGFLOAT)
-#define TEST_TYPES Float64, BigFloat
 #else
-#define TEST_TYPES Float64
+#define TEST_TYPES Float64, BigFloat
 #endif
 
 template <typename T>
@@ -94,11 +88,9 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
       ERROR_LIMIT = FLOAT128_ERROR_LIMIT;
     }
 #endif
-#ifdef BIGFLOAT
     if constexpr (std::is_same_v<TestType, BigFloat>) {
       ERROR_LIMIT = BIGFLOAT_ERROR_LIMIT;
     }
-#endif
     CHECK(abs(forward.r1_c - r1) < ERROR_LIMIT);
     CHECK(abs(forward.r2_c - r2) < ERROR_LIMIT);
     CHECK(abs(forward.r3_c - r3) < ERROR_LIMIT);

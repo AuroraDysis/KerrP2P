@@ -47,6 +47,7 @@ class ForwardRayTracing;
 
 using std::real;
 using std::isinf;
+using std::isnan;
 
 #ifdef FLOAT128
 #include <boost/multiprecision/float128.hpp>
@@ -56,15 +57,61 @@ template <>
 struct fmt::formatter<boost::multiprecision::float128> : fmt::ostream_formatter {};
 #endif
 
-#ifdef BIGFLOAT
+#ifdef BIGFLOAT_MPFR
 #include <boost/multiprecision/mpfr.hpp>
 #include <boost/multiprecision/mpc.hpp>
+
+using BigFloatReal = boost::multiprecision::mpfr_float_50;
+using BigFloatComplex = boost::multiprecision::mpc_complex_50;
+#else
+#include <boost/multiprecision/cpp_bin_float.hpp>
+#include <boost/multiprecision/cpp_complex.hpp>
+
+using BigFloatReal = boost::multiprecision::cpp_bin_float_50;
+using BigFloatComplex = boost::multiprecision::cpp_complex_50;;
 #endif
 
-#if defined(FLOAT128) || defined(BIGFLOAT)
-using boost::multiprecision::isinf;
 using boost::multiprecision::real;
+using boost::multiprecision::isinf;
+using boost::multiprecision::isnan;
 
 template <typename T>
 struct fmt::formatter<boost::multiprecision::number<T>> : fmt::ostream_formatter {};
+
+// helper return higher precision type
+template <typename T>
+struct HigherPrecision {
+  using Type = T;
+};
+
+#if defined(FLOAT128)
+template <>
+struct HigherPrecision<double> {
+  using Type = boost::multiprecision::float128;
+};
+
+template <>
+struct HigherPrecision<std::complex<double>> {
+  using Type = boost::multiprecision::complex128;
+};
+
+template <>
+struct HigherPrecision<boost::multiprecision::float128> {
+  using Type = boost::multiprecision::float128;
+};
+
+template <>
+struct HigherPrecision<std::complex<boost::multiprecision::float128>> {
+  using Type = BigFloatComplex;
+};
+#else
+template <>
+struct HigherPrecision<double> {
+  using Type = BigFloatReal;
+};
+
+template <>
+struct HigherPrecision<std::complex<double>> {
+  using Type = BigFloatComplex;
+};
 #endif

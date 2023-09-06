@@ -49,6 +49,10 @@ struct ForwardRayTracingUtils {
     return ray_tracing->to_result();
   }
 
+  static ForwardRayTracingResult<Real, Complex> refine_result(ForwardRayTracingResult<Real, Complex> &res) {
+
+  }
+
   static SweepResult<Real>
   sweep_rc_d(Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta, Real theta_o, Real phi_o,
              const std::vector<Real> &rc_list, const std::vector<Real> &d_list) {
