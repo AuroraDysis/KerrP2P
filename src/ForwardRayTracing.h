@@ -34,6 +34,11 @@ struct ForwardRayTracingParams {
     Real d = to_integral(lgd_sign) * pow(static_cast<Real>(10), lgd);
     lambda = lambda_c + d * ((3 - rc) / (a * (-1 + rc)) / coeff);
     q = qc + d * (sqrt(eta_c) / MY_SQUARE(rc) / coeff);
+#ifdef PRINT_DEBUG
+    fmt::println("rc: {}, lgd: {}", rc, lgd);
+    fmt::println("lambda_c: {}, eta_c: {}, qc: {}", lambda_c, eta_c, qc);
+    fmt::println("coeff: {}", coeff);
+#endif
   }
 };
 
@@ -58,9 +63,9 @@ class ForwardRayTracing {
   friend class GIntegral<Real, Complex>;
 
 #ifdef TESTS
-public:
+  public:
 #else
-  private:
+private:
 #endif
   inline static ObjectPool<ForwardRayTracing<Real, Complex>> pool;
 
@@ -124,6 +129,8 @@ public:
     }
 
 #ifdef PRINT_DEBUG
+    fmt::println("AA: {}, BB: {}, CC: {}, PP: {}, QQ: {}", AA, BB, CC, PP, QQ);
+    fmt::println("r1_c: {}, r2_c: {}, r3_c: {}, r4_c: {}", r1_c, r2_c, r3_c, r4_c);
     fmt::println("r1: {}, r2: {}, r3: {}, r4: {}", r1, r2, r3, r4);
 #endif
   }
@@ -240,6 +247,12 @@ public:
     rm = 1 - sqrt(1 - a * a);
 
     calc_t_f = params.calc_t_f;
+
+#ifdef PRINT_DEBUG
+    fmt::println("a: {}, r_s: {}, theta_s: {}, r_o: {}", a, r_s, theta_s, r_o);
+    fmt::println("rp: {}, rm: {}", rp, rm);
+    fmt::println("lambda: {}, q: {}", params.lambda, params.q);
+#endif
 
     reset_by_lambda_q(params.lambda, params.q, params.nu_r, params.nu_theta);
 
