@@ -3,6 +3,7 @@
 #include <cmath>
 #include <array>
 #include <complex>
+
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
@@ -11,7 +12,6 @@
 #include <boost/math/special_functions/ellint_2.hpp>
 #include <boost/math/special_functions/ellint_3.hpp>
 #include <boost/math/special_functions/jacobi_elliptic.hpp>
-
 
 using boost::math::ellint_1;
 using boost::math::ellint_2;

@@ -1,5 +1,3 @@
-#include "ForwardRayTracing.h"
-
 #include <tuple>
 #include <boost/lexical_cast.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -7,18 +5,31 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "TestData.h"
+#include "ForwardRayTracing.h"
+#include "Utils.h"
+
+// ErrorLimit
+template <typename T>
+struct ErrorLimit {
+  static const T Value;
+};
 
 using std::string;
 using Float64 = std::tuple<double, std::complex<double>>;
-constexpr double FLOAT64_ERROR_LIMIT = 1e-10;
+
+template <>
+const double ErrorLimit<double>::Value = 1e-10;
 
 #ifdef FLOAT128
 using Float128 = std::tuple<boost::multiprecision::float128, boost::multiprecision::complex128>;
-const boost::multiprecision::float128 FLOAT128_ERROR_LIMIT{"1e-29"};
+
+template <>
+const boost::multiprecision::float128 ErrorLimit<boost::multiprecision::float128>::Value{"1e-29"};
 #endif
 
 using BigFloat = std::tuple<BigFloatReal , BigFloatComplex>;
-const BigFloatReal BIGFLOAT_ERROR_LIMIT{"1e-45"};
+template <>
+const BigFloatReal ErrorLimit<BigFloatReal>::Value{"1e-45"};
 
 #if defined(FLOAT128)
 #define TEST_TYPES Float64, Float128, BigFloat
@@ -39,20 +50,21 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
   using Complex = std::tuple_element_t<1u, TestType>;
 
   for (const auto &data : TEST_DATA) {
-    Real a = boost::lexical_cast<Real>(data.get<string>("a"));
-    Real r_s = boost::lexical_cast<Real>(data.get<string>("r_s"));
-    Real theta_s = boost::lexical_cast<Real>(data.get<string>("theta_s"));
-    Real r_o = boost::lexical_cast<Real>(data.get<string>("r_o"));
-    Sign nu_r = data.get<int>("nu_r") == 1 ? Sign::POSITIVE : Sign::NEGATIVE;
-    Sign nu_theta = data.get<int>("nu_theta") == 1 ? Sign::POSITIVE : Sign::NEGATIVE;
+    ForwardRayTracingParams<Real> params;
+    params.a = boost::lexical_cast<Real>(data.get<string>("a"));
+    params.r_s = boost::lexical_cast<Real>(data.get<string>("r_s"));
+    params.theta_s = boost::lexical_cast<Real>(data.get<string>("theta_s"));
+    params.r_o = boost::lexical_cast<Real>(data.get<string>("r_o"));
+    params.nu_r = data.get<int>("nu_r") == 1 ? Sign::POSITIVE : Sign::NEGATIVE;
+    params.nu_theta = data.get<int>("nu_theta") == 1 ? Sign::POSITIVE : Sign::NEGATIVE;
 
-    Real lambda = boost::lexical_cast<Real>(data.get<string>("lambda"));
-    Real eta = boost::lexical_cast<Real>(data.get<string>("eta"));
+    params.lambda = boost::lexical_cast<Real>(data.get<string>("lambda"));
+    params.q = sqrt(boost::lexical_cast<Real>(data.get<string>("eta")));
+    params.calc_t_f = true;
 
     ForwardRayTracing<Real, Complex> forward;
-    forward.calc_t_f = true;
-    auto status = forward.calc_ray_by_lambda_q(a, r_s, theta_s, r_o, nu_r, nu_theta, lambda, sqrt(eta));
-    REQUIRE(status == RayStatus::NORMAL);
+    forward.calc_ray(params);
+    REQUIRE(forward.ray_status == RayStatus::NORMAL);
 
     auto r1_vec = as_vector<string>(data, "r1");
     Complex r1 = Complex(boost::lexical_cast<Real>(r1_vec[0]), boost::lexical_cast<Real>(r1_vec[1]));
@@ -78,19 +90,8 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
     Real theta_f = boost::lexical_cast<Real>(data.get<string>("theta_f"));
     Real phi_f = boost::lexical_cast<Real>(data.get<string>("phi_f"));
 
-    // is big float
-    Real ERROR_LIMIT;
-    if constexpr (std::is_same_v<TestType, Float64>) {
-      ERROR_LIMIT = FLOAT64_ERROR_LIMIT;
-    }
-#ifdef FLOAT128
-    if constexpr (std::is_same_v<TestType, Float128>) {
-      ERROR_LIMIT = FLOAT128_ERROR_LIMIT;
-    }
-#endif
-    if constexpr (std::is_same_v<TestType, BigFloat>) {
-      ERROR_LIMIT = BIGFLOAT_ERROR_LIMIT;
-    }
+    Real ERROR_LIMIT = ErrorLimit<Real>::Value;
+
     CHECK(abs(forward.r1_c - r1) < ERROR_LIMIT);
     CHECK(abs(forward.r2_c - r2) < ERROR_LIMIT);
     CHECK(abs(forward.r3_c - r3) < ERROR_LIMIT);
@@ -103,5 +104,50 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
     CHECK(abs(forward.angular_integrals[2] - angular_integrals[2]) < ERROR_LIMIT);
     CHECK(abs(forward.theta_f - theta_f) < ERROR_LIMIT);
     CHECK(abs(forward.phi_f - phi_f) < ERROR_LIMIT);
+  }
+}
+
+TEMPLATE_TEST_CASE("Find Root Function", "[root]", Float64) {
+  using Real = std::tuple_element_t<0u, TestType>;
+  using Complex = std::tuple_element_t<1u, TestType>;
+
+  for (const auto &data : TEST_DATA) {
+    ForwardRayTracingParams<Real> params;
+    params.a = boost::lexical_cast<Real>(data.get<string>("a"));
+    params.r_s = boost::lexical_cast<Real>(data.get<string>("r_s"));
+    params.theta_s = boost::lexical_cast<Real>(data.get<string>("theta_s"));
+    params.r_o = boost::lexical_cast<Real>(data.get<string>("r_o"));
+    params.nu_r = data.get<int>("nu_r") == 1 ? Sign::POSITIVE : Sign::NEGATIVE;
+    params.nu_theta = data.get<int>("nu_theta") == 1 ? Sign::POSITIVE : Sign::NEGATIVE;
+
+    params.rc = boost::lexical_cast<Real>(data.get<string>("rc"));
+    Real d = boost::lexical_cast<Real>(data.get<string>("d"));
+    params.lgd_sign = d > 0 ? Sign::POSITIVE : Sign::NEGATIVE;
+    params.lgd = log10(abs(d));
+    params.calc_t_f = false;
+
+    auto res = ForwardRayTracingUtils<Real, Complex>::find_result(params);
+    REQUIRE(res.ray_status == RayStatus::NORMAL);
+
+    auto r1_vec = as_vector<string>(data, "r1");
+    Complex r1 = Complex(boost::lexical_cast<Real>(r1_vec[0]), boost::lexical_cast<Real>(r1_vec[1]));
+    auto r2_vec = as_vector<string>(data, "r2");
+    Complex r2 = Complex(boost::lexical_cast<Real>(r2_vec[0]), boost::lexical_cast<Real>(r2_vec[1]));
+    auto r3_vec = as_vector<string>(data, "r3");
+    Complex r3 = Complex(boost::lexical_cast<Real>(r3_vec[0]), boost::lexical_cast<Real>(r3_vec[1]));
+    auto r4_vec = as_vector<string>(data, "r4");
+    Complex r4 = Complex(boost::lexical_cast<Real>(r4_vec[0]), boost::lexical_cast<Real>(r4_vec[1]));
+
+    Real theta_f = boost::lexical_cast<Real>(data.get<string>("theta_f"));
+    Real phi_f = boost::lexical_cast<Real>(data.get<string>("phi_f"));
+
+    Real ERROR_LIMIT = ErrorLimit<Real>::Value;
+
+    CHECK(abs(res.r1_c - r1) < ERROR_LIMIT);
+    CHECK(abs(res.r2_c - r2) < ERROR_LIMIT);
+    CHECK(abs(res.r3_c - r3) < ERROR_LIMIT);
+    CHECK(abs(res.r4_c - r4) < ERROR_LIMIT);
+    CHECK(abs(res.theta_f - theta_f) < ERROR_LIMIT);
+    CHECK(abs(res.phi_f - phi_f) < ERROR_LIMIT);
   }
 }

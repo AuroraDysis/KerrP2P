@@ -6,6 +6,37 @@
 #include "GIntegral.h"
 #include "ObjectPool.h"
 
+template<typename Real>
+struct ForwardRayTracingParams {
+  Real a;
+  Real r_s;
+  Real theta_s;
+  Real r_o;
+  Sign nu_r;
+  Sign nu_theta;
+
+  Real rc, lgd;
+  Sign lgd_sign;
+
+  Real lambda, q;
+
+  bool calc_t_f = false;
+
+  void rc_d_to_lambda_q() {
+    Real lambda_c = a + (rc * (2 * MY_SQUARE(a) + (-3 + rc) * rc)) / (a - a * rc);
+    Real eta_c = -((MY_CUBE(rc) * (-4 * MY_SQUARE(a) + MY_SQUARE(-3 + rc) * rc)) /
+                   (MY_SQUARE(a) * MY_SQUARE(-1 + rc)));
+    Real qc = sqrt(eta_c);
+
+    Real coeff = sqrt(
+        MY_SQUARE(-3 + rc) / (MY_SQUARE(a) * MY_SQUARE(-1 + rc)) + eta_c / pow(rc, 4));
+
+    Real d = to_integral(lgd_sign) * pow(static_cast<Real>(10), lgd);
+    lambda = lambda_c + d * ((3 - rc) / (a * (-1 + rc)) / coeff);
+    q = qc + d * (sqrt(eta_c) / MY_SQUARE(rc) / coeff);
+  }
+};
+
 template<typename Real, typename Complex>
 struct ForwardRayTracingResult {
   Real a, rp, rm, r_s, theta_s, r_o;
@@ -119,21 +150,6 @@ public:
 #endif
   }
 
-  void reset_by_rc_d(const Real &rc, const Real &d, Sign nu_r_, Sign nu_theta_) {
-    ray_status = RayStatus::NORMAL;
-    Real lambda_c = a + (rc * (2 * MY_SQUARE(a) + (-3 + rc) * rc)) / (a - a * rc);
-    Real eta_c = -((MY_CUBE(rc) * (-4 * MY_SQUARE(a) + MY_SQUARE(-3 + rc) * rc)) /
-                   (MY_SQUARE(a) * MY_SQUARE(-1 + rc)));
-    Real qc = sqrt(eta_c);
-
-    Real coeff = sqrt(
-        MY_SQUARE(-3 + rc) / (MY_SQUARE(a) * MY_SQUARE(-1 + rc)) + eta_c / pow(rc, 4));
-
-    reset_by_lambda_q(lambda_c + d * ((3 - rc) / (a * (-1 + rc)) / coeff),
-                      qc + d * (sqrt(eta_c) / MY_SQUARE(rc) / coeff), nu_r_, nu_theta_);
-    reset_variables();
-  }
-
   void calcI() {
     bool radial_turning = r34_is_real && r4 > rp;
 
@@ -213,39 +229,27 @@ public:
   std::shared_ptr<IIntegral3<Real, Complex>> I_integral_3;
   std::shared_ptr<GIntegral<Real, Complex>> G_integral;
 
-  RayStatus calc_ray_by_lambda_q(Real a_, Real r_s_, Real theta_s_, Real r_o_, Sign nu_r_, Sign nu_theta_, Real lambda_,
-                                 Real q_) {
-    a = std::move(a_);
-    r_s = std::move(r_s_);
-    theta_s = std::move(theta_s_);
-    r_o = std::move(r_o_);
+  void calc_ray(const ForwardRayTracingParams<Real> &params) {
+    a = params.a;
+    r_s = params.r_s;
+    theta_s = params.theta_s;
+    r_o = params.r_o;
+
     rp = 1 + sqrt(1 - a * a);
     rm = 1 - sqrt(1 - a * a);
 
-    reset_by_lambda_q(std::move(lambda_), std::move(q_), nu_r_, nu_theta_);
-    return calc_ray();
-  }
+    calc_t_f = params.calc_t_f;
 
-  RayStatus calc_ray_by_rc_d(Real a_, Real r_s_, Real theta_s_, Real r_o_, Sign nu_r_, Sign nu_theta_, const Real &rc,
-                             const Real &d) {
-    a = std::move(a_);
-    r_s = std::move(r_s_);
-    theta_s = std::move(theta_s_);
-    r_o = std::move(r_o_);
-    rp = 1 + sqrt(1 - a * a);
-    rm = 1 - sqrt(1 - a * a);
+    reset_by_lambda_q(params.lambda, params.q, params.nu_r, params.nu_theta);
 
-    reset_by_rc_d(rc, d, nu_r_, nu_theta_);
-    return calc_ray();
-  }
-
-  RayStatus calc_ray() {
     if (eta <= 0) {
-      return RayStatus::ETA_OUT_OF_RANGE;
+      ray_status = RayStatus::ETA_OUT_OF_RANGE;
+      return;
     }
 
     if (theta_s < theta_m || theta_s > theta_p) {
-      return RayStatus::THETA_OUT_OF_RANGE;
+      ray_status = RayStatus::THETA_OUT_OF_RANGE;
+      return;
     }
 
     // Radial integrals
@@ -254,7 +258,7 @@ public:
     tau_o = radial_integrals[0];
 
     if (ray_status != RayStatus::NORMAL) {
-      return ray_status;
+      return;
     }
 
     G_integral->calc();
@@ -268,7 +272,6 @@ public:
 #ifdef PRINT_DEBUG
     fmt::println("theta_f, phi_f, t_f, m, nhalf: {}, {}, {}, {}, {}", theta_f, phi_f, t_f, m, n_half);
 #endif
-    return RayStatus::NORMAL;
   }
 
   ForwardRayTracingResult<Real, Complex> to_result() {
