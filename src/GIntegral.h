@@ -2,6 +2,8 @@
 
 #include "Common.h"
 
+#include <boost/numeric/conversion/converter.hpp>
+
 template<typename Real, typename Complex>
 class GIntegral {
 #ifdef TESTS
@@ -99,7 +101,11 @@ public:
         boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
 
     // floor
-    data.m = RealToInt::convert(m_Real);
+    if (isnan(m_Real)) {
+      data.m = std::numeric_limits<int>::max();
+    } else {
+      data.m = RealToInt::convert(m_Real);
+    }
 
     // Number of half-orbits
     data.n_half = tau_o / (2 * G_theta_theta_p);

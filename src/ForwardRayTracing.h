@@ -6,8 +6,6 @@
 #include "GIntegral.h"
 #include "ObjectPool.h"
 
-#include <boost/numeric/conversion/converter.hpp>
-
 template<typename Real, typename Complex>
 class ForwardRayTracing {
   friend class IIntegral2<Real, Complex>;

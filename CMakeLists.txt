@@ -7,6 +7,10 @@ option(ENABLE_TESTING "Enable Test Builds" ON)
 option(ENABLE_FLOAT128 "Enable float128 precision" ON)
 option(ENABLE_BIGFLOAT "Enable bigfloat precision" ON)
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    SET(ENABLE_FLOAT128 OFF)
+endif()
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 find_package(fmt REQUIRED)
