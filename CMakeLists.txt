@@ -14,10 +14,12 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 find_package(fmt REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(Ceres REQUIRED)
 find_package(TBB CONFIG REQUIRED)
 find_package(Boost 1.82.0 COMPONENTS filesystem REQUIRED)
 find_package(Catch2 3 REQUIRED)
-set(LIBRARIES Boost::boost Boost::filesystem fmt::fmt TBB::tbb)
+set(LIBRARIES Boost::boost Boost::filesystem fmt::fmt Eigen3::Eigen Ceres::ceres TBB::tbb)
 
 # add_definitions(-DPRINT_DEBUG)
 
