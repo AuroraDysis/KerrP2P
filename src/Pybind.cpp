@@ -4,10 +4,18 @@
 
 #include <oneapi/tbb.h>
 
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point.hpp>
+#include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/index/rtree.hpp>
+
 #include "ObjectPool.h"
 #include "ForwardRayTracing.h"
 
 namespace py = pybind11;
+
+namespace bg = boost::geometry;
+namespace bgi = boost::geometry::index;
 
 template<typename Real, typename Complex>
 void define_forward_ray_tracing(pybind11::module_ &mod, const char *name) {
@@ -99,8 +107,9 @@ struct PyForwardRayTracing {
                                 }
                               });
 
-    std::vector<std::pair<py::ssize_t, py::ssize_t>> theta_roots_index;
-    std::vector<std::pair<py::ssize_t, py::ssize_t>> phi_roots_index;
+    using Point = bg::model::point<int, 2, bg::cs::cartesian>;
+    std::vector<Point> theta_roots_index;
+    std::vector<Point> phi_roots_index;
     Real d_row, d_col;
     for (py::ssize_t i = 1; i < d_size; i++) {
       for (py::ssize_t j = 1; j < rc_size; j++) {
@@ -127,29 +136,22 @@ struct PyForwardRayTracing {
     auto phi_roots_data = phi_roots.template mutable_unchecked<2>();
 
     for (py::ssize_t i = 0; i < theta_roots_index.size(); i++) {
-      theta_roots_data(i, 0) = rc_list[theta_roots_index[i].second];
-      theta_roots_data(i, 1) = d_list[theta_roots_index[i].first];
+      theta_roots_data(i, 0) = rc_list[theta_roots_index[i].template get<1>()];
+      theta_roots_data(i, 1) = d_list[theta_roots_index[i].template get<0>()];
     }
     for (py::ssize_t i = 0; i < phi_roots_index.size(); i++) {
-      phi_roots_data(i, 0) = rc_list[phi_roots_index[i].second];
-      phi_roots_data(i, 1) = d_list[phi_roots_index[i].first];
+      phi_roots_data(i, 0) = rc_list[phi_roots_index[i].template get<1>()];
+      phi_roots_data(i, 1) = d_list[phi_roots_index[i].template get<0>()];
     }
 
-
-    std::vector<std::pair<py::ssize_t, py::ssize_t>> theta_roots_closest_index(theta_roots_index.size());
+    std::vector<Point> theta_roots_closest_index;
+    theta_roots_closest_index.reserve(theta_roots_index.size());
     std::vector<double> distances(theta_roots_index.size());
-    // find the closest point in phi_roots_index for each point in theta_roots_index
+    bgi::rtree<Point, bgi::quadratic<16>> rtree(phi_roots_index);
     for (py::ssize_t i = 0; i < theta_roots_index.size(); i++) {
-      double min_dist = std::numeric_limits<double>::max();
-      for (auto & j : phi_roots_index) {
-        double dist = square(theta_roots_index[i].first - j.first) +
-                      square(theta_roots_index[i].second - j.second);
-        if (dist < min_dist) {
-          min_dist = dist;
-          theta_roots_closest_index[i] = j;
-        }
-      }
-      distances[i] = min_dist;
+      Point p = theta_roots_index[i];
+      rtree.query(bgi::nearest(p, 1), std::back_inserter(theta_roots_closest_index));
+      distances[i] = bg::distance(p, theta_roots_closest_index.back());
     }
 
     // sort rows of theta_roots_closest_index by distances
@@ -159,8 +161,8 @@ struct PyForwardRayTracing {
 
     auto theta_roots_closest_data = theta_roots_closest.template mutable_unchecked<2>();
     for (py::ssize_t i = 0; i < theta_roots_index.size(); i++) {
-      theta_roots_closest_data(i, 0) = rc_list[theta_roots_closest_index[indices[i]].second];
-      theta_roots_closest_data(i, 1) = d_list[theta_roots_closest_index[indices[i]].first];
+      theta_roots_closest_data(i, 0) = rc_list[theta_roots_closest_index[indices[i]].template get<1>()];
+      theta_roots_closest_data(i, 1) = d_list[theta_roots_closest_index[indices[i]].template get<0>()];
     }
 
     return {theta_mat, phi_mat, theta_roots, phi_roots, theta_roots_closest};
