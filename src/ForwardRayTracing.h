@@ -7,6 +7,17 @@
 #include "ObjectPool.h"
 
 template<typename Real, typename Complex>
+struct ForwardRayTracingResult {
+  Real a, rp, rm, r_s, theta_s, r_o;
+  Real r1, r2, r3, r4;
+  Complex r1_c, r2_c, r3_c, r4_c;
+  Real t_f, theta_f, phi_f;
+  int m;
+  Real n_half;
+  RayStatus ray_status;
+};
+
+template<typename Real, typename Complex>
 class ForwardRayTracing {
   friend class IIntegral2<Real, Complex>;
 
@@ -258,5 +269,30 @@ public:
     fmt::println("theta_f, phi_f, t_f, m, nhalf: {}, {}, {}, {}, {}", theta_f, phi_f, t_f, m, n_half);
 #endif
     return RayStatus::NORMAL;
+  }
+
+  ForwardRayTracingResult<Real, Complex> to_result() {
+    ForwardRayTracingResult<Real, Complex> result;
+    result.a = a;
+    result.rp = rp;
+    result.rm = rm;
+    result.r_s = r_s;
+    result.theta_s = theta_s;
+    result.r_o = r_o;
+    result.r1 = r1;
+    result.r2 = r2;
+    result.r3 = r3;
+    result.r4 = r4;
+    result.r1_c = r1_c;
+    result.r2_c = r2_c;
+    result.r3_c = r3_c;
+    result.r4_c = r4_c;
+    result.t_f = t_f;
+    result.theta_f = theta_f;
+    result.phi_f = phi_f;
+    result.m = m;
+    result.n_half = n_half;
+    result.ray_status = ray_status;
+    return result;
   }
 };

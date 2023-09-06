@@ -23,29 +23,29 @@ void define_sweep_result(pybind11::module_ &mod, const char *name) {
 }
 
 template<typename Real, typename Complex>
-void define_forward_ray_tracing(pybind11::module_ &mod, const char *name) {
-  using RayTracing = ForwardRayTracing<Real, Complex>;
-  py::class_<RayTracing, std::shared_ptr<RayTracing>>(mod, name)
-      .def_readonly("a", &RayTracing::a)
-      .def_readonly("rp", &RayTracing::rp)
-      .def_readonly("rm", &RayTracing::rm)
-      .def_readonly("r_s", &RayTracing::r_s)
-      .def_readonly("theta_s", &RayTracing::theta_s)
-      .def_readonly("r_o", &RayTracing::r_o)
-      .def_readonly("r1", &RayTracing::r1)
-      .def_readonly("r2", &RayTracing::r2)
-      .def_readonly("r3", &RayTracing::r3)
-      .def_readonly("r4", &RayTracing::r4)
-      .def_readonly("r1_c", &RayTracing::r1_c)
-      .def_readonly("r2_c", &RayTracing::r2_c)
-      .def_readonly("r3_c", &RayTracing::r3_c)
-      .def_readonly("r4_c", &RayTracing::r4_c)
-      .def_readonly("t_f", &RayTracing::t_f)
-      .def_readonly("theta_f", &RayTracing::theta_f)
-      .def_readonly("phi_f", &RayTracing::phi_f)
-      .def_readonly("m", &RayTracing::m)
-      .def_readonly("n_half", &RayTracing::n_half)
-      .def_readonly("ray_status", &RayTracing::ray_status);
+void define_forward_ray_tracing_result(pybind11::module_ &mod, const char *name) {
+  using ResultType = ForwardRayTracingResult<Real, Complex>;
+  py::class_<ResultType>(mod, name)
+      .def_readonly("a", &ResultType::a)
+      .def_readonly("rp", &ResultType::rp)
+      .def_readonly("rm", &ResultType::rm)
+      .def_readonly("r_s", &ResultType::r_s)
+      .def_readonly("theta_s", &ResultType::theta_s)
+      .def_readonly("r_o", &ResultType::r_o)
+      .def_readonly("r1", &ResultType::r1)
+      .def_readonly("r2", &ResultType::r2)
+      .def_readonly("r3", &ResultType::r3)
+      .def_readonly("r4", &ResultType::r4)
+      .def_readonly("r1_c", &ResultType::r1_c)
+      .def_readonly("r2_c", &ResultType::r2_c)
+      .def_readonly("r3_c", &ResultType::r3_c)
+      .def_readonly("r4_c", &ResultType::r4_c)
+      .def_readonly("t_f", &ResultType::t_f)
+      .def_readonly("theta_f", &ResultType::theta_f)
+      .def_readonly("phi_f", &ResultType::phi_f)
+      .def_readonly("m", &ResultType::m)
+      .def_readonly("n_half", &ResultType::n_half)
+      .def_readonly("ray_status", &ResultType::ray_status);
 }
 
 PYBIND11_MODULE(py_forward_ray_tracing, mod) {
@@ -63,23 +63,23 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
       .export_values();
 
   mod.def("calc_rc_d", &ForwardRayTracingUtils<double, std::complex<double>>::calc_rc_d,
-          py::call_guard<py::gil_scoped_release>());
+          py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
   mod.def("calc_lambda_q", &ForwardRayTracingUtils<double, std::complex<double>>::calc_lambda_q,
-          py::call_guard<py::gil_scoped_release>());
+          py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
   mod.def("sweep_rc_d", &ForwardRayTracingUtils<double, std::complex<double>>::sweep_rc_d,
           py::return_value_policy::move);
   mod.def("clean_cache", ForwardRayTracing<double, std::complex<double>>::clear_cache);
 
-  define_forward_ray_tracing<double, std::complex<double>>(mod, "ForwardRayTracingFloat64");
-  define_forward_ray_tracing<long double, std::complex<long double>>(mod, "ForwardRayTracingLongDouble");
+  define_forward_ray_tracing_result<double, std::complex<double>>(mod, "ForwardRayTracingFloat64");
+  define_forward_ray_tracing_result<long double, std::complex<long double>>(mod, "ForwardRayTracingLongDouble");
   define_sweep_result<double>(mod, "SweepResultFloat64");
   define_sweep_result<long double>(mod, "SweepResultLongDouble");
 #ifdef FLOAT128
-  // define_forward_ray_tracing<boost::multiprecision::float128, boost::multiprecision::complex128>(mod, "ForwardRayTracingFloat128");
+  // define_forward_ray_tracing_result<boost::multiprecision::float128, boost::multiprecision::complex128>(mod, "ForwardRayTracingFloat128");
   // define_sweep_result<boost::multiprecision::float128>(mod, "SweepResultFloat128");
 #endif
 #ifdef BIGFLOAT
-  // define_forward_ray_tracing<BigFloat, BigComplex>(mod, "ForwardRayTracingBigFloat");
+  // define_forward_ray_tracing_result<BigFloat, BigComplex>(mod, "ForwardRayTracingBigFloat");
   // define_sweep_result<BigFloat>(mod, "SweepResultBigFloat");
 #endif
 }

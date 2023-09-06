@@ -33,20 +33,20 @@ struct SweepResult {
 
 template<typename Real, typename Complex>
 struct ForwardRayTracingUtils {
-  static std::shared_ptr<ForwardRayTracing<Real, Complex>>
+  static ForwardRayTracingResult<Real, Complex>
   calc_rc_d(Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta, Real rc, Real d) {
     auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
     ray_tracing->calc_ray_by_rc_d(std::move(a), std::move(r_s), std::move(theta_s), std::move(r_o), nu_r, nu_theta,
                                   std::move(rc), std::move(d));
-    return ray_tracing;
+    return ray_tracing->to_result();
   }
 
-  static std::shared_ptr<ForwardRayTracing<Real, Complex>> calc_lambda_q(
+  static ForwardRayTracingResult<Real, Complex> calc_lambda_q(
       Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta, Real lambda, Real q) {
     auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
     ray_tracing->calc_ray_by_lambda_q(std::move(a), std::move(r_s), std::move(theta_s), std::move(r_o), nu_r, nu_theta,
                                       std::move(lambda), std::move(q));
-    return ray_tracing;
+    return ray_tracing->to_result();
   }
 
   static SweepResult<Real>
