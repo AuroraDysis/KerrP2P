@@ -53,7 +53,7 @@ public:
                                           (alpha2 + ellint_m - alpha2 * ellint_m)) *
                                      sqrt(1 - ellint_m * MY_SQUARE(ellint_sin_phi)))));
 #ifdef PRINT_DEBUG
-    fmt::println("R1 - k: {}, n: {}, n1: {}, phi: {}", ellint_k, ellint3_n, ellint_phi);
+    fmt::println("R1 - k: {}, n: {}, phi: {}", ellint_k, ellint3_n, ellint_phi);
     fmt::println("R1 - ellint_3: {}, f1: {}", ellint_3_tmp, f1);
 #endif
     // sign is different from Mathematica
@@ -91,8 +91,7 @@ public:
 
 #ifdef PRINT_DEBUG
     fmt::println("I3 - A: {}, B: {}, ellint_k: {}", A, B, ellint_k);
-    fmt::println("I3 - alpha_p: {}, alpha_m: {}, phi_rs: {}, phi_ro: {}", alpha_p, alpha_m, ellint_phi_rs,
-                 ellint_phi_ro);
+    fmt::println("I3 - alpha_p: {}, alpha_m: {}", alpha_p, alpha_m);
 #endif
   }
 
