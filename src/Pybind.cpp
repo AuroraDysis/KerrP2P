@@ -35,6 +35,21 @@ void define_forward_ray_tracing(pybind11::module_ &mod, const char *name) {
       .def_readonly("ray_status", &RayTracing::ray_status);
 }
 
+template <typename Real>
+Real my_mod(Real x, Real y) {
+  if (y == 0.0) {
+    // Handle division by zero, maybe throw an exception or return a special value.
+    std::cerr << "Division by zero!" << std::endl;
+    return std::numeric_limits<Real>::quiet_NaN();
+  }
+
+  Real result = fmod(x, y);
+  if ((result < 0 && y > 0) || (result > 0 && y < 0)) {
+    result += y;
+  }
+  return result;
+}
+
 template<typename Real, typename Complex>
 struct PyForwardRayTracing {
   static std::shared_ptr<ForwardRayTracing<Real, Complex>>
@@ -75,7 +90,7 @@ struct PyForwardRayTracing {
                                                                   d_list[i]);
                                     if (ray_tracing->ray_status == RayStatus::NORMAL) {
                                       theta_data(i, j) = ray_tracing->theta_f - theta_o;
-                                      phi_data(i, j) = ray_tracing->phi_f - phi_o;
+                                      phi_data(i, j) = my_mod(ray_tracing->phi_f, two_pi) - phi_o;
                                     } else {
                                       theta_data(i, j) = std::numeric_limits<Real>::quiet_NaN();
                                       phi_data(i, j) = std::numeric_limits<Real>::quiet_NaN();
@@ -120,19 +135,32 @@ struct PyForwardRayTracing {
       phi_roots_data(i, 1) = d_list[phi_roots_index[i].first];
     }
 
-    auto theta_roots_closest_data = theta_roots_closest.template mutable_unchecked<2>();
+
+    std::vector<std::pair<py::ssize_t, py::ssize_t>> theta_roots_closest_index(theta_roots_index.size());
+    std::vector<double> distances(theta_roots_index.size());
     // find the closest point in phi_roots_index for each point in theta_roots_index
     for (py::ssize_t i = 0; i < theta_roots_index.size(); i++) {
       double min_dist = std::numeric_limits<double>::max();
-      for (py::ssize_t j = 0; j < phi_roots_index.size(); j++) {
-        double dist = square(theta_roots_index[i].first - phi_roots_index[j].first) +
-                      square(theta_roots_index[i].second - phi_roots_index[j].second);
+      for (auto & j : phi_roots_index) {
+        double dist = square(theta_roots_index[i].first - j.first) +
+                      square(theta_roots_index[i].second - j.second);
         if (dist < min_dist) {
           min_dist = dist;
-          theta_roots_closest_data(i, 0) = phi_roots_data(j, 0);
-          theta_roots_closest_data(i, 1) = phi_roots_data(j, 1);
+          theta_roots_closest_index[i] = j;
         }
       }
+      distances[i] = min_dist;
+    }
+
+    // sort rows of theta_roots_closest_index by distances
+    std::vector<size_t> indices(theta_roots_index.size());
+    std::iota(indices.begin(), indices.end(), 0);
+    std::sort(indices.begin(), indices.end(), [&distances](size_t i1, size_t i2) { return distances[i1] < distances[i2]; });
+
+    auto theta_roots_closest_data = theta_roots_closest.template mutable_unchecked<2>();
+    for (py::ssize_t i = 0; i < theta_roots_index.size(); i++) {
+      theta_roots_closest_data(i, 0) = rc_list[theta_roots_closest_index[indices[i]].second];
+      theta_roots_closest_data(i, 1) = d_list[theta_roots_closest_index[indices[i]].first];
     }
 
     return {theta_mat, phi_mat, theta_roots, phi_roots, theta_roots_closest};
