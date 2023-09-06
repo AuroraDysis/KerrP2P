@@ -64,7 +64,7 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
 
     ForwardRayTracing<Real, Complex> forward;
     forward.calc_ray(params);
-    REQUIRE(forward.ray_status == RayStatus::NORMAL);
+    CHECK(forward.ray_status == RayStatus::NORMAL);
 
     auto r1_vec = as_vector<string>(data, "r1");
     Complex r1 = Complex(boost::lexical_cast<Real>(r1_vec[0]), boost::lexical_cast<Real>(r1_vec[1]));

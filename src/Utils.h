@@ -2,11 +2,11 @@
 
 #include "ForwardRayTracing.h"
 
+#define OPTIM_ENABLE_EIGEN_WRAPPERS
+#include "optim/optim.hpp"
+
 #include <oneapi/tbb.h>
-
 #include <Eigen/Dense>
-
-#include <ceres/ceres.h>
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
@@ -40,7 +40,7 @@ private:
   const std::shared_ptr<ForwardRayTracingParams<Real>> params;
 
   const Real two_pi = boost::math::constants::two_pi<Real>();
-  const std::shared_ptr<Real> phi_tmp = std::make_shared<Real>();
+  Real phi_tmp;
 
 public:
   std::shared_ptr<ForwardRayTracing<Real, Complex>> ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
@@ -49,7 +49,7 @@ public:
     ray_tracing->calc_t_f = false;
   }
 
-  bool operator()(const double *x, double *residual) const {
+  Eigen::Vector2d operator()(const Eigen::Vector2d &x, void* opt_data) {
     auto &rc = x[0];
     auto &lgd = x[1];
     params->rc = rc;
@@ -58,15 +58,14 @@ public:
     ray_tracing->calc_ray(*params);
 
     if (ray_tracing->ray_status != RayStatus::NORMAL) {
-      return false;
+      return Eigen::Vector2d::Constant(std::numeric_limits<Real>::quiet_NaN());
     }
 
-    if (residual != nullptr) {
-      residual[0] = ray_tracing->theta_f - x[0];
-      (*phi_tmp) = fmod(ray_tracing->phi_f, two_pi);
-      residual[1] = ((*phi_tmp) < 0 ? (*phi_tmp) + two_pi : (*phi_tmp)) - x[1];
-    }
-    return true;
+    Eigen::Vector2d residual;
+    residual[0] = ray_tracing->theta_f - x[0];
+    phi_tmp = fmod(ray_tracing->phi_f, two_pi);
+    residual[1] = (phi_tmp < 0 ? phi_tmp + two_pi : phi_tmp) - x[1];
+    return residual;
   }
 };
 
@@ -79,23 +78,13 @@ struct ForwardRayTracingUtils {
   }
 
   static ForwardRayTracingResult<Real, Complex> find_result(const ForwardRayTracingParams<Real> &params) {
-    std::array<Real, 2> x = {params.rc, params.lgd};
-    using ceres::Problem;
-    using ceres::Solve;
-    using ceres::Solver;
-    using ceres::CENTRAL;
+    // std::array<Real, 2> x = {params.rc, params.lgd};
+    Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
+    x << params.rc, params.lgd;
 
-    Problem problem;
     RootFunctor<Real, Complex> root_functor(params);
-    auto cost_function = std::make_shared<ceres::NumericDiffCostFunction<RootFunctor<Real, Complex>, CENTRAL, 2, 2>>(&root_functor);
-    problem.AddResidualBlock(cost_function.get(), nullptr, x.data());
-
-    Solver::Options options;
-    options.minimizer_progress_to_stdout = false;
-    options.linear_solver_type = ceres::DENSE_QR;
-
-    root_functor(x.data(), nullptr);
-
+    optim::broyden_df(x, root_functor, nullptr);
+    root_functor(x, nullptr);
     return root_functor.ray_tracing->to_result();
   }
 
