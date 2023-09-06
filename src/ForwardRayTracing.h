@@ -45,6 +45,7 @@ struct ForwardRayTracingResult {
   Real t_f, theta_f, phi_f;
   int m;
   Real n_half;
+  Real eta, lambda, q;
   RayStatus ray_status;
 };
 
@@ -296,6 +297,9 @@ public:
     result.m = m;
     result.n_half = n_half;
     result.ray_status = ray_status;
+    result.eta = eta;
+    result.lambda = lambda;
+    result.q = q;
     return result;
   }
 };

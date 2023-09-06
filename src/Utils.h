@@ -3,6 +3,7 @@
 #include "ForwardRayTracing.h"
 
 #define OPTIM_ENABLE_EIGEN_WRAPPERS
+
 #include "optim/optim.hpp"
 
 #include <oneapi/tbb.h>
@@ -38,6 +39,8 @@ template<typename Real, typename Complex>
 class RootFunctor {
 private:
   const std::shared_ptr<ForwardRayTracingParams<Real>> params;
+  const Real theta_o;
+  const Real phi_o;
 
   const Real two_pi = boost::math::constants::two_pi<Real>();
   Real phi_tmp;
@@ -45,11 +48,12 @@ private:
 public:
   std::shared_ptr<ForwardRayTracing<Real, Complex>> ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
 
-  RootFunctor(ForwardRayTracingParams<Real> params_) : params(std::make_shared<ForwardRayTracingParams<Real>>(params_)) {
+  RootFunctor(ForwardRayTracingParams<Real> params_, Real theta_o_, Real phi_o_) : params(
+      std::make_shared<ForwardRayTracingParams<Real>>(params_)), theta_o(std::move(theta_o_)), phi_o(std::move(phi_o_)) {
     ray_tracing->calc_t_f = false;
   }
 
-  Eigen::Vector2d operator()(const Eigen::Vector2d &x, void* opt_data) {
+  Eigen::Vector2d operator()(const Eigen::Vector2d &x, void *opt_data) {
     auto &rc = x[0];
     auto &lgd = x[1];
     params->rc = rc;
@@ -62,9 +66,13 @@ public:
     }
 
     Eigen::Vector2d residual;
-    residual[0] = ray_tracing->theta_f - x[0];
+    residual[0] = ray_tracing->theta_f - theta_o;
     phi_tmp = fmod(ray_tracing->phi_f, two_pi);
-    residual[1] = (phi_tmp < 0 ? phi_tmp + two_pi : phi_tmp) - x[1];
+    residual[1] = (phi_tmp < 0 ? phi_tmp + two_pi : phi_tmp) - phi_o;
+#ifdef PRINT_DEBUG
+    fmt::println("rc: {}, lgd: {}, theta_f: {}, phi_f: {}", x[0], x[1], ray_tracing->theta_f, ray_tracing->phi_f);
+    fmt::println("residual: {}, {}", residual[0], residual[1]);
+#endif
     return residual;
   }
 };
@@ -77,14 +85,15 @@ struct ForwardRayTracingUtils {
     return ray_tracing->to_result();
   }
 
-  static ForwardRayTracingResult<Real, Complex> find_result(const ForwardRayTracingParams<Real> &params) {
+  static ForwardRayTracingResult<Real, Complex> find_result(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o) {
     // std::array<Real, 2> x = {params.rc, params.lgd};
     Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
     x << params.rc, params.lgd;
 
-    RootFunctor<Real, Complex> root_functor(params);
+    RootFunctor<Real, Complex> root_functor(params, std::move(theta_o), std::move(phi_o));
     optim::broyden_df(x, root_functor, nullptr);
     root_functor(x, nullptr);
+
     return root_functor.ray_tracing->to_result();
   }
 
