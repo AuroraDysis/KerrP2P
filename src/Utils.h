@@ -99,13 +99,13 @@ struct ForwardRayTracingUtils {
     Real d_row, d_col;
     for (size_t i = 1; i < d_size; i++) {
       for (size_t j = 1; j < rc_size; j++) {
-        d_row = theta(i, j) * theta(i, j - 1);
-        d_col = theta(i, j) * theta(i - 1, j);
+        d_row = delta_theta(i, j) * delta_theta(i, j - 1);
+        d_col = delta_theta(i, j) * delta_theta(i - 1, j);
         if (!isnan(d_row) && !isnan(d_col) && (d_row <= 0 || d_col <= 0)) {
           theta_roots_index.emplace_back(i, j);
         }
-        d_row = phi(i, j) * phi(i, j - 1);
-        d_col = phi(i, j) * phi(i - 1, j);
+        d_row = delta_phi(i, j) * delta_phi(i, j - 1);
+        d_col = delta_phi(i, j) * delta_phi(i - 1, j);
         if (!isnan(d_row) && !isnan(d_col) && (d_row <= 0 || d_col <= 0)) {
           phi_roots_index.emplace_back(i, j);
         }
@@ -117,8 +117,6 @@ struct ForwardRayTracingUtils {
 
     theta_roots.resize(theta_roots_index.size(), 2);
     phi_roots.resize(phi_roots_index.size(), 2);
-
-    auto &theta_roots_closest = sweep_result.theta_roots_closest;
 
     for (size_t i = 0; i < theta_roots_index.size(); i++) {
       theta_roots(i, 0) = rc_list[theta_roots_index[i].template get<1>()];
@@ -145,6 +143,8 @@ struct ForwardRayTracingUtils {
     std::sort(indices.begin(), indices.end(),
               [&distances](size_t i1, size_t i2) { return distances[i1] < distances[i2]; });
 
+    auto &theta_roots_closest = sweep_result.theta_roots_closest;
+    theta_roots_closest.resize(theta_roots_index.size(), 2);
     for (size_t i = 0; i < theta_roots_index.size(); i++) {
       theta_roots_closest(i, 0) = rc_list[theta_roots_closest_index[indices[i]].template get<1>()];
       theta_roots_closest(i, 1) = d_list[theta_roots_closest_index[indices[i]].template get<0>()];
