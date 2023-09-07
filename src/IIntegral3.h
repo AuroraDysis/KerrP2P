@@ -16,7 +16,7 @@ public:
 
   Real ellint_phi, ellint_cos_phi, ellint_sin_phi;
   Real r34_re, r34_im;
-  Real A, B, alpha_p, alpha_m, ellint_k, ellint_m, alpha2;
+  Real A, B, alpha_p, alpha_m, ellint_k, ellint_m, alpha2, ellint1_phi;
   Real alpha_0, R1_alpha_0, R2_alpha_0, Pi_13, Pi_23, I_1, I_2;
   Real ellint3_n, ellint_c, ellint_3_tmp, f1, ellint3_n1;
   Real F3, R1_alpha_p, R1_alpha_m, I_p, I_m;
@@ -103,12 +103,13 @@ public:
     const Real &r2 = data.r2;
     ellint_cos_phi = -1 + (2 * A * (r - r1)) / (A * (r - r1) + B * (r - r2));
     ellint_sin_phi = sqrt(1 - MY_SQUARE(ellint_cos_phi));
+    ellint_c = 1 / (1 - MY_SQUARE(ellint_cos_phi));
     ellint_phi = acos(ellint_cos_phi);
-    ellint_c = 1 / MY_SQUARE(ellint_sin_phi);
 
     R1_alpha_p = R1(alpha_p);
     R1_alpha_m = R1(alpha_m);
-    F3 = ellint_1(ellint_k, ellint_phi) / sqrt(A * B);
+    ellint1_phi = ellint_1(ellint_k, ellint_phi);
+    F3 = ellint1_phi / sqrt(A * B);
     I_p = -(((A + B) * F3 + (2 * sqrt(A * B) * R1_alpha_p * (-r1 + r2)) /
                             (A * (r1 - rp) + B * (-r2 + rp))) /
             (-(A * r1) - B * r2 + (A + B) * rp));
@@ -122,7 +123,7 @@ public:
       R1_alpha_0 = R1(alpha_0);
       using boost::math::ellint_rd;
       R2_alpha_0 = ((-1 + alpha2) * ellint_m * (1 + alpha_0 * ellint_cos_phi) *
-                    (ellint_1(ellint_k, ellint_phi) - 2 * R1_alpha_0) +
+                    (ellint1_phi - 2 * R1_alpha_0) +
                     alpha2 * (1 + alpha_0 * ellint_cos_phi) *
                     (third<Real>() * ellint_m * ellint_rd(ellint_c - 1, ellint_c - ellint_m, ellint_c) + R1_alpha_0) -
                     MY_CUBE(alpha_0) * ellint_sin_phi * sqrt(1 - ellint_m * MY_SQUARE(ellint_sin_phi))) /
