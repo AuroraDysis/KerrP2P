@@ -21,7 +21,9 @@ public:
   Real jacobi_sn_k1, jacobi_sn_k1_prime;
   Real one_over_umaa_sqrt;
 
-  Real ellint_sin_phi, ellint_cos_theta, ellint_sin_theta, ellint_c;
+  Real ellint_sin_phi;
+  Real ellint_theta;
+  Real ellint_cos_theta, ellint_sin_theta;
   Real ellint_1_phi, ellint_2_phi, ellint_3_phi;
 
   ForwardRayTracing<Real, Complex> &data;
@@ -40,19 +42,11 @@ public:
       return;
     }
     ellint_cos_theta = sqrt(1 - MY_SQUARE(ellint_sin_theta));
-    // ellint_theta = asin(ellint_sin_theta);
+    ellint_theta = asin(ellint_sin_theta);
 
-    using boost::math::ellint_rf;
-    using boost::math::ellint_rd;
-    using boost::math::ellint_rj;
-    // ellint_1_phi = boost::math::ellint_1(ellint_kappa, ellint_theta);
-    ellint_c = 1 / MY_SQUARE(ellint_sin_theta);
-    ellint_1_phi = ellint_rf(ellint_c - 1, ellint_c - ellint_kappa2, ellint_c);
-    // ellint_2_phi = boost::math::ellint_2(ellint_kappa, ellint_theta);
-    ellint_2_phi = ellint_1_phi - third<Real>() * ellint_kappa2 * ellint_rd(ellint_c - 1, ellint_c - ellint_kappa2, ellint_c);
-    // ellint_3_phi = boost::math::ellint_3(ellint_kappa, ellint_alpha1_2, ellint_theta);
-    ellint_3_phi = ellint_1_phi + third<Real>() * ellint_alpha1_2 * ellint_rj(ellint_c - 1, ellint_c - ellint_kappa2, ellint_c, ellint_c - ellint_alpha1_2);
-
+    ellint_1_phi = boost::math::ellint_1(ellint_kappa, ellint_theta);
+    ellint_2_phi = boost::math::ellint_2(ellint_kappa, ellint_theta);
+    ellint_3_phi = boost::math::ellint_3(ellint_kappa, ellint_alpha1_2, ellint_theta);
     G_arr[0] = -one_over_umaa_sqrt * ellint_kappa_prime * ellint_1_phi;
     G_arr[1] = -one_over_umaa_sqrt * ellint_kappa_prime / ellint_alpha1_2 *
                (MY_SQUARE(ellint_kappa_prime) * up *
