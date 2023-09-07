@@ -26,6 +26,7 @@ enum class RayStatus {
   CONFINED,
   ETA_OUT_OF_RANGE, // eta should be positive
   THETA_OUT_OF_RANGE, // theta should be in [theta_m, theta_p]
+  ARGUMENT_ERROR,
   UNKOWN_ERROR,
 };
 

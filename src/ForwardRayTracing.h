@@ -130,7 +130,6 @@ private:
 
 #ifdef PRINT_DEBUG
     fmt::println("AA: {}, BB: {}, CC: {}, PP: {}, QQ: {}", AA, BB, CC, PP, QQ);
-    fmt::println("r1_c: {}, r2_c: {}, r3_c: {}, r4_c: {}", r1_c, r2_c, r3_c, r4_c);
     fmt::println("r1: {}, r2: {}, r3: {}, r4: {}", r1, r2, r3, r4);
 #endif
   }
@@ -253,6 +252,11 @@ public:
     fmt::println("rp: {}, rm: {}", rp, rm);
     fmt::println("lambda: {}, q: {}", params.lambda, params.q);
 #endif
+
+    if (isnan(params.lambda) || isnan(params.q)) {
+      ray_status = RayStatus::ARGUMENT_ERROR;
+      return;
+    }
 
     reset_by_lambda_q(params.lambda, params.q, params.nu_r, params.nu_theta);
 
