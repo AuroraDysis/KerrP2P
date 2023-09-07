@@ -20,7 +20,7 @@ public:
   Real ellint_kappa, ellint_kappa2, ellint_kappa_prime, ellint_one_over_kappa_prime, ellint3_n, ellint_alpha1_2;
   Real jacobi_sn_k1, jacobi_sn_k1_prime;
   Real one_over_umaa_sqrt;
-  Real ellint_phi; // ArcCsc[sqrt[up] Sec[\[Theta]]]
+
   Real ellint_sin_phi;
   Real ellint_theta;
   Real ellint_cos_theta, ellint_sin_theta;
@@ -36,7 +36,6 @@ public:
       data.ray_status = RayStatus::INTERNAL_ERROR;
       return;
     }
-    ellint_phi = asin(ellint_sin_phi);
     ellint_sin_theta = (sqrt(1 + ellint_m) * ellint_sin_phi) / sqrt(1 + ellint_m * MY_SQUARE(ellint_sin_phi));
     if (ellint_sin_theta < -1 || ellint_sin_theta > 1) {
       data.ray_status = RayStatus::INTERNAL_ERROR;
