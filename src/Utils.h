@@ -131,9 +131,14 @@ struct ForwardRayTracingUtils {
 
     auto &theta = sweep_result.theta;
     auto &phi = sweep_result.phi;
+    auto &delta_theta = sweep_result.delta_theta;
+    auto &delta_phi = sweep_result.delta_phi;
 
     theta.resize(lgd_size, rc_size);
     phi.resize(lgd_size, rc_size);
+
+    delta_theta.resize(lgd_size, rc_size);
+    delta_phi.resize(lgd_size, rc_size);
 
     // rc and d
     oneapi::tbb::parallel_for(oneapi::tbb::blocked_range2d<size_t>(0u, lgd_size, 0u, rc_size),
@@ -150,22 +155,18 @@ struct ForwardRayTracingUtils {
                                     if (ray_tracing->ray_status == RayStatus::NORMAL) {
                                       theta(i, j) = ray_tracing->theta_f;
                                       phi(i, j) = ray_tracing->phi_f;
+                                      delta_theta(i, j) = theta(i, j) - theta_o;
+                                      int sign = ray_tracing->lambda > 0 ? 1 : -1;
+                                      delta_phi(i, j) = sign * sin((phi(i, j) - phi_o) * half<Real>());
                                     } else {
                                       theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
                                       phi(i, j) = std::numeric_limits<Real>::quiet_NaN();
+                                      delta_theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
+                                      delta_phi(i, j) = std::numeric_limits<Real>::quiet_NaN();
                                     }
                                   }
                                 }
                               });
-
-    auto &delta_theta = sweep_result.delta_theta;
-    auto &delta_phi = sweep_result.delta_phi;
-
-    delta_theta.resize(lgd_size, rc_size);
-    delta_phi.resize(lgd_size, rc_size);
-
-    delta_theta = theta.array() - theta_o;
-    delta_phi = ((phi.array() - phi_o) * half<Real>()).sin();
 
     using Point = bg::model::point<int, 2, bg::cs::cartesian>;
     std::vector<Point> theta_roots_index;
