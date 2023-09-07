@@ -19,7 +19,8 @@ void define_sweep_result(pybind11::module_ &mod, const char *name) {
       .def_readonly("delta_phi", &SweepR::delta_phi)
       .def_readonly("theta_roots", &SweepR::theta_roots)
       .def_readonly("phi_roots", &SweepR::phi_roots)
-      .def_readonly("theta_roots_closest", &SweepR::theta_roots_closest);
+      .def_readonly("theta_roots_closest", &SweepR::theta_roots_closest)
+      .def_readonly("results", &SweepR::results);
 }
 
 template<typename Real>
@@ -65,6 +66,11 @@ void define_forward_ray_tracing_result(pybind11::module_ &mod, const char *name)
       .def_readonly("phi_f", &ResultType::phi_f)
       .def_readonly("m", &ResultType::m)
       .def_readonly("n_half", &ResultType::n_half)
+      .def_readonly("eta", &ResultType::eta)
+      .def_readonly("lambda", &ResultType::lambda)
+      .def_readonly("rc", &ResultType::rc)
+      .def_readonly("lgd", &ResultType::lgd)
+      .def_readonly("lgd_sign", &ResultType::lgd_sign)
       .def_readonly("ray_status", &ResultType::ray_status);
 }
 

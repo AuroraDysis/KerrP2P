@@ -131,6 +131,7 @@ struct ForwardRayTracingUtils {
 
     auto &theta = sweep_result.theta;
     auto &phi = sweep_result.phi;
+
     theta.resize(lgd_size, rc_size);
     phi.resize(lgd_size, rc_size);
 
@@ -148,7 +149,7 @@ struct ForwardRayTracingUtils {
                                     ray_tracing->calc_ray(local_params);
                                     if (ray_tracing->ray_status == RayStatus::NORMAL) {
                                       theta(i, j) = ray_tracing->theta_f;
-                                      phi(i, j) = mod_real(ray_tracing->phi_f, two_pi);
+                                      phi(i, j) = ray_tracing->phi_f;
                                     } else {
                                       theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
                                       phi(i, j) = std::numeric_limits<Real>::quiet_NaN();
@@ -164,7 +165,7 @@ struct ForwardRayTracingUtils {
     delta_phi.resize(lgd_size, rc_size);
 
     delta_theta = theta.array() - theta_o;
-    delta_phi = phi.array() - phi_o;
+    delta_phi = ((phi.array() - phi_o) * half<Real>()).sin();
 
     using Point = bg::model::point<int, 2, bg::cs::cartesian>;
     std::vector<Point> theta_roots_index;
@@ -240,8 +241,8 @@ struct ForwardRayTracingUtils {
                           int period = RealToInt::convert(phi(row, col) / boost::math::constants::two_pi<Real>());
                           try {
                             auto res = find_result(local_params, period, theta_o, phi_o);
-                            res.rc = rc_list[col];
-                            res.lgd = lgd_list[row];
+                            res.rc = local_params.rc;
+                            res.lgd = local_params.lgd;
                             results.push_back(std::move(res));
                           } catch (std::exception &e) {
                             fmt::print(stderr, "Error: {}\n", e.what());
