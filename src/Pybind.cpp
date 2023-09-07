@@ -22,6 +22,26 @@ void define_sweep_result(pybind11::module_ &mod, const char *name) {
       .def_readonly("theta_roots_closest", &SweepR::theta_roots_closest);
 }
 
+template<typename Real>
+void define_params(pybind11::module_ &mod, const char *name) {
+  using Params = ForwardRayTracingParams<Real>;
+  py::class_<Params>(mod, name)
+      .def(py::init<>())
+      .def_readwrite("a", &Params::a)
+      .def_readwrite("r_s", &Params::r_s)
+      .def_readwrite("theta_s", &Params::theta_s)
+      .def_readwrite("r_o", &Params::r_o)
+      .def_readwrite("nu_r", &Params::nu_r)
+      .def_readwrite("nu_theta", &Params::nu_theta)
+      .def_readwrite("rc", &Params::rc)
+      .def_readwrite("lgd", &Params::lgd)
+      .def_readwrite("lgd_sign", &Params::lgd_sign)
+      .def_readwrite("lambda", &Params::lambda)
+      .def_readwrite("q", &Params::q)
+      .def_readwrite("calc_t_f", &Params::calc_t_f)
+      .def("rc_d_to_lambda_q", &Params::rc_d_to_lambda_q);
+}
+
 template<typename Real, typename Complex>
 void define_forward_ray_tracing_result(pybind11::module_ &mod, const char *name) {
   using ResultType = ForwardRayTracingResult<Real, Complex>;
@@ -62,14 +82,14 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
       .value("NEGATIVE", Sign::NEGATIVE)
       .export_values();
 
-  mod.def("calc_rc_d", &ForwardRayTracingUtils<double, std::complex<double>>::calc_rc_d,
-          py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
-  mod.def("calc_lambda_q", &ForwardRayTracingUtils<double, std::complex<double>>::calc_lambda_q,
+  mod.def("calc_ray", &ForwardRayTracingUtils<double, std::complex<double>>::calc_ray,
           py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
   mod.def("sweep_rc_d", &ForwardRayTracingUtils<double, std::complex<double>>::sweep_rc_d,
           py::return_value_policy::move);
   mod.def("clean_cache", ForwardRayTracing<double, std::complex<double>>::clear_cache);
 
+  define_params<double>(mod, "ForwardRayTracingParamsFloat64");
+  define_params<long double>(mod, "ForwardRayTracingParamsLongDouble");
   define_forward_ray_tracing_result<double, std::complex<double>>(mod, "ForwardRayTracingFloat64");
   define_forward_ray_tracing_result<long double, std::complex<long double>>(mod, "ForwardRayTracingLongDouble");
   define_sweep_result<double>(mod, "SweepResultFloat64");

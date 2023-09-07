@@ -48,7 +48,8 @@ public:
   std::shared_ptr<ForwardRayTracing<Real, Complex>> ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
 
   RootFunctor(ForwardRayTracingParams<Real> params_, Real theta_o_, Real phi_o_) : params(
-      std::make_shared<ForwardRayTracingParams<Real>>(params_)), theta_o(std::move(theta_o_)), phi_o(std::move(phi_o_)) {
+      std::make_shared<ForwardRayTracingParams<Real>>(params_)), theta_o(std::move(theta_o_)),
+                                                                                   phi_o(std::move(phi_o_)) {
     ray_tracing->calc_t_f = false;
   }
 
@@ -90,7 +91,8 @@ struct ForwardRayTracingUtils {
     return ray_tracing->to_result();
   }
 
-  static ForwardRayTracingResult<Real, Complex> find_result(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o) {
+  static ForwardRayTracingResult<Real, Complex>
+  find_result(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o) {
     // std::array<Real, 2> x = {params.rc, params.lgd};
     Eigen::Vector<Real, 2> x = Eigen::Vector<Real, 2>();
     x << params.rc, params.lgd;
@@ -109,8 +111,8 @@ struct ForwardRayTracingUtils {
   }
 
   static SweepResult<Real>
-  sweep_rc_d(Real a, Real r_s, Real theta_s, Real r_o, Sign nu_r, Sign nu_theta, Real theta_o, Real phi_o,
-             const std::vector<Real> &rc_list, const std::vector<Real> &d_list) {
+  sweep_rc_d(ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, const std::vector<Real> &rc_list,
+             const std::vector<Real> &d_list) {
     size_t rc_size = rc_list.size();
     size_t d_size = d_list.size();
 
@@ -127,10 +129,12 @@ struct ForwardRayTracingUtils {
                                 auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
                                 Real two_pi = boost::math::constants::two_pi<Real>();
                                 Real phi_tmp;
+                                ForwardRayTracingParams<Real> local_params(params);
                                 for (size_t i = r.rows().begin(); i != r.rows().end(); ++i) {
                                   for (size_t j = r.cols().begin(); j != r.cols().end(); ++j) {
-                                    ray_tracing->calc_ray_by_rc_d(a, r_s, theta_s, r_o, nu_r, nu_theta, rc_list[j],
-                                                                  d_list[i]);
+                                    local_params.rc = rc_list[j];
+                                    local_params.lgd = d_list[i];
+                                    ray_tracing->calc_ray(local_params);
                                     if (ray_tracing->ray_status == RayStatus::NORMAL) {
                                       theta(i, j) = ray_tracing->theta_f;
                                       phi_tmp = fmod(ray_tracing->phi_f, two_pi);
