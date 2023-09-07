@@ -11,28 +11,14 @@ using namespace boost::property_tree;
 #include "ForwardRayTracing.h"
 #include "Utils.h"
 
-// ErrorLimit
-template <typename T>
-struct ErrorLimit {
-  static const T Value;
-};
-
 using std::string;
 using Float64 = std::tuple<double, std::complex<double>>;
 
-template <>
-const double ErrorLimit<double>::Value = 1e-10;
-
 #ifdef FLOAT128
 using Float128 = std::tuple<boost::multiprecision::float128, boost::multiprecision::complex128>;
-
-template <>
-const boost::multiprecision::float128 ErrorLimit<boost::multiprecision::float128>::Value{"1e-29"};
 #endif
 
 using BigFloat = std::tuple<BigFloatReal , BigFloatComplex>;
-template <>
-const BigFloatReal ErrorLimit<BigFloatReal>::Value{"1e-45"};
 
 #if defined(FLOAT128)
 #define TEST_TYPES Float64, Float128, BigFloat

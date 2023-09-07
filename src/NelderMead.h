@@ -1,6 +1,6 @@
 #pragma once
 
-// https://github.com/Enderdead/nelder-mead
+// Modified from https://github.com/Enderdead/nelder-mead
 
 #include <Eigen/Dense>
 #include <vector>
@@ -8,19 +8,22 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
-#include <stdio.h>
+#include <cstdio>
 #include <utility>
+#include <boost/math/constants/constants.hpp>
+
+
 
 template <typename Real>
 struct NelderMeadOptimizerParams {
-  Real step = 0.0001;
-  Real no_improve_thr = 10e-6;
+  Real step = static_cast<Real>(1) / static_cast<Real>(10000);
+  Real no_improve_thr = ErrorLimit<Real>::Value * 100;
   int no_improv_break = 10;
   int max_iter = 1000;
-  Real alpha = 1.0;
-  Real gamma = 2.0;
-  Real rho = -0.5;
-  Real sigma = 0.5;
+  Real alpha = 1;
+  Real gamma = 2;
+  Real rho = -boost::math::constants::half<Real>();
+  Real sigma = boost::math::constants::half<Real>();
   bool log = true;
 };
 
