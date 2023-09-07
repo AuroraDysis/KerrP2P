@@ -106,15 +106,6 @@ void test() {
 }
 
 void test2() {
-//  params = py_forward_ray_tracing.ForwardRayTracingParamsFloat64()
-//  params.a = 0.8
-//  params.r_s = 10
-//  params.theta_s = 85 * np.pi / 180
-//  params.r_o = 1000
-//  params.nu_r = py_forward_ray_tracing.Sign.NEGATIVE
-//  params.nu_theta = py_forward_ray_tracing.Sign.NEGATIVE
-//  theta_o = 17 * np.pi / 180
-//  phi_o = np.pi / 4
   ForwardRayTracingParams<double> params;
   params.a = 0.8;
   params.r_s = 10;

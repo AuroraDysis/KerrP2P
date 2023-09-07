@@ -68,6 +68,8 @@ struct ForwardRayTracingResult {
   int m;
   Real n_half;
   Real eta, lambda, q;
+  Real rc, lgd;
+  Sign lgd_sign;
   RayStatus ray_status;
 };
 

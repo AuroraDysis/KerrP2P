@@ -123,19 +123,19 @@ struct ForwardRayTracingUtils {
 
   static SweepResult<Real, Complex>
   sweep_rc_d(ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, const std::vector<Real> &rc_list,
-             const std::vector<Real> &d_list, size_t cutoff) {
+             const std::vector<Real> &lgd_list, size_t cutoff) {
     size_t rc_size = rc_list.size();
-    size_t d_size = d_list.size();
+    size_t lgd_size = lgd_list.size();
 
     SweepResult<Real, Complex> sweep_result;
 
     auto &theta = sweep_result.theta;
     auto &phi = sweep_result.phi;
-    theta.resize(d_size, rc_size);
-    phi.resize(d_size, rc_size);
+    theta.resize(lgd_size, rc_size);
+    phi.resize(lgd_size, rc_size);
 
     // rc and d
-    oneapi::tbb::parallel_for(oneapi::tbb::blocked_range2d<size_t>(0u, d_size, 0u, rc_size),
+    oneapi::tbb::parallel_for(oneapi::tbb::blocked_range2d<size_t>(0u, lgd_size, 0u, rc_size),
                               [&](const oneapi::tbb::blocked_range2d<size_t, size_t> &r) {
                                 auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
                                 Real two_pi = boost::math::constants::two_pi<Real>();
@@ -143,7 +143,7 @@ struct ForwardRayTracingUtils {
                                 for (size_t i = r.rows().begin(); i != r.rows().end(); ++i) {
                                   for (size_t j = r.cols().begin(); j != r.cols().end(); ++j) {
                                     local_params.rc = rc_list[j];
-                                    local_params.lgd = d_list[i];
+                                    local_params.lgd = lgd_list[i];
                                     local_params.rc_d_to_lambda_q();
                                     ray_tracing->calc_ray(local_params);
                                     if (ray_tracing->ray_status == RayStatus::NORMAL) {
@@ -160,8 +160,8 @@ struct ForwardRayTracingUtils {
     auto &delta_theta = sweep_result.delta_theta;
     auto &delta_phi = sweep_result.delta_phi;
 
-    delta_theta.resize(d_size, rc_size);
-    delta_phi.resize(d_size, rc_size);
+    delta_theta.resize(lgd_size, rc_size);
+    delta_phi.resize(lgd_size, rc_size);
 
     delta_theta = theta.array() - theta_o;
     delta_phi = phi.array() - phi_o;
@@ -170,7 +170,7 @@ struct ForwardRayTracingUtils {
     std::vector<Point> theta_roots_index;
     std::vector<Point> phi_roots_index;
     Real d_row, d_col;
-    for (size_t i = 1; i < d_size; i++) {
+    for (size_t i = 1; i < lgd_size; i++) {
       for (size_t j = 1; j < rc_size; j++) {
         d_row = delta_theta(i, j) * delta_theta(i, j - 1);
         d_col = delta_theta(i, j) * delta_theta(i - 1, j);
@@ -193,11 +193,11 @@ struct ForwardRayTracingUtils {
 
     for (size_t i = 0; i < theta_roots_index.size(); i++) {
       theta_roots(i, 0) = rc_list[theta_roots_index[i].template get<1>()];
-      theta_roots(i, 1) = d_list[theta_roots_index[i].template get<0>()];
+      theta_roots(i, 1) = lgd_list[theta_roots_index[i].template get<0>()];
     }
     for (size_t i = 0; i < phi_roots_index.size(); i++) {
       phi_roots(i, 0) = rc_list[phi_roots_index[i].template get<1>()];
-      phi_roots(i, 1) = d_list[phi_roots_index[i].template get<0>()];
+      phi_roots(i, 1) = lgd_list[phi_roots_index[i].template get<0>()];
     }
 
     std::vector<Point> theta_roots_closest_index;
@@ -220,7 +220,7 @@ struct ForwardRayTracingUtils {
     theta_roots_closest.resize(theta_roots_index.size(), 2);
     for (size_t i = 0; i < theta_roots_index.size(); i++) {
       theta_roots_closest(i, 0) = rc_list[theta_roots_closest_index[indices[i]].template get<1>()];
-      theta_roots_closest(i, 1) = d_list[theta_roots_closest_index[indices[i]].template get<0>()];
+      theta_roots_closest(i, 1) = lgd_list[theta_roots_closest_index[indices[i]].template get<0>()];
     }
 
     // find results
@@ -233,13 +233,16 @@ struct ForwardRayTracingUtils {
                           size_t row = theta_roots_closest_index[indices[i]].template get<0>();
                           size_t col = theta_roots_closest_index[indices[i]].template get<1>();
                           local_params.rc = rc_list[col];
-                          local_params.lgd = d_list[row];
+                          local_params.lgd = lgd_list[row];
                           local_params.rc_d_to_lambda_q();
                           using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
                               boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
                           int period = RealToInt::convert(phi(row, col) / boost::math::constants::two_pi<Real>());
                           try {
-                            results.push_back(std::move(find_result(local_params, period, theta_o, phi_o)));
+                            auto res = find_result(local_params, period, theta_o, phi_o);
+                            res.rc = rc_list[col];
+                            res.lgd = lgd_list[row];
+                            results.push_back(std::move(res));
                           } catch (std::exception &e) {
                             fmt::print(stderr, "Error: {}\n", e.what());
                           }
