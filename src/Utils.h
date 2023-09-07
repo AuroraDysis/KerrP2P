@@ -31,7 +31,7 @@ struct SweepResult {
   PointVector theta_roots_closest;
 };
 
-template <typename Real>
+template<typename Real>
 inline Real mod_real(const Real &x, const Real &y) {
   return x - y * floor(x / y);
 }
@@ -41,31 +41,34 @@ class RootFunctor {
 private:
   using Vector = Eigen::Matrix<Real, 2, 1>;
 
-  const std::shared_ptr<ForwardRayTracingParams<Real>> params;
+  ForwardRayTracingParams<Real> &params;
   const Real theta_o;
   const Real phi_o;
-
+  const int period;
   const Real two_pi = boost::math::constants::two_pi<Real>();
-  Real phi_tmp;
 
-  int period = std::numeric_limits<int>::max();
+  Real phi_tmp;
 
 public:
   std::shared_ptr<ForwardRayTracing<Real, Complex>> ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
 
-  RootFunctor(ForwardRayTracingParams<Real> params_, Real theta_o_, Real phi_o_) : params(
-      std::make_shared<ForwardRayTracingParams<Real>>(params_)), theta_o(std::move(theta_o_)),
-                                                                                   phi_o(std::move(phi_o_)) {
+  RootFunctor(ForwardRayTracingParams<Real> &params_, int period_, Real theta_o_, Real phi_o_) : params(params_),
+                                                                                                 period(period_),
+                                                                                                 theta_o(std::move(
+                                                                                                     theta_o_)),
+                                                                                                 phi_o(
+                                                                                                     std::move(
+                                                                                                         phi_o_)) {
     ray_tracing->calc_t_f = false;
   }
 
   Real operator()(Vector x) {
     auto &rc = x[0];
     auto &lgd = x[1];
-    params->rc = rc;
-    params->lgd = lgd;
-    params->rc_d_to_lambda_q();
-    ray_tracing->calc_ray(*params);
+    params.rc = rc;
+    params.lgd = lgd;
+    params.rc_d_to_lambda_q();
+    ray_tracing->calc_ray(params);
 
     if (ray_tracing->ray_status != RayStatus::NORMAL) {
       fmt::println("ray status: {}", ray_status_to_str(ray_tracing->ray_status));
@@ -74,14 +77,7 @@ public:
 
     Vector residual;
     residual[0] = ray_tracing->theta_f - theta_o;
-    if (period == std::numeric_limits<int>::max()) {
-      using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
-          boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
-      period = RealToInt::convert(ray_tracing->phi_f / two_pi);
-      residual[1] = mod_real(ray_tracing->phi_f, two_pi);
-    } else {
-      residual[1] = ray_tracing->phi_f - phi_o - period * two_pi;
-    }
+    residual[1] = ray_tracing->phi_f - phi_o - period * two_pi;
 
     if (isnan(residual[0]) || isnan(residual[1])) {
       throw std::runtime_error("Ray tracing failed: residual is NaN");
@@ -104,15 +100,16 @@ struct ForwardRayTracingUtils {
   }
 
   static ForwardRayTracingResult<Real, Complex>
-  find_result(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o) {
+  find_result(ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o) {
     // std::array<Real, 2> x = {params.rc, params.lgd};
     Eigen::Vector<Real, 2> x = Eigen::Vector<Real, 2>();
     x << params.rc, params.lgd;
 
-    RootFunctor<Real, Complex> root_functor(params, std::move(theta_o), std::move(phi_o));
+    RootFunctor<Real, Complex> root_functor(params, period, std::move(theta_o), std::move(phi_o));
 
     NelderMeadOptimizerParams<Real> settings;
     auto xout = NelderMeadOptimizer(root_functor, x, settings);
+
     root_functor(xout);
 
     return root_functor.ray_tracing->to_result();

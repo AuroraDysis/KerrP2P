@@ -70,7 +70,10 @@ void test() {
 
     params.rc = rc + 0.001;
     params.lgd = lgd - 0.001;
-    auto res = ForwardRayTracingUtils<Real, Complex>::find_result(params, theta_o, phi_o);
+    using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
+        boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
+    int period = RealToInt::convert(theta_o / boost::math::constants::two_pi<Real>());
+    auto res = ForwardRayTracingUtils<Real, Complex>::find_result(params, period, theta_o, phi_o);
     CHECK(res.ray_status == RayStatus::NORMAL);
 
     Real ERROR_LIMIT = ErrorLimit<Real>::Value * 1000;

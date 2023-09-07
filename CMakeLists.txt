@@ -20,7 +20,7 @@ find_package(Boost 1.82.0 COMPONENTS filesystem REQUIRED)
 find_package(Catch2 3 REQUIRED)
 set(LIBRARIES Boost::boost Boost::filesystem fmt::fmt Eigen3::Eigen TBB::tbb)
 
-add_definitions(-DPRINT_DEBUG)
+# add_definitions(-DPRINT_DEBUG)
 
 if (ENABLE_FLOAT128)
     message("Enable float128 precision")

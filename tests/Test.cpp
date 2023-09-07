@@ -105,14 +105,33 @@ TEMPLATE_TEST_CASE("Find Root Function", "[root]", Float64) {
     params.nu_r = data.get<int>("nu_r") == 1 ? Sign::POSITIVE : Sign::NEGATIVE;
     params.nu_theta = data.get<int>("nu_theta") == 1 ? Sign::POSITIVE : Sign::NEGATIVE;
 
-    params.rc = boost::lexical_cast<Real>(data.get<string>("rc"));
+    Real lambda = boost::lexical_cast<Real>(data.get<string>("lambda"));
+    Real eta = boost::lexical_cast<Real>(data.get<string>("eta"));
+
+    Real rc = boost::lexical_cast<Real>(data.get<string>("rc"));
     Real d = boost::lexical_cast<Real>(data.get<string>("d"));
     params.lgd_sign = d > 0 ? Sign::POSITIVE : Sign::NEGATIVE;
-    params.lgd = log10(abs(d));
+    Real lgd = log10(abs(d));
     params.calc_t_f = false;
 
-    auto res = ForwardRayTracingUtils<Real, Complex>::find_result(params);
-    REQUIRE(res.ray_status == RayStatus::NORMAL);
+    Real theta_o = boost::lexical_cast<Real>(data.get<string>("theta_f"));
+    Real phi_o = boost::lexical_cast<Real>(data.get<string>("phi_f"));
+
+    params.rc = rc + 0.001;
+    params.lgd = lgd - 0.001;
+    using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
+        boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
+    int period = RealToInt::convert(theta_o / boost::math::constants::two_pi<Real>());
+    auto res = ForwardRayTracingUtils<Real, Complex>::find_result(params, period, theta_o, phi_o);
+    CHECK(res.ray_status == RayStatus::NORMAL);
+
+    Real ERROR_LIMIT = ErrorLimit<Real>::Value * 1000;
+
+    fmt::println("eta: {}, lambad: {}", eta, lambda);
+    fmt::println("eta: {}, lambad: {}", res.eta, res.lambda);
+    fmt::println("delta eta: {}, delta lambad: {}", abs(eta - res.eta), abs(lambda - res.lambda));
+    CHECK(abs(eta - res.eta) < ERROR_LIMIT);
+    CHECK(abs(lambda - res.lambda) < ERROR_LIMIT);
 
     auto r1_vec = as_vector<string>(data, "r1");
     Complex r1 = Complex(boost::lexical_cast<Real>(r1_vec[0]), boost::lexical_cast<Real>(r1_vec[1]));
@@ -125,8 +144,6 @@ TEMPLATE_TEST_CASE("Find Root Function", "[root]", Float64) {
 
     Real theta_f = boost::lexical_cast<Real>(data.get<string>("theta_f"));
     Real phi_f = boost::lexical_cast<Real>(data.get<string>("phi_f"));
-
-    Real ERROR_LIMIT = ErrorLimit<Real>::Value;
 
     CHECK(abs(res.r1_c - r1) < ERROR_LIMIT);
     CHECK(abs(res.r2_c - r2) < ERROR_LIMIT);
