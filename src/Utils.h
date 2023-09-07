@@ -35,7 +35,9 @@ struct SweepResult {
 
 template<typename Real>
 inline Real mod_real(const Real &x, const Real &y) {
-  return x - y * floor(x / y);
+  using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
+      boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
+  return x - y * RealToInt::convert(x / y);
 }
 
 template<typename Real, typename Complex>
@@ -48,8 +50,6 @@ private:
   const Real phi_o;
   const int period;
   const Real two_pi = boost::math::constants::two_pi<Real>();
-
-  Real phi_tmp;
 
 public:
   std::shared_ptr<ForwardRayTracing<Real, Complex>> ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
@@ -139,19 +139,19 @@ struct ForwardRayTracingUtils {
                               [&](const oneapi::tbb::blocked_range2d<size_t, size_t> &r) {
                                 auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
                                 Real two_pi = boost::math::constants::two_pi<Real>();
-                                Real phi_tmp;
                                 ForwardRayTracingParams<Real> local_params(params);
                                 for (size_t i = r.rows().begin(); i != r.rows().end(); ++i) {
                                   for (size_t j = r.cols().begin(); j != r.cols().end(); ++j) {
                                     local_params.rc = rc_list[j];
                                     local_params.lgd = d_list[i];
+                                    local_params.rc_d_to_lambda_q();
                                     ray_tracing->calc_ray(local_params);
                                     if (ray_tracing->ray_status == RayStatus::NORMAL) {
                                       theta(i, j) = ray_tracing->theta_f;
                                       phi(i, j) = mod_real(ray_tracing->phi_f, two_pi);
                                     } else {
                                       theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
-                                      theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
+                                      phi(i, j) = std::numeric_limits<Real>::quiet_NaN();
                                     }
                                   }
                                 }

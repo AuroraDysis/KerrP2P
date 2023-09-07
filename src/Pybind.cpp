@@ -9,9 +9,9 @@
 
 namespace py = pybind11;
 
-template<typename Real>
+template<typename Real, typename Complex>
 void define_sweep_result(pybind11::module_ &mod, const char *name) {
-  using SweepR = SweepResult<Real>;
+  using SweepR = SweepResult<Real, Complex>;
   py::class_<SweepR>(mod, name)
       .def_readonly("theta", &SweepR::theta)
       .def_readonly("phi", &SweepR::phi)
@@ -93,8 +93,8 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
   define_params<long double>(mod, "ForwardRayTracingParamsLongDouble");
   define_forward_ray_tracing_result<double, std::complex<double>>(mod, "ForwardRayTracingFloat64");
   define_forward_ray_tracing_result<long double, std::complex<long double>>(mod, "ForwardRayTracingLongDouble");
-  define_sweep_result<double>(mod, "SweepResultFloat64");
-  define_sweep_result<long double>(mod, "SweepResultLongDouble");
+  define_sweep_result<double, std::complex<double>>(mod, "SweepResultFloat64");
+  define_sweep_result<long double, std::complex<long double>>(mod, "SweepResultLongDouble");
 #ifdef FLOAT128
   // define_forward_ray_tracing_result<boost::multiprecision::float128, boost::multiprecision::complex128>(mod, "ForwardRayTracingFloat128");
   // define_sweep_result<boost::multiprecision::float128>(mod, "SweepResultFloat128");
