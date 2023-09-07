@@ -75,6 +75,7 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
       .value("ETA_OUT_OF_RANGE", RayStatus::ETA_OUT_OF_RANGE)
       .value("THETA_OUT_OF_RANGE", RayStatus::THETA_OUT_OF_RANGE)
       .value("UNKOWN_ERROR", RayStatus::UNKOWN_ERROR)
+      .value("ARGUMENT_ERROR", RayStatus::ARGUMENT_ERROR)
       .export_values();
 
   py::enum_<Sign>(mod, "Sign")
@@ -98,8 +99,6 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
   // define_forward_ray_tracing_result<boost::multiprecision::float128, boost::multiprecision::complex128>(mod, "ForwardRayTracingFloat128");
   // define_sweep_result<boost::multiprecision::float128>(mod, "SweepResultFloat128");
 #endif
-#ifdef BIGFLOAT
   // define_forward_ray_tracing_result<BigFloat, BigComplex>(mod, "ForwardRayTracingBigFloat");
   // define_sweep_result<BigFloat>(mod, "SweepResultBigFloat");
-#endif
 }
