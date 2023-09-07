@@ -67,7 +67,7 @@ void define_forward_ray_tracing_result(pybind11::module_ &mod, const char *name)
       .def_readonly("m", &ResultType::m)
       .def_readonly("n_half", &ResultType::n_half)
       .def_readonly("eta", &ResultType::eta)
-      .def_readonly("lambda", &ResultType::lambda)
+      .def_readonly("lda", &ResultType::lambda) // lambda
       .def_readonly("rc", &ResultType::rc)
       .def_readonly("lgd", &ResultType::lgd)
       .def_readonly("lgd_sign", &ResultType::lgd_sign)
