@@ -97,6 +97,7 @@ struct ForwardRayTracingUtils {
     x << params.rc, params.lgd;
 
     RootFunctor<Real, Complex> root_functor(params, std::move(theta_o), std::move(phi_o));
+
     optim::algo_settings_t settings;
     settings.broyden_settings.par_rho = 0.5;
     optim::broyden_df(x, root_functor, nullptr, settings);

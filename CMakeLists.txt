@@ -40,7 +40,6 @@ endif ()
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/src/optim)
-include_directories(${PROJECT_SOURCE_DIR}/src/optim/BaseMatrixOps)
 
 set(SOURCE_FILES src/Common.h src/ForwardRayTracing.h src/GIntegral.h src/IIntegral2.h src/IIntegral3.h src/ObjectPool.h src/Utils.h)
 
