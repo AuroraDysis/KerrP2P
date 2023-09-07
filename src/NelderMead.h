@@ -60,7 +60,7 @@ Eigen::Matrix<Real, dim, 1> NelderMeadOptimizer(F &func, Eigen::Matrix<Real, dim
   const bool log = params.log;
 
   Real best, prev_best = func(x_start);
-  int no_improv = 0;
+  int no_improve = 0;
   std::vector<Tuple> result;
 
   result.push_back(std::make_tuple(x_start, prev_best));
@@ -93,13 +93,13 @@ Eigen::Matrix<Real, dim, 1> NelderMeadOptimizer(F &func, Eigen::Matrix<Real, dim
     if (log) std::cout << "... best so far:  " << best << std::endl;
 
     if (best < (prev_best - no_improve_thr)) {
-      no_improv = 0;
+      no_improve = 0;
       prev_best = best;
     } else {
-      no_improv++;
+      no_improve++;
     }
 
-    if (no_improv >= no_improve_break) {
+    if (no_improve >= no_improve_break) {
       return std::get<0>(result[0]);
     }
 
