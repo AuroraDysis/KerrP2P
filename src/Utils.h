@@ -249,6 +249,24 @@ struct ForwardRayTracingUtils {
                           }
                         }
                       });
+    // remove duplicate by rc and lgd using std::set
+    // abs(r1.rc - r2.rc) < 10000 * ErrorLimit<Real>::Value &&
+    //                                   abs(r1.lgd - r2.lgd) < 10000 * ErrorLimit<Real>::Value
+    std::vector<size_t> duplicated_index;
+    for (size_t i = 0; i < results.size(); i++) {
+      for (size_t j = i + 1; j < results.size(); j++) {
+        if (abs(results[i].rc - results[j].rc) < 10000 * ErrorLimit<Real>::Value &&
+            abs(results[i].lgd - results[j].lgd) < 10000 * ErrorLimit<Real>::Value) {
+          duplicated_index.push_back(j);
+          break;
+        }
+      }
+    }
+    // remove duplicated results
+    std::sort(duplicated_index.begin(), duplicated_index.end());
+    for (size_t i = duplicated_index.size(); i > 0; i--) {
+      results.erase(results.begin() + duplicated_index[i - 1]);
+    }
 
     return sweep_result;
   }

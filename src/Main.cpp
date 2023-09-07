@@ -126,9 +126,11 @@ void test2() {
   for (int i = 0; i < 100; ++i) {
     lgd_list.push_back(-10 + i * 0.1);
   }
-  auto sweep_result = ForwardRayTracingUtils<double, std::complex<double>>::sweep_rc_d(params, theta_o, phi_o, rc_list, lgd_list, 50);
-  for (const auto &res : sweep_result.results) {
-    fmt::println("eta: {}, lambda: {}", res.eta, res.lambda);
+  auto sweep_result = ForwardRayTracingUtils<double, std::complex<double>>::sweep_rc_d(params, theta_o, phi_o, rc_list,
+                                                                                       lgd_list, 50);
+  fmt::println("count: {}", sweep_result.results.size());
+  for (const auto &res: sweep_result.results) {
+    fmt::println("rc: {}, lgd: {}, eta: {}, lambda: {}", res.rc, res.lgd, res.eta, res.lambda);
   }
 }
 
