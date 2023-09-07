@@ -22,7 +22,7 @@ struct NelderMeadOptimizerParams {
   Real gamma = 2;
   Real rho = -boost::math::constants::half<Real>();
   Real sigma = boost::math::constants::half<Real>();
-  bool log = true;
+  bool log = false;
 };
 
 /**
