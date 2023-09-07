@@ -123,7 +123,7 @@ struct ForwardRayTracingUtils {
 
   static SweepResult<Real, Complex>
   sweep_rc_d(ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, const std::vector<Real> &rc_list,
-             const std::vector<Real> &d_list, size_t cutoff = 50) {
+             const std::vector<Real> &d_list, size_t cutoff) {
     size_t rc_size = rc_list.size();
     size_t d_size = d_list.size();
 
@@ -225,17 +225,24 @@ struct ForwardRayTracingUtils {
 
     // find results
     auto &results = sweep_result.results;
-    results.reserve(theta_roots_index.size());
-    tbb::parallel_for(tbb::blocked_range<size_t>(0u, theta_roots_index.size()),
+    results.reserve(cutoff);
+    tbb::parallel_for(tbb::blocked_range<size_t>(0u, cutoff),
                       [&](const tbb::blocked_range<size_t> &r) {
                         ForwardRayTracingParams<Real> local_params(params);
                         for (size_t i = r.begin(); i != r.end(); ++i) {
                           size_t row = theta_roots_closest_index[indices[i]].template get<0>();
                           size_t col = theta_roots_closest_index[indices[i]].template get<1>();
+                          local_params.rc = rc_list[col];
+                          local_params.lgd = d_list[row];
+                          local_params.rc_d_to_lambda_q();
                           using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
                               boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
                           int period = RealToInt::convert(phi(row, col) / boost::math::constants::two_pi<Real>());
-                          results.push_back(std::move(find_result(local_params, period, theta_o, phi_o)));
+                          try {
+                            results.push_back(std::move(find_result(local_params, period, theta_o, phi_o)));
+                          } catch (std::exception &e) {
+                            fmt::print(stderr, "Error: {}\n", e.what());
+                          }
                         }
                       });
 

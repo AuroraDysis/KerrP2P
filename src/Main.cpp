@@ -105,16 +105,53 @@ void test() {
   }
 }
 
-int main(int argc, char **argv) {
-  if (argc < 2) {
-    std::cout << "Usage: " << argv[0] << " <path to test data>" << std::endl;
-    return 1;
+void test2() {
+//  params = py_forward_ray_tracing.ForwardRayTracingParamsFloat64()
+//  params.a = 0.8
+//  params.r_s = 10
+//  params.theta_s = 85 * np.pi / 180
+//  params.r_o = 1000
+//  params.nu_r = py_forward_ray_tracing.Sign.NEGATIVE
+//  params.nu_theta = py_forward_ray_tracing.Sign.NEGATIVE
+//  theta_o = 17 * np.pi / 180
+//  phi_o = np.pi / 4
+  ForwardRayTracingParams<double> params;
+  params.a = 0.8;
+  params.r_s = 10;
+  params.theta_s = 85 * boost::math::constants::pi<double>() / 180;
+  params.r_o = 1000;
+  params.nu_r = Sign::NEGATIVE;
+  params.nu_theta = Sign::NEGATIVE;
+  double theta_o = 17 * boost::math::constants::pi<double>() / 180;
+  double phi_o = boost::math::constants::pi<double>() / 4;
+  params.lgd_sign = Sign::POSITIVE;
+  std::vector<double> rc_list;
+  std::vector<double> lgd_list;
+  rc_list.reserve(100);
+  lgd_list.reserve(100);
+  for (int i = 0; i < 100; ++i) {
+    rc_list.push_back(2 + i * 0.015);
   }
-  std::string path = argv[1];
-  get_test_data(path);
+  for (int i = 0; i < 100; ++i) {
+    lgd_list.push_back(-10 + i * 0.1);
+  }
+  auto sweep_result = ForwardRayTracingUtils<double, std::complex<double>>::sweep_rc_d(params, theta_o, phi_o, rc_list, lgd_list, 50);
+  for (const auto &res : sweep_result.results) {
+    fmt::println("eta: {}, lambda: {}", res.eta, res.lambda);
+  }
+}
 
-  test<double, std::complex<double>>();
-
+int main(int argc, char **argv) {
+//  if (argc < 2) {
+//    std::cout << "Usage: " << argv[0] << " <path to test data>" << std::endl;
+//    return 1;
+//  }
+//  std::string path = argv[1];
+//  get_test_data(path);
+//
+//  test<double, std::complex<double>>();
+//
+  test2();
   return 0;
 }
 

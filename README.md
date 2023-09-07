@@ -9,6 +9,7 @@ spack:
     - gmp
     - mpfr
     - mpc
+    - eigen
     - intel-oneapi-tbb
     - python
     - py-pybind11
