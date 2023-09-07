@@ -24,6 +24,7 @@ public:
   Real ellint_sin_phi;
   Real ellint_theta;
   Real ellint_cos_theta, ellint_sin_theta;
+  Real ellint_1_phi, ellint_2_phi, ellint_3_phi;
 
   ForwardRayTracing<Real, Complex> &data;
 
@@ -43,13 +44,17 @@ public:
     }
     ellint_cos_theta = sqrt(1 - MY_SQUARE(ellint_sin_theta));
     ellint_theta = asin(ellint_sin_theta);
-    G_arr[0] = -one_over_umaa_sqrt * ellint_kappa_prime * boost::math::ellint_1(ellint_kappa, ellint_theta);
+
+    ellint_1_phi = boost::math::ellint_1(ellint_kappa, ellint_theta);
+    ellint_2_phi = boost::math::ellint_2(ellint_kappa, ellint_theta);
+    ellint_3_phi = boost::math::ellint_3(ellint_kappa, ellint_alpha1_2, ellint_theta);
+    G_arr[0] = -one_over_umaa_sqrt * ellint_kappa_prime * ellint_1_phi;
     G_arr[1] = -one_over_umaa_sqrt * ellint_kappa_prime / ellint_alpha1_2 *
                (MY_SQUARE(ellint_kappa_prime) * up *
-                boost::math::ellint_3(ellint_kappa, ellint_alpha1_2, ellint_theta) +
-                ellint_kappa2 * boost::math::ellint_1(ellint_kappa, ellint_theta));
+                ellint_3_phi +
+                ellint_kappa2 * ellint_1_phi);
     G_arr[2] = um *
-               (one_over_umaa_sqrt * ellint_one_over_kappa_prime * (boost::math::ellint_2(ellint_kappa, ellint_theta) -
+               (one_over_umaa_sqrt * ellint_one_over_kappa_prime * (ellint_2_phi -
                                                                     ellint_kappa2 * ellint_sin_theta *
                                                                     ellint_cos_theta / sqrt(1 - ellint_kappa2 *
                                                                                                 MY_SQUARE(
@@ -115,13 +120,8 @@ public:
 
     using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
         boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
-
     // floor
-    if (isnan(m_Real)) {
-      data.m = std::numeric_limits<int>::max();
-    } else {
-      data.m = RealToInt::convert(m_Real);
-    }
+    data.m = RealToInt::convert(m_Real);
 
     // Number of half-orbits
     data.n_half = tau_o / (2 * G_theta_theta_p);
