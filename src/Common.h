@@ -30,6 +30,26 @@ enum class RayStatus {
   UNKOWN_ERROR,
 };
 
+constexpr char* ray_status_to_str(RayStatus status) {
+  switch (status) {
+    case RayStatus::NORMAL:
+      return "NORMAL";
+    case RayStatus::FALLS_IN:
+      return "FALLS_IN";
+    case RayStatus::CONFINED:
+      return "CONFINED";
+    case RayStatus::ETA_OUT_OF_RANGE:
+      return "ETA_OUT_OF_RANGE";
+    case RayStatus::THETA_OUT_OF_RANGE:
+      return "THETA_OUT_OF_RANGE";
+    case RayStatus::ARGUMENT_ERROR:
+      return "ARGUMENT_ERROR";
+    case RayStatus::UNKOWN_ERROR:
+      return "UNKOWN_ERROR";
+  }
+  return "UNKOWN_ERROR";
+}
+
 enum class Sign : int {
   POSITIVE = 1,
   NEGATIVE = -1,

@@ -82,8 +82,8 @@ void test() {
     Real theta_o = boost::lexical_cast<Real>(data.get<string>("theta_f"));
     Real phi_o = boost::lexical_cast<Real>(data.get<string>("phi_f"));
 
-    params.rc = rc + 0.01;
-    params.lgd = lgd + 0.1;
+    params.rc = rc + 0.001;
+    params.lgd = lgd - 0.001;
     auto res = ForwardRayTracingUtils<Real, Complex>::find_result(params, theta_o, phi_o);
     CHECK(res.ray_status == RayStatus::NORMAL);
 

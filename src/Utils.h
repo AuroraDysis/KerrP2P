@@ -62,13 +62,19 @@ public:
     ray_tracing->calc_ray(*params);
 
     if (ray_tracing->ray_status != RayStatus::NORMAL) {
-      return Eigen::Vector2d::Constant(std::numeric_limits<Real>::quiet_NaN());
+      fmt::println("ray status: {}", ray_status_to_str(ray_tracing->ray_status));
+      throw std::runtime_error("Ray tracing failed: ray status is not normal");
     }
 
     Eigen::Vector2d residual;
     residual[0] = ray_tracing->theta_f - theta_o;
     phi_tmp = fmod(ray_tracing->phi_f, two_pi);
     residual[1] = (phi_tmp < 0 ? phi_tmp + two_pi : phi_tmp) - phi_o;
+
+    if (isnan(residual[0]) || isnan(residual[1])) {
+      throw std::runtime_error("Ray tracing failed: residual is NaN");
+    }
+
 #ifdef PRINT_DEBUG
     fmt::println("rc: {}, lgd: {}, theta_f: {}, phi_f: {}", x[0], x[1], ray_tracing->theta_f, ray_tracing->phi_f);
     fmt::println("residual: {}, {}", residual[0], residual[1]);
@@ -91,7 +97,9 @@ struct ForwardRayTracingUtils {
     x << params.rc, params.lgd;
 
     RootFunctor<Real, Complex> root_functor(params, std::move(theta_o), std::move(phi_o));
-    optim::broyden_df(x, root_functor, nullptr);
+    optim::algo_settings_t settings;
+    settings.broyden_settings.par_rho = 0.5;
+    optim::broyden_df(x, root_functor, nullptr, settings);
     root_functor(x, nullptr);
 
     return root_functor.ray_tracing->to_result();
