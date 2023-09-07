@@ -72,7 +72,6 @@ public:
     const Real &r1 = data.r1;
     const Real &r2 = data.r2;
     const Complex &r3 = data.r3_c;
-    // const Complex &r4 = data.r4_c;
     const Real &r_o = data.r_o;
 
     r34_re = real(r3);
