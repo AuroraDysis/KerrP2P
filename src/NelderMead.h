@@ -16,7 +16,7 @@ template <typename Real>
 struct NelderMeadOptimizerParams {
   Real step = static_cast<Real>(1) / static_cast<Real>(10000);
   Real no_improve_thr = ErrorLimit<Real>::Value * 100;
-  int no_improv_break = 10;
+  int no_improve_break = 10;
   int max_iter = 1000;
   Real alpha = 1;
   Real gamma = 2;
@@ -34,7 +34,7 @@ struct NelderMeadOptimizerParams {
 * @param x_start  initial position.
 * @param step  look-around radius in initial step.
 * @param no_improv_thr  threshold on improve classification .
-* @param no_improv_break  break after no_improv_break iterations without improvement.
+* @param no_improve_break  break after no_improve_break iterations without improvement.
 * @param max_iter  break after exeed max_iter iterations.
 * @param alpha  function to minimize, must return a Real scalar.
 * @param gamma  function to minimize, must return a Real scalar.
@@ -51,7 +51,7 @@ Eigen::Matrix<Real, dim, 1> NelderMeadOptimizer(F &func, Eigen::Matrix<Real, dim
   // unpack params
   const Real &step = params.step;
   const Real &no_improve_thr = params.no_improve_thr;
-  int no_improv_break = params.no_improv_break;
+  int no_improve_break = params.no_improve_break;
   int max_iter = params.max_iter;
   const Real &alpha = params.alpha;
   const Real &gamma = params.gamma;
@@ -89,7 +89,7 @@ Eigen::Matrix<Real, dim, 1> NelderMeadOptimizer(F &func, Eigen::Matrix<Real, dim
 
     iteration++;
 
-    //break after no_improv_break iterations with no improvement
+    //break after no_improve_break iterations with no improvement
     if (log) std::cout << "... best so far:  " << best << std::endl;
 
     if (best < (prev_best - no_improve_thr)) {
@@ -99,7 +99,7 @@ Eigen::Matrix<Real, dim, 1> NelderMeadOptimizer(F &func, Eigen::Matrix<Real, dim
       no_improv++;
     }
 
-    if (no_improv >= no_improv_break) {
+    if (no_improv >= no_improve_break) {
       return std::get<0>(result[0]);
     }
 
