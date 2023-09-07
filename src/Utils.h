@@ -31,6 +31,10 @@ struct SweepResult {
   PointVector theta_roots_closest;
 };
 
+template <typename Real>
+inline Real mod_real(const Real &x, const Real &y) {
+  return x - y * floor(x / y);
+}
 
 template<typename Real, typename Complex>
 class RootFunctor {
@@ -68,8 +72,7 @@ public:
 
     Vector residual;
     residual[0] = ray_tracing->theta_f - theta_o;
-    phi_tmp = fmod(ray_tracing->phi_f, two_pi);
-    residual[1] = (phi_tmp < 0 ? phi_tmp + two_pi : phi_tmp) - phi_o;
+    residual[1] = mod_real(ray_tracing->phi_f, two_pi);
 
     if (isnan(residual[0]) || isnan(residual[1])) {
       throw std::runtime_error("Ray tracing failed: residual is NaN");
@@ -137,8 +140,7 @@ struct ForwardRayTracingUtils {
                                     ray_tracing->calc_ray(local_params);
                                     if (ray_tracing->ray_status == RayStatus::NORMAL) {
                                       theta(i, j) = ray_tracing->theta_f;
-                                      phi_tmp = fmod(ray_tracing->phi_f, two_pi);
-                                      phi(i, j) = phi_tmp < 0 ? phi_tmp + two_pi : phi_tmp;
+                                      phi(i, j) = mod_real(ray_tracing->phi_f, two_pi);
                                     } else {
                                       theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
                                       theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
