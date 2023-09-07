@@ -14,7 +14,7 @@
 namespace bg = boost::geometry;
 namespace bgi = boost::geometry::index;
 
-template<typename Real>
+template<typename Real, typename Complex>
 struct SweepResult {
   using PointVector = Eigen::Matrix<Real, Eigen::Dynamic, 2>;
   using Matrix = Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>;
@@ -29,6 +29,8 @@ struct SweepResult {
   PointVector phi_roots;
 
   PointVector theta_roots_closest;
+
+  std::vector<ForwardRayTracingResult<Real, Complex>> results;
 };
 
 template<typename Real>
@@ -119,13 +121,13 @@ struct ForwardRayTracingUtils {
 
   }
 
-  static SweepResult<Real>
+  static SweepResult<Real, Complex>
   sweep_rc_d(ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, const std::vector<Real> &rc_list,
-             const std::vector<Real> &d_list) {
+             const std::vector<Real> &d_list, size_t cutoff = 50) {
     size_t rc_size = rc_list.size();
     size_t d_size = d_list.size();
 
-    SweepResult<Real> sweep_result;
+    SweepResult<Real, Complex> sweep_result;
 
     auto &theta = sweep_result.theta;
     auto &phi = sweep_result.phi;
@@ -199,7 +201,7 @@ struct ForwardRayTracingUtils {
     }
 
     std::vector<Point> theta_roots_closest_index;
-    theta_roots_closest_index.reserve(theta_roots_index.size());
+    theta_roots_closest_index.reserve(std::max(theta_roots_index.size(), cutoff));
     std::vector<double> distances(theta_roots_index.size());
     bgi::rtree<Point, bgi::quadratic<16>> rtree(phi_roots_index);
     for (size_t i = 0; i < theta_roots_index.size(); i++) {
@@ -220,6 +222,22 @@ struct ForwardRayTracingUtils {
       theta_roots_closest(i, 0) = rc_list[theta_roots_closest_index[indices[i]].template get<1>()];
       theta_roots_closest(i, 1) = d_list[theta_roots_closest_index[indices[i]].template get<0>()];
     }
+
+    // find results
+    auto &results = sweep_result.results;
+    results.reserve(theta_roots_index.size());
+    tbb::parallel_for(tbb::blocked_range<size_t>(0u, theta_roots_index.size()),
+                      [&](const tbb::blocked_range<size_t> &r) {
+                        ForwardRayTracingParams<Real> local_params(params);
+                        for (size_t i = r.begin(); i != r.end(); ++i) {
+                          size_t row = theta_roots_closest_index[indices[i]].template get<0>();
+                          size_t col = theta_roots_closest_index[indices[i]].template get<1>();
+                          using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
+                              boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
+                          int period = RealToInt::convert(phi(row, col) / boost::math::constants::two_pi<Real>());
+                          results.push_back(std::move(find_result(local_params, period, theta_o, phi_o)));
+                        }
+                      });
 
     return sweep_result;
   }

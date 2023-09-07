@@ -22,6 +22,23 @@ struct ForwardRayTracingParams {
 
   bool calc_t_f = false;
 
+  ForwardRayTracingParams() = default;
+
+  ForwardRayTracingParams(ForwardRayTracingParams &params) {
+    a = params.a;
+    r_s = params.r_s;
+    theta_s = params.theta_s;
+    r_o = params.r_o;
+    nu_r = params.nu_r;
+    nu_theta = params.nu_theta;
+    rc = params.rc;
+    lgd = params.lgd;
+    lgd_sign = params.lgd_sign;
+    lambda = params.lambda;
+    q = params.q;
+    calc_t_f = params.calc_t_f;
+  }
+
   void rc_d_to_lambda_q() {
     Real lambda_c = a + (rc * (2 * MY_SQUARE(a) + (-3 + rc) * rc)) / (a - a * rc);
     Real eta_c = -((MY_CUBE(rc) * (-4 * MY_SQUARE(a) + MY_SQUARE(-3 + rc) * rc)) /
