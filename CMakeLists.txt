@@ -41,7 +41,7 @@ endif ()
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/src/optim)
 
-set(SOURCE_FILES src/Common.h src/ForwardRayTracing.h src/GIntegral.h src/IIntegral2.h src/IIntegral3.h src/ObjectPool.h src/Utils.h)
+set(SOURCE_FILES src/Common.h src/ForwardRayTracing.h src/GIntegral.h src/IIntegral2.h src/IIntegral3.h src/ObjectPool.h src/Utils.h src/NelderMead.h)
 
 add_executable(forward_ray_tracing src/Main.cpp ${SOURCE_FILES})
 target_link_libraries(forward_ray_tracing PRIVATE ${LIBRARIES})

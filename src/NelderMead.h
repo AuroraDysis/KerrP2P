@@ -13,14 +13,14 @@
 
 template <typename Real>
 struct NelderMeadOptimizerParams {
-  double step = 0.1;
-  double no_improve_thr = 10e-6;
+  Real step = 0.0001;
+  Real no_improve_thr = 10e-6;
   int no_improv_break = 10;
-  int max_iter = 0;
-  double alpha = 1.0;
-  double gamma = 2.0;
-  double rho = -0.5;
-  double sigma = 0.5;
+  int max_iter = 1000;
+  Real alpha = 1.0;
+  Real gamma = 2.0;
+  Real rho = -0.5;
+  Real sigma = 0.5;
   bool log = true;
 };
 
@@ -42,8 +42,8 @@ struct NelderMeadOptimizerParams {
 
 * @return best x find.
 */
-template <int dim, typename Real>
-Eigen::Matrix<Real, dim, 1> NelderMeadOptimizer(Real (*func)(Eigen::Matrix<Real, dim, 1>), Eigen::Matrix<Real, dim, 1> x_start, const NelderMeadOptimizerParams<Real> &params) {
+template <int dim, typename Real, typename F>
+Eigen::Matrix<Real, dim, 1> NelderMeadOptimizer(F &func, Eigen::Matrix<Real, dim, 1> x_start, const NelderMeadOptimizerParams<Real> &params) {
   using Tuple = std::tuple<Eigen::Matrix<Real, dim, 1>, Real>;
   using Vector = Eigen::Matrix<Real, dim, 1>;
 

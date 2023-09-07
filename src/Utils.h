@@ -1,10 +1,7 @@
 #pragma once
 
 #include "ForwardRayTracing.h"
-
-#define OPTIM_ENABLE_EIGEN_WRAPPERS
-
-#include "optim/optim.hpp"
+#include "NelderMead.h"
 
 #include <oneapi/tbb.h>
 #include <Eigen/Dense>
@@ -38,6 +35,8 @@ struct SweepResult {
 template<typename Real, typename Complex>
 class RootFunctor {
 private:
+  using Vector = Eigen::Matrix<Real, 2, 1>;
+
   const std::shared_ptr<ForwardRayTracingParams<Real>> params;
   const Real theta_o;
   const Real phi_o;
@@ -53,7 +52,7 @@ public:
     ray_tracing->calc_t_f = false;
   }
 
-  Eigen::Vector2d operator()(const Eigen::Vector2d &x, void *opt_data) {
+  Real operator()(Vector x) {
     auto &rc = x[0];
     auto &lgd = x[1];
     params->rc = rc;
@@ -66,7 +65,7 @@ public:
       throw std::runtime_error("Ray tracing failed: ray status is not normal");
     }
 
-    Eigen::Vector2d residual;
+    Vector residual;
     residual[0] = ray_tracing->theta_f - theta_o;
     phi_tmp = fmod(ray_tracing->phi_f, two_pi);
     residual[1] = (phi_tmp < 0 ? phi_tmp + two_pi : phi_tmp) - phi_o;
@@ -79,7 +78,7 @@ public:
     fmt::println("rc: {}, lgd: {}, theta_f: {}, phi_f: {}", x[0], x[1], ray_tracing->theta_f, ray_tracing->phi_f);
     fmt::println("residual: {}, {}", residual[0], residual[1]);
 #endif
-    return residual;
+    return residual.norm();
   }
 };
 
@@ -93,15 +92,14 @@ struct ForwardRayTracingUtils {
 
   static ForwardRayTracingResult<Real, Complex> find_result(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o) {
     // std::array<Real, 2> x = {params.rc, params.lgd};
-    Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
+    Eigen::Vector<Real, 2> x = Eigen::Vector<Real, 2>();
     x << params.rc, params.lgd;
 
     RootFunctor<Real, Complex> root_functor(params, std::move(theta_o), std::move(phi_o));
 
-    optim::algo_settings_t settings;
-    settings.broyden_settings.par_rho = 0.5;
-    optim::broyden_df(x, root_functor, nullptr, settings);
-    root_functor(x, nullptr);
+    NelderMeadOptimizerParams<Real> settings;
+    auto xout = NelderMeadOptimizer(root_functor, x, settings);
+    root_functor(xout);
 
     return root_functor.ray_tracing->to_result();
   }

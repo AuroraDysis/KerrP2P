@@ -30,7 +30,7 @@ enum class RayStatus {
   UNKOWN_ERROR,
 };
 
-constexpr char* ray_status_to_str(RayStatus status) {
+constexpr const char *ray_status_to_str(RayStatus status) {
   switch (status) {
     case RayStatus::NORMAL:
       return "NORMAL";
