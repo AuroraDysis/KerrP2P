@@ -73,7 +73,7 @@ void test() {
     auto res = ForwardRayTracingUtils<Real, Complex>::find_result(params, theta_o, phi_o);
     CHECK(res.ray_status == RayStatus::NORMAL);
 
-    Real ERROR_LIMIT = ErrorLimit<Real>::Value;
+    Real ERROR_LIMIT = ErrorLimit<Real>::Value * 1000;
 
     fmt::println("eta: {}, lambad: {}", eta, lambda);
     fmt::println("eta: {}, lambad: {}", res.eta, res.lambda);

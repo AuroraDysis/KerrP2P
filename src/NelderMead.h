@@ -12,8 +12,6 @@
 #include <utility>
 #include <boost/math/constants/constants.hpp>
 
-
-
 template <typename Real>
 struct NelderMeadOptimizerParams {
   Real step = static_cast<Real>(1) / static_cast<Real>(10000);
