@@ -96,6 +96,11 @@ public:
   }
 };
 
+template<typename T>
+int sgn(T val) {
+  return (T(0) < val) - (val < T(0));
+}
+
 template<typename Real, typename Complex>
 struct ForwardRayTracingUtils {
   static ForwardRayTracingResult<Real, Complex> calc_ray(const ForwardRayTracingParams<Real> &params) {
@@ -137,8 +142,8 @@ struct ForwardRayTracingUtils {
     auto &delta_theta = sweep_result.delta_theta;
     auto &delta_phi = sweep_result.delta_phi;
 
-     auto &lambda = sweep_result.lambda;
-      auto &eta = sweep_result.eta;
+    auto &lambda = sweep_result.lambda;
+    auto &eta = sweep_result.eta;
 
     theta.resize(lgd_size, rc_size);
     phi.resize(lgd_size, rc_size);
@@ -184,19 +189,23 @@ struct ForwardRayTracingUtils {
     std::vector<Point> theta_roots_index;
     std::vector<Point> phi_roots_index;
     Real two_pi = boost::math::constants::two_pi<Real>();
-    Real d_row, d_col, d_phi_row, d_phi_col;
+    int d_row, d_col, d_row_lambda, d_col_lambda;
     for (size_t i = 1; i < lgd_size; i++) {
       for (size_t j = 1; j < rc_size; j++) {
-        d_row = delta_theta(i, j) * delta_theta(i, j - 1);
-        d_col = delta_theta(i, j) * delta_theta(i - 1, j);
-        if (!isnan(d_row) && !isnan(d_col) && (d_row <= 0 || d_col <= 0)) {
+        d_row = sgn(delta_theta(i, j)) * sgn(delta_theta(i, j - 1));
+        d_col = sgn(delta_theta(i, j)) * sgn(delta_theta(i - 1, j));
+        if (!isnan(delta_theta(i, j)) && !isnan(delta_theta(i, j - 1)) && !isnan(delta_theta(i - 1, j)) &&
+            (d_row <= 0 || d_col <= 0)) {
           theta_roots_index.emplace_back(i, j);
         }
-        d_row = delta_phi(i, j) * delta_phi(i, j - 1);
-        d_col = delta_phi(i, j) * delta_phi(i - 1, j);
-        d_phi_row = abs(phi(i, j) - phi(i, j - 1));
-        d_phi_col = abs(phi(i, j) - phi(i - 1, j));
-        if (!isnan(d_row) && !isnan(d_col) && (d_phi_row < two_pi && d_phi_col < two_pi) && (d_row <= 0 || d_col <= 0)) {
+        d_row = sgn(delta_phi(i, j)) * sgn(delta_phi(i, j - 1));
+        d_col = sgn(delta_phi(i, j)) * sgn(delta_phi(i - 1, j));
+        d_row_lambda = sgn(lambda(i, j)) * sgn(lambda(i, j - 1));
+        d_col_lambda = sgn(lambda(i, j)) * sgn(lambda(i - 1, j));
+        if (!isnan(delta_phi(i, j)) && !isnan(delta_phi(i, j - 1)) && !isnan(delta_phi(i - 1, j)) &&
+            !isnan(lambda(i, j)) && !isnan(lambda(i, j - 1)) && !isnan(lambda(i - 1, j)) && d_row_lambda > 0 &&
+            d_col_lambda > 0 &&
+            (d_row <= 0 || d_col <= 0)) {
           phi_roots_index.emplace_back(i, j);
         }
       }
