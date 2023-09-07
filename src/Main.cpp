@@ -118,8 +118,8 @@ void test2() {
   params.lgd_sign = Sign::POSITIVE;
   std::vector<double> rc_list;
   std::vector<double> lgd_list;
-  rc_list.reserve(100);
-  lgd_list.reserve(100);
+  rc_list.reserve(1000);
+  lgd_list.reserve(1000);
   for (int i = 0; i < 1000; ++i) {
     rc_list.push_back(2 + i * 0.0015);
   }

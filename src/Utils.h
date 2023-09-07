@@ -22,6 +22,9 @@ struct SweepResult {
   Matrix theta;
   Matrix phi;
 
+  Matrix lambda;
+  Matrix eta;
+
   Matrix delta_theta;
   Matrix delta_phi;
 
@@ -130,14 +133,21 @@ struct ForwardRayTracingUtils {
 
     auto &theta = sweep_result.theta;
     auto &phi = sweep_result.phi;
+
     auto &delta_theta = sweep_result.delta_theta;
     auto &delta_phi = sweep_result.delta_phi;
+
+     auto &lambda = sweep_result.lambda;
+      auto &eta = sweep_result.eta;
 
     theta.resize(lgd_size, rc_size);
     phi.resize(lgd_size, rc_size);
 
     delta_theta.resize(lgd_size, rc_size);
     delta_phi.resize(lgd_size, rc_size);
+
+    lambda.resize(lgd_size, rc_size);
+    eta.resize(lgd_size, rc_size);
 
     // rc and d
     oneapi::tbb::parallel_for(oneapi::tbb::blocked_range2d<size_t>(0u, lgd_size, 0u, rc_size),
@@ -155,48 +165,26 @@ struct ForwardRayTracingUtils {
                                       theta(i, j) = ray_tracing->theta_f;
                                       phi(i, j) = ray_tracing->phi_f;
                                       delta_theta(i, j) = theta(i, j) - theta_o;
-                                      int sign = ray_tracing->lambda > 0 ? 1 : -1;
                                       delta_phi(i, j) = sin((phi(i, j) - phi_o) * half<Real>());
+                                      lambda(i, j) = ray_tracing->lambda;
+                                      eta(i, j) = ray_tracing->eta;
                                     } else {
                                       theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
                                       phi(i, j) = std::numeric_limits<Real>::quiet_NaN();
                                       delta_theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
                                       delta_phi(i, j) = std::numeric_limits<Real>::quiet_NaN();
+                                      lambda(i, j) = std::numeric_limits<Real>::quiet_NaN();
+                                      eta(i, j) = std::numeric_limits<Real>::quiet_NaN();
                                     }
                                   }
                                 }
                               });
 
-//    auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
-//    Real two_pi = boost::math::constants::two_pi<Real>();
-//    ForwardRayTracingParams<Real> local_params(params);
-//    // for loop
-//     for (size_t i = 0; i < lgd_size; i++) {
-//       for (size_t j = 0; j < rc_size; j++) {
-//         params.rc = rc_list[j];
-//         params.lgd = lgd_list[i];
-//         params.rc_d_to_lambda_q();
-//         ray_tracing->calc_ray(params);
-//         if (ray_tracing->ray_status == RayStatus::NORMAL) {
-//           theta(i, j) = ray_tracing->theta_f;
-//           phi(i, j) = ray_tracing->phi_f;
-//           delta_theta(i, j) = theta(i, j) - theta_o;
-//           int sign = ray_tracing->lambda > 0 ? 1 : -1;
-//           delta_phi(i, j) = sign * sin((phi(i, j) - phi_o) * half<Real>());
-//         } else {
-//           theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
-//           phi(i, j) = std::numeric_limits<Real>::quiet_NaN();
-//           delta_theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
-//           delta_phi(i, j) = std::numeric_limits<Real>::quiet_NaN();
-//         }
-//       }
-//     }
-
-
     using Point = bg::model::point<int, 2, bg::cs::cartesian>;
     std::vector<Point> theta_roots_index;
     std::vector<Point> phi_roots_index;
-    Real d_row, d_col;
+    Real two_pi = boost::math::constants::two_pi<Real>();
+    Real d_row, d_col, d_phi_row, d_phi_col;
     for (size_t i = 1; i < lgd_size; i++) {
       for (size_t j = 1; j < rc_size; j++) {
         d_row = delta_theta(i, j) * delta_theta(i, j - 1);
@@ -206,7 +194,9 @@ struct ForwardRayTracingUtils {
         }
         d_row = delta_phi(i, j) * delta_phi(i, j - 1);
         d_col = delta_phi(i, j) * delta_phi(i - 1, j);
-        if (!isnan(d_row) && !isnan(d_col) && (d_row <= 0 || d_col <= 0)) {
+        d_phi_row = abs(phi(i, j) - phi(i, j - 1));
+        d_phi_col = abs(phi(i, j) - phi(i - 1, j));
+        if (!isnan(d_row) && !isnan(d_col) && (d_phi_row < two_pi && d_phi_col < two_pi) && (d_row <= 0 || d_col <= 0)) {
           phi_roots_index.emplace_back(i, j);
         }
       }

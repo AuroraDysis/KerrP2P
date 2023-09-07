@@ -15,6 +15,8 @@ void define_sweep_result(pybind11::module_ &mod, const char *name) {
   py::class_<SweepR>(mod, name)
       .def_readonly("theta", &SweepR::theta)
       .def_readonly("phi", &SweepR::phi)
+      .def_readonly("lda", &SweepR::lambda)
+      .def_readonly("eta", &SweepR::eta)
       .def_readonly("delta_theta", &SweepR::delta_theta)
       .def_readonly("delta_phi", &SweepR::delta_phi)
       .def_readonly("theta_roots", &SweepR::theta_roots)
