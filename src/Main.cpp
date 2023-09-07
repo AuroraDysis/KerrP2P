@@ -120,11 +120,11 @@ void test2() {
   std::vector<double> lgd_list;
   rc_list.reserve(100);
   lgd_list.reserve(100);
-  for (int i = 0; i < 100; ++i) {
-    rc_list.push_back(2 + i * 0.015);
+  for (int i = 0; i < 1000; ++i) {
+    rc_list.push_back(2 + i * 0.0015);
   }
-  for (int i = 0; i < 100; ++i) {
-    lgd_list.push_back(-10 + i * 0.1);
+  for (int i = 0; i < 1000; ++i) {
+    lgd_list.push_back(-10 + i * 0.01);
   }
   auto sweep_result = ForwardRayTracingUtils<double, std::complex<double>>::sweep_rc_d(params, theta_o, phi_o, rc_list,
                                                                                        lgd_list, 50);

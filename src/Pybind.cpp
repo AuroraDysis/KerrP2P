@@ -82,6 +82,7 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
       .value("THETA_OUT_OF_RANGE", RayStatus::THETA_OUT_OF_RANGE)
       .value("UNKOWN_ERROR", RayStatus::UNKOWN_ERROR)
       .value("ARGUMENT_ERROR", RayStatus::ARGUMENT_ERROR)
+      .value("INTERNAL_ERROR", RayStatus::INTERNAL_ERROR)
       .export_values();
 
   py::enum_<Sign>(mod, "Sign")

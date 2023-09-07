@@ -21,26 +21,39 @@ public:
   Real jacobi_sn_k1, jacobi_sn_k1_prime;
   Real one_over_umaa_sqrt;
   Real ellint_phi; // ArcCsc[sqrt[up] Sec[\[Theta]]]
+  Real ellint_sin_phi;
   Real ellint_theta;
+  Real ellint_cos_theta, ellint_sin_theta;
 
   ForwardRayTracing<Real, Complex> &data;
 
   void G_theta_phi_t(std::array<Real, 3> &G_arr, const Real &theta) {
     const Real &up = data.up;
     const Real &um = data.um;
-    ellint_phi = asin(cos(theta) * one_over_sqrt_up);
-    ellint_theta = asin(
-        (sqrt(1 + ellint_m) * sin(ellint_phi)) / sqrt(1 + ellint_m * MY_SQUARE(sin(ellint_phi))));
+    ellint_sin_phi = cos(theta) * one_over_sqrt_up;
+    if (ellint_sin_phi < -1 || ellint_sin_phi > 1) {
+      data.ray_status = RayStatus::INTERNAL_ERROR;
+      return;
+    }
+    ellint_phi = asin(ellint_sin_phi);
+    ellint_sin_theta = (sqrt(1 + ellint_m) * ellint_sin_phi) / sqrt(1 + ellint_m * MY_SQUARE(ellint_sin_phi));
+    if (ellint_sin_theta < -1 || ellint_sin_theta > 1) {
+      data.ray_status = RayStatus::INTERNAL_ERROR;
+      return;
+    }
+    ellint_cos_theta = sqrt(1 - MY_SQUARE(ellint_sin_theta));
+    ellint_theta = asin(ellint_sin_theta);
     G_arr[0] = -one_over_umaa_sqrt * ellint_kappa_prime * boost::math::ellint_1(ellint_kappa, ellint_theta);
     G_arr[1] = -one_over_umaa_sqrt * ellint_kappa_prime / ellint_alpha1_2 *
-               (MY_SQUARE(ellint_kappa_prime) * up * boost::math::ellint_3(ellint_kappa, ellint_alpha1_2, ellint_theta) +
+               (MY_SQUARE(ellint_kappa_prime) * up *
+                boost::math::ellint_3(ellint_kappa, ellint_alpha1_2, ellint_theta) +
                 ellint_kappa2 * boost::math::ellint_1(ellint_kappa, ellint_theta));
     G_arr[2] = um *
                (one_over_umaa_sqrt * ellint_one_over_kappa_prime * (boost::math::ellint_2(ellint_kappa, ellint_theta) -
-                                                                    ellint_kappa2 * sin(ellint_theta) *
-                                                                    cos(ellint_theta) / sqrt(1 - ellint_kappa2 *
-                                                                                                 MY_SQUARE(
-                                                                                                     sin(ellint_theta)))) +
+                                                                    ellint_kappa2 * ellint_sin_theta *
+                                                                    ellint_cos_theta / sqrt(1 - ellint_kappa2 *
+                                                                                                MY_SQUARE(
+                                                                                                    ellint_sin_theta))) +
                 G_arr[0]);
   }
 
@@ -81,6 +94,9 @@ public:
     }
 
     G_theta_phi_t(G_theta_s, theta_s);
+    if (data.ray_status != RayStatus::NORMAL) {
+      return;
+    }
 
     const Real &G_theta_theta_s = G_theta_s[0];
     const Real &G_theta_theta_p = G_theta_p[0];
@@ -111,6 +127,9 @@ public:
     data.n_half = tau_o / (2 * G_theta_theta_p);
 
     G_theta_phi_t(G_theta_f, data.theta_f);
+    if (data.ray_status != RayStatus::NORMAL) {
+      return;
+    }
 
     auto &angular_integrals = data.angular_integrals;
     // (-1)^m

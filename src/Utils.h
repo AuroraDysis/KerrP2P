@@ -103,7 +103,6 @@ struct ForwardRayTracingUtils {
 
   static ForwardRayTracingResult<Real, Complex>
   find_result(ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o) {
-    // std::array<Real, 2> x = {params.rc, params.lgd};
     Eigen::Vector<Real, 2> x = Eigen::Vector<Real, 2>();
     x << params.rc, params.lgd;
 
@@ -157,7 +156,7 @@ struct ForwardRayTracingUtils {
                                       phi(i, j) = ray_tracing->phi_f;
                                       delta_theta(i, j) = theta(i, j) - theta_o;
                                       int sign = ray_tracing->lambda > 0 ? 1 : -1;
-                                      delta_phi(i, j) = sign * sin((phi(i, j) - phi_o) * half<Real>());
+                                      delta_phi(i, j) = sin((phi(i, j) - phi_o) * half<Real>());
                                     } else {
                                       theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
                                       phi(i, j) = std::numeric_limits<Real>::quiet_NaN();
@@ -167,6 +166,32 @@ struct ForwardRayTracingUtils {
                                   }
                                 }
                               });
+
+//    auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
+//    Real two_pi = boost::math::constants::two_pi<Real>();
+//    ForwardRayTracingParams<Real> local_params(params);
+//    // for loop
+//     for (size_t i = 0; i < lgd_size; i++) {
+//       for (size_t j = 0; j < rc_size; j++) {
+//         params.rc = rc_list[j];
+//         params.lgd = lgd_list[i];
+//         params.rc_d_to_lambda_q();
+//         ray_tracing->calc_ray(params);
+//         if (ray_tracing->ray_status == RayStatus::NORMAL) {
+//           theta(i, j) = ray_tracing->theta_f;
+//           phi(i, j) = ray_tracing->phi_f;
+//           delta_theta(i, j) = theta(i, j) - theta_o;
+//           int sign = ray_tracing->lambda > 0 ? 1 : -1;
+//           delta_phi(i, j) = sign * sin((phi(i, j) - phi_o) * half<Real>());
+//         } else {
+//           theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
+//           phi(i, j) = std::numeric_limits<Real>::quiet_NaN();
+//           delta_theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
+//           delta_phi(i, j) = std::numeric_limits<Real>::quiet_NaN();
+//         }
+//       }
+//     }
+
 
     using Point = bg::model::point<int, 2, bg::cs::cartesian>;
     std::vector<Point> theta_roots_index;

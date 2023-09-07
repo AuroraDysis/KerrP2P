@@ -27,6 +27,7 @@ enum class RayStatus {
   ETA_OUT_OF_RANGE, // eta should be positive
   THETA_OUT_OF_RANGE, // theta should be in [theta_m, theta_p]
   ARGUMENT_ERROR,
+  INTERNAL_ERROR, // may be caused by not enough precision
   UNKOWN_ERROR,
 };
 
@@ -44,6 +45,8 @@ constexpr const char *ray_status_to_str(RayStatus status) {
       return "THETA_OUT_OF_RANGE";
     case RayStatus::ARGUMENT_ERROR:
       return "ARGUMENT_ERROR";
+    case RayStatus::INTERNAL_ERROR:
+      return "INTERNAL_ERROR";
     case RayStatus::UNKOWN_ERROR:
       return "UNKOWN_ERROR";
   }

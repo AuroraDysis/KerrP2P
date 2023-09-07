@@ -272,7 +272,7 @@ public:
     fmt::println("lambda: {}, q: {}", params.lambda, params.q);
 #endif
 
-    if (isnan(params.lambda) || isnan(params.q)) {
+    if (isnan(params.lambda) || isnan(params.q) || abs(params.lambda) <= 10000 * ErrorLimit<Real>::Value) {
       ray_status = RayStatus::ARGUMENT_ERROR;
       return;
     }
@@ -291,6 +291,9 @@ public:
 
     // Radial integrals
     calcI();
+    if (ray_status != RayStatus::NORMAL) {
+      return;
+    }
 
     tau_o = radial_integrals[0];
 
@@ -299,6 +302,9 @@ public:
     }
 
     G_integral->calc();
+    if (ray_status != RayStatus::NORMAL) {
+      return;
+    }
 
     // Final values of phi and t
     phi_f = radial_integrals[1] + lambda * angular_integrals[1];
