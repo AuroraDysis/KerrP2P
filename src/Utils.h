@@ -48,6 +48,8 @@ private:
   const Real two_pi = boost::math::constants::two_pi<Real>();
   Real phi_tmp;
 
+  int period = std::numeric_limits<int>::max();
+
 public:
   std::shared_ptr<ForwardRayTracing<Real, Complex>> ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
 
@@ -72,7 +74,14 @@ public:
 
     Vector residual;
     residual[0] = ray_tracing->theta_f - theta_o;
-    residual[1] = mod_real(ray_tracing->phi_f, two_pi);
+    if (period == std::numeric_limits<int>::max()) {
+      using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
+          boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
+      period = RealToInt::convert(ray_tracing->phi_f / two_pi);
+      residual[1] = mod_real(ray_tracing->phi_f, two_pi);
+    } else {
+      residual[1] = ray_tracing->phi_f - phi_o - period * two_pi;
+    }
 
     if (isnan(residual[0]) || isnan(residual[1])) {
       throw std::runtime_error("Ray tracing failed: residual is NaN");
