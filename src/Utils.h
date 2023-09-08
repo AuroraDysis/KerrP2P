@@ -36,13 +36,6 @@ struct SweepResult {
   std::vector<ForwardRayTracingResult<Real, Complex>> results;
 };
 
-template<typename Real>
-inline Real mod_real(const Real &x, const Real &y) {
-  using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
-      boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
-  return x - y * RealToInt::convert(x / y);
-}
-
 template<typename Real, typename Complex>
 class RootFunctor {
 private:
@@ -188,7 +181,6 @@ struct ForwardRayTracingUtils {
     using Point = bg::model::point<int, 2, bg::cs::cartesian>;
     std::vector<Point> theta_roots_index;
     std::vector<Point> phi_roots_index;
-    Real two_pi = boost::math::constants::two_pi<Real>();
     int d_row, d_col, d_row_lambda, d_col_lambda;
     for (size_t i = 1; i < lgd_size; i++) {
       for (size_t j = 1; j < rc_size; j++) {
@@ -255,15 +247,16 @@ struct ForwardRayTracingUtils {
     tbb::parallel_for(tbb::blocked_range<size_t>(0u, cutoff),
                       [&](const tbb::blocked_range<size_t> &r) {
                         ForwardRayTracingParams<Real> local_params(params);
+                        Real two_pi = boost::math::constants::two_pi<Real>();
+                        using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
+                            boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
                         for (size_t i = r.begin(); i != r.end(); ++i) {
                           size_t row = theta_roots_closest_index[indices[i]].template get<0>();
                           size_t col = theta_roots_closest_index[indices[i]].template get<1>();
                           local_params.rc = rc_list[col];
                           local_params.lgd = lgd_list[row];
                           local_params.rc_d_to_lambda_q();
-                          using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
-                              boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
-                          int period = RealToInt::convert(phi(row, col) / boost::math::constants::two_pi<Real>());
+                          int period = RealToInt::convert(phi(row, col) / two_pi);
                           try {
                             auto res = find_result(local_params, period, theta_o, phi_o);
                             res.rc = local_params.rc;

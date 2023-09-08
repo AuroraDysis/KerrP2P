@@ -69,7 +69,6 @@ Eigen::Matrix<Real, dim, 1> NelderMeadOptimizer(F &func, Eigen::Matrix<Real, dim
     Vector x(x_start);
     x[i] += step;
     result.push_back({x, func(x)});
-
   }
 
   int iteration = 0;

@@ -17,3 +17,9 @@ spack:
   concretizer:
     unify: true
 ```
+
+```vcpkg
+git clone https://github.com/Microsoft/vcpkg.git
+.\vcpkg\bootstrap-vcpkg.bat
+.\vcpkg\vcpkg.exe install boost catch2 fmt eigen3 tbb pybind11
+```
