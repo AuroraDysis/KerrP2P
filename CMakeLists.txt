@@ -4,8 +4,15 @@ project(forward_ray_tracing)
 set(CMAKE_CXX_STANDARD 17)
 
 option(ENABLE_TESTING "Enable Test Builds" ON)
-option(ENABLE_FLOAT128 "Enable float128 precision" ON)
-option(ENABLE_BIGFLOAT_MPFR "Enable mpfr support" ON)
+option(ENABLE_FLOAT128 "Enable float128 precision" OFF)
+option(ENABLE_BIGFLOAT_MPFR "Enable mpfr support" OFF)
+
+if (WIN32)
+    SET(ENABLE_FLOAT128 OFF)
+    SET(ENABLE_BIGFLOAT_MPFR OFF)
+    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     SET(ENABLE_FLOAT128 OFF)

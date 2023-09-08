@@ -36,3 +36,6 @@ cmake-build-release/
 .idea/
 /examples/
 .vscode/settings.json
+
+.vs/
+out/
