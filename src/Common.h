@@ -19,7 +19,6 @@ using boost::math::ellint_3;
 using boost::math::constants::half;
 using boost::math::constants::third;
 using boost::math::constants::sixth;
-using boost::math::constants::two_pi;
 
 enum class RayStatus {
   NORMAL,

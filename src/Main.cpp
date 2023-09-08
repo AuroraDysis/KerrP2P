@@ -72,7 +72,8 @@ void test() {
     params.lgd = lgd - 0.001;
     using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
         boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
-    int period = RealToInt::convert(theta_o / boost::math::constants::two_pi<Real>());
+    const Real two_pi = boost::math::constants::two_pi<Real>();
+    int period = RealToInt::convert(theta_o / two_pi);
     auto res = ForwardRayTracingUtils<Real, Complex>::find_result(params, period, theta_o, phi_o);
     CHECK(res.ray_status == RayStatus::NORMAL);
 
@@ -106,15 +107,16 @@ void test() {
 }
 
 void test2() {
+  using boost::math::constants::pi;
   ForwardRayTracingParams<double> params;
   params.a = 0.8;
   params.r_s = 10;
-  params.theta_s = 85 * boost::math::constants::pi<double>() / 180;
+  params.theta_s = 85 * pi<double>() / 180;
   params.r_o = 1000;
   params.nu_r = Sign::NEGATIVE;
   params.nu_theta = Sign::NEGATIVE;
-  double theta_o = 17 * boost::math::constants::pi<double>() / 180;
-  double phi_o = boost::math::constants::pi<double>() / 4;
+  double theta_o = 17 * pi<double>() / 180;
+  double phi_o = pi<double>() / 4;
   params.lgd_sign = Sign::POSITIVE;
   std::vector<double> rc_list;
   std::vector<double> lgd_list;
