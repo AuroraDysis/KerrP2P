@@ -25,7 +25,7 @@ find_package(Eigen3 REQUIRED)
 find_package(TBB CONFIG REQUIRED)
 find_package(Boost 1.82.0 COMPONENTS filesystem REQUIRED)
 find_package(Catch2 3 REQUIRED)
-set(LIBRARIES Boost::boost Boost::filesystem fmt::fmt Eigen3::Eigen TBB::tbb)
+set(LIBRARIES Boost::boost Boost::filesystem fmt::fmt Eigen3::Eigen TBB::tbb TBB::tbbmalloc TBB::tbbmalloc_proxy)
 
 # add_definitions(-DPRINT_DEBUG)
 
