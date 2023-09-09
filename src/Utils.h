@@ -203,16 +203,23 @@ struct ForwardRayTracingUtils {
       }
     }
 
+    if (theta_roots_index.empty() && phi_roots_index.empty()) {
+        return sweep_result;
+    }
+
     auto &theta_roots = sweep_result.theta_roots;
-    auto &phi_roots = sweep_result.phi_roots;
-
     theta_roots.resize(theta_roots_index.size(), 2);
-    phi_roots.resize(phi_roots_index.size(), 2);
-
     for (size_t i = 0; i < theta_roots_index.size(); i++) {
       theta_roots(i, 0) = rc_list[theta_roots_index[i].template get<1>()];
       theta_roots(i, 1) = lgd_list[theta_roots_index[i].template get<0>()];
     }
+
+    if (phi_roots_index.empty()) {
+        return sweep_result;
+    }
+
+    auto& phi_roots = sweep_result.phi_roots;
+    phi_roots.resize(phi_roots_index.size(), 2);
     for (size_t i = 0; i < phi_roots_index.size(); i++) {
       phi_roots(i, 0) = rc_list[phi_roots_index[i].template get<1>()];
       phi_roots(i, 1) = lgd_list[phi_roots_index[i].template get<0>()];
@@ -243,6 +250,7 @@ struct ForwardRayTracingUtils {
 
     // find results
     auto &results = sweep_result.results;
+    cutoff = min(cutoff, indices.size());
     results.reserve(cutoff);
     tbb::parallel_for(tbb::blocked_range<size_t>(0u, cutoff),
                       [&](const tbb::blocked_range<size_t> &r) {

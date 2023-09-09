@@ -20,7 +20,7 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-find_package(fmt REQUIRED)
+find_package(fmt CONFIG REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(TBB CONFIG REQUIRED)
 find_package(Boost 1.82.0 COMPONENTS filesystem REQUIRED)

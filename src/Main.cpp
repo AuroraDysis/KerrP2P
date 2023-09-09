@@ -113,10 +113,10 @@ void test2() {
   params.r_s = 10;
   params.theta_s = 85 * pi<double>() / 180;
   params.r_o = 1000;
-  params.nu_r = Sign::NEGATIVE;
-  params.nu_theta = Sign::NEGATIVE;
-  double theta_o = 17 * pi<double>() / 180;
-  double phi_o = pi<double>() / 4;
+  params.nu_r = Sign::POSITIVE;
+  params.nu_theta = Sign::POSITIVE;
+  constexpr double theta_o = 17 * pi<double>() / 180;
+  constexpr double phi_o = pi<double>() / 4;
   params.lgd_sign = Sign::POSITIVE;
   std::vector<double> rc_list;
   std::vector<double> lgd_list;
