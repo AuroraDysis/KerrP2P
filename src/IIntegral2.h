@@ -80,9 +80,9 @@ public:
     integral[1] = (a * (-2 * rp * I_p + a * I_p * lambda + (2 * rm - a * lambda) * I_m)) / (rm - rp);
     if (this->data.calc_t_f && !isinf(this->data.r_o)) {
       // I_t
-      const Real &r4 = this->data.r4;
       const Real &r1 = this->data.r1;
       const Real &r2 = this->data.r2;
+      const Real& r4 = this->data.r4;
       const Real &eta = this->data.eta;
 
       E2 = E2_coeff * boost::math::ellint_2(ellint_k, ellint_phi);
