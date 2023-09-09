@@ -122,7 +122,7 @@ struct ForwardRayTracingUtils {
   }
 
   static SweepResult<Real, Complex>
-  sweep_rc_d(ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, const std::vector<Real> &rc_list,
+  sweep_rc_d(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, const std::vector<Real> &rc_list,
              const std::vector<Real> &lgd_list, size_t cutoff) {
     size_t rc_size = rc_list.size();
     size_t lgd_size = lgd_list.size();

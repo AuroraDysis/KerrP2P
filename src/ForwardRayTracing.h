@@ -24,7 +24,7 @@ struct ForwardRayTracingParams {
 
   ForwardRayTracingParams() = default;
 
-  ForwardRayTracingParams(ForwardRayTracingParams &params) {
+  ForwardRayTracingParams(const ForwardRayTracingParams &params) {
     a = params.a;
     r_s = params.r_s;
     theta_s = params.theta_s;
