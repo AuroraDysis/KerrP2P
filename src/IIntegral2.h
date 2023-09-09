@@ -11,7 +11,7 @@ public:
 #else
 private:
 #endif
-  Real ellint_phi_rs, ellint_phi_ro, ellint_sin_phi_rs, ellint_sin_phi_ro, ellint_k;
+  Real ellint_sin_phi_rs, ellint_sin_phi_ro, ellint_phi, ellint_k;
   Real E2_coeff, F2_coeff, Pi_p2_coeff, Pi_m2_coeff, Pi_p2_ellint_n, Pi_m2_ellint_n;
 
   Real F2, Pi_p2, Pi_m2, I_p, I_m;
@@ -36,14 +36,12 @@ public:
 
     ellint_sin_phi_rs = sqrt(((r1 - r3) * (r_s - r4)) / ((r_s - r3) * (r1 - r4)));
     CHECK_SIN_RANGE(ellint_sin_phi_rs);
-    ellint_phi_rs = asin(ellint_sin_phi_rs);
     if (isinf(r_o)) {
       ellint_sin_phi_ro = sqrt((r1 - r3) / (r1 - r4));
     } else {
       ellint_sin_phi_ro = sqrt(((r1 - r3) * (r_o - r4)) / ((r_o - r3) * (r1 - r4)));
     }
     CHECK_SIN_RANGE(ellint_sin_phi_rs);
-    ellint_phi_ro = asin(ellint_sin_phi_ro);
     ellint_k = sqrt(((-r2 + r3) * (-r1 + r4)) / ((r1 - r3) * (r2 - r4)));
 
     E2_coeff = sqrt((r1 - r3) * (r2 - r4));
@@ -55,12 +53,14 @@ public:
     Pi_12_ellint_n = (r1 - r4) / (r1 - r3);
   }
 
-  void calc_x(std::array<Real, 3>& integral, const Real &ellint_phi, const Real &r) {
+  void calc_x(std::array<Real, 3>& integral, const Real &ellint_sin_phi, const Real &r) {
     const Real &a = this->data.a;
     const Real &lambda = this->data.lambda;
     const Real &rp = this->data.rp;
     const Real &rm = this->data.rm;
     const Real &r3 = this->data.r3;
+
+    ellint_phi = asin(ellint_sin_phi);
 
     // ellint_k, phi
     F2 = F2_coeff * ellint_1(ellint_k, ellint_phi);
@@ -106,8 +106,8 @@ public:
     pre_calc();
     const Real &r_s = this->data.r_s;
     const Real &r_o = this->data.r_o;
-    calc_x(integral_rs, ellint_phi_rs, r_s);
-    calc_x(integral_ro, ellint_phi_ro, r_o);
+    calc_x(integral_rs, ellint_sin_phi_rs, r_s);
+    calc_x(integral_ro, ellint_sin_phi_ro, r_o);
 
     auto &radial_integrals = this->data.radial_integrals;
 
