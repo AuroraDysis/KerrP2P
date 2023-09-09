@@ -73,6 +73,7 @@ public:
     const Real &theta_s = this->data.theta_s;
     Sign nu_theta = this->data.nu_theta;
 
+    // up / um < 0, Imaginary-Modulus Transformation
     // https://dlmf.nist.gov/19.7#ii
     // https://analyticphysics.com/Special%20Functions/A%20Miscellany%20of%20Elliptic%20Integrals.htm
     ellint_m = -up / um;

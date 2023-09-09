@@ -165,6 +165,7 @@ private:
     delta_theta = half<Real>() * (1 - (eta + MY_SQUARE(lambda)) / MY_SQUARE(a));
     up = delta_theta + sqrt(MY_SQUARE(delta_theta) + eta / MY_SQUARE(a));
     um = delta_theta - sqrt(MY_SQUARE(delta_theta) + eta / MY_SQUARE(a));
+    // (28), theta_p \in (pi/2, pi), theta_m \in (0, pi/2)
     theta_p = acos(-sqrt(up));
     theta_m = acos(sqrt(up));
   }
