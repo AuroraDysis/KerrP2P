@@ -40,7 +40,17 @@ struct ForwardRayTracingParams {
   }
 
   void rc_d_to_lambda_q() {
-    Real lambda_c = a + (rc * (2 * MY_SQUARE(a) + (-3 + rc) * rc)) / (a - a * rc);
+    Real r_up = 4 * MY_SQUARE(cos(acos(a) * third<Real>()));
+    Real r_down = 4 * MY_SQUARE(cos(acos(-a) * third<Real>()));
+
+    if (rc < r_down || rc > r_up) {
+	  fmt::println("rc out of range: rc = {}, r_down: {}, r_up: {}", rc, r_down, r_up);
+      lambda = std::numeric_limits<Real>::quiet_NaN();
+      q = std::numeric_limits<Real>::quiet_NaN();
+      return;
+	}
+
+    Real lambda_c = a + (rc * (2 * MY_SQUARE(a) + (-3 + rc) * rc)) / (a * (1 - rc));
     Real eta_c = -((MY_CUBE(rc) * (-4 * MY_SQUARE(a) + MY_SQUARE(-3 + rc) * rc)) /
                    (MY_SQUARE(a) * MY_SQUARE(-1 + rc)));
     Real qc = sqrt(eta_c);
