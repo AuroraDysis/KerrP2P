@@ -13,7 +13,7 @@ public:
 #else
   private:
 #endif
-  Real ellint_phi, ellint_cos_phi, ellint_sin_phi;
+  Real ellint_phi, ellint_cos_phi, ellint_sin_phi, ellint_sin_phi2;
   Real r34_re, r34_im;
   Real A, B, alpha_p, alpha_m, ellint_k, ellint_m, alpha2, ellint1_phi;
   Real alpha_0, R1_alpha_0, R2_alpha_0, Pi_13, Pi_23, I_1, I_2;
@@ -47,10 +47,10 @@ public:
     f1 = half<Real>() * sqrt((-1 + alpha2) / (alpha2 + ellint_m - alpha2 * ellint_m)) *
          log(abs((ellint_sin_phi + sqrt((-1 + alpha2) /
                                          (alpha2 + ellint_m - alpha2 * ellint_m)) *
-                                    sqrt(1 - ellint_m * MY_SQUARE(ellint_sin_phi))) /
+                                    sqrt(1 - ellint_m * ellint_sin_phi2)) /
                  (-ellint_sin_phi + sqrt((-1 + alpha2) /
                                           (alpha2 + ellint_m - alpha2 * ellint_m)) *
-                                     sqrt(1 - ellint_m * MY_SQUARE(ellint_sin_phi)))));
+                                     sqrt(1 - ellint_m * ellint_sin_phi2))));
 #ifdef PRINT_DEBUG
     fmt::println("R1 - k: {}, n: {}, phi: {}", ellint_k, ellint3_n, ellint_phi);
     fmt::println("R1 - ellint_3: {}, f1: {}", ellint_3_tmp, f1);
@@ -102,9 +102,9 @@ public:
     const Real &r2 = this->data.r2;
     ellint_cos_phi = -1 + (2 * A * (r - r1)) / (A * (r - r1) + B * (r - r2));
     CHECK_VAR_INT_RANGE(ellint_cos_phi, -1, 1);
-    ellint_sin_phi = sqrt(1 - MY_SQUARE(ellint_cos_phi));
-    CHECK_VAR_INT_RANGE(ellint_sin_phi, -1, 1);
-    ellint_c = 1 / (1 - MY_SQUARE(ellint_cos_phi));
+    ellint_sin_phi2 = 1 - MY_SQUARE(ellint_cos_phi);
+    ellint_sin_phi = sqrt(ellint_sin_phi2);
+    ellint_c = 1 / ellint_sin_phi2;
     ellint_phi = acos(ellint_cos_phi);
 
     R1_alpha_p = R1(alpha_p);
@@ -126,7 +126,7 @@ public:
                     (ellint1_phi - 2 * R1_alpha_0) +
                     alpha2 * (1 + alpha_0 * ellint_cos_phi) *
                     (ellint_2(ellint_k, ellint_phi) - ellint1_phi + R1_alpha_0) -
-                    MY_CUBE(alpha_0) * ellint_sin_phi * sqrt(1 - ellint_m * MY_SQUARE(ellint_sin_phi))) /
+                    MY_CUBE(alpha_0) * ellint_sin_phi * sqrt(1 - ellint_m * ellint_sin_phi2)) /
                    ((-1 + alpha2) * (alpha2 * (-1 + ellint_m) - ellint_m) *
                     (1 + alpha_0 * ellint_cos_phi));
       Pi_13 = (2 * sqrt(A * B) * R1_alpha_0 * (r1 - r2)) / ((A - B) * (A + B));

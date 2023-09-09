@@ -76,9 +76,9 @@ find_package(pybind11 CONFIG REQUIRED)
 pybind11_add_module(py_forward_ray_tracing src/Pybind.cpp ${SOURCE_FILES})
 target_link_libraries(py_forward_ray_tracing PUBLIC ${LIBRARIES})
 
-if (WIN32)
-file(GLOB OUTPUT_FILES ${CMAKE_CURRENT_BINARY_DIR}/*.exe ${CMAKE_CURRENT_BINARY_DIR}/*.dll  ${CMAKE_CURRENT_BINARY_DIR}/*.pyd)
-file(ARCHIVE_CREATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/forward_ray_tracing.zip
-    PATHS ${OUTPUT_FILES}
-    FORMAT zip)
-endif()
+# if (WIN32)
+# file(GLOB OUTPUT_FILES ${CMAKE_CURRENT_BINARY_DIR}/*.exe ${CMAKE_CURRENT_BINARY_DIR}/*.dll  ${CMAKE_CURRENT_BINARY_DIR}/*.pyd)
+# file(ARCHIVE_CREATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/forward_ray_tracing.zip
+#     PATHS ${OUTPUT_FILES}
+#     FORMAT zip)
+# endif()
