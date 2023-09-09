@@ -68,10 +68,13 @@ public:
     // ellint_k, phi
     // F2 = F2_coeff * ellint_1(ellint_k, ellint_phi);
     using boost::math::ellint_rf;
+    using boost::math::ellint_rj;
     ellint1_phi = ellint_rf(ellint_c - 1, ellint_c - ellint_m, ellint_c);
     F2 = F2_coeff * ellint1_phi;
-    Pi_p2 = Pi_p2_coeff * ellint_3(ellint_k, Pi_p2_ellint_n, ellint_phi);
-    Pi_m2 = Pi_m2_coeff * ellint_3(ellint_k, Pi_m2_ellint_n, ellint_phi);
+    // Pi_p2 = Pi_p2_coeff * ellint_3(ellint_k, Pi_p2_ellint_n, ellint_phi);
+    Pi_p2 = Pi_p2_coeff * (ellint1_phi + third<Real>() * Pi_p2_ellint_n * ellint_rj(ellint_c - 1, ellint_c - ellint_m, ellint_c, ellint_c - Pi_p2_ellint_n));
+    // Pi_m2 = Pi_m2_coeff * ellint_3(ellint_k, Pi_m2_ellint_n, ellint_phi);
+    Pi_m2 = Pi_m2_coeff * (ellint1_phi + third<Real>() * Pi_m2_ellint_n * ellint_rj(ellint_c - 1, ellint_c - ellint_m, ellint_c, ellint_c - Pi_m2_ellint_n));
     I_p = F2 / (r3 - rp) - Pi_p2;
     I_m = F2 / (r3 - rm) - Pi_m2;
 
