@@ -11,23 +11,9 @@ using namespace boost::property_tree;
 #include "ForwardRayTracing.h"
 #include "Utils.h"
 
-using std::string;
-using Float64 = std::tuple<double, std::complex<double>>;
-
-#ifdef FLOAT128
-using Float128 = std::tuple<boost::multiprecision::float128, boost::multiprecision::complex128>;
-#endif
-
-using BigFloat = std::tuple<BigFloatReal , BigFloatComplex>;
-
-#if defined(FLOAT128)
-#define TEST_TYPES Float64, Float128, BigFloat
-#else
-#define TEST_TYPES Float64, BigFloat
-#endif
-
 inline std::vector<boost::property_tree::ptree> TEST_DATA;
 void get_test_data(std::string &path);
+
 template <typename T>
 std::vector<T> as_vector(boost::property_tree::ptree const& pt, boost::property_tree::ptree::key_type const& key) {
   std::vector<T> r;
@@ -79,9 +65,9 @@ void test() {
 
     Real ERROR_LIMIT = ErrorLimit<Real>::Value * 1000;
 
-    fmt::println("eta: {}, lambad: {}", eta, lambda);
-    fmt::println("eta: {}, lambad: {}", res.eta, res.lambda);
-    fmt::println("delta eta: {}, delta lambad: {}", abs(eta - res.eta), abs(lambda - res.lambda));
+    fmt::println("eta: {}, lambda: {}", eta, lambda);
+    fmt::println("eta: {}, lambda: {}", res.eta, res.lambda);
+    fmt::println("delta eta: {}, delta lambda: {}", abs(eta - res.eta), abs(lambda - res.lambda));
     CHECK(abs(eta - res.eta) < ERROR_LIMIT);
     CHECK(abs(lambda - res.lambda) < ERROR_LIMIT);
 
