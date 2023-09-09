@@ -111,10 +111,8 @@ public:
     Real m_Real = 1 + floor(real((tau_o - G_theta_theta_p + to_integral(nu_theta) * G_theta_theta_s) /
                                  (2 * G_theta_theta_p)));
 
-    using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
-        boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
     // floor
-    this->data.m = RealToInt::convert(m_Real);
+    this->data.m = MY_FLOOR<Real>::convert(m_Real);
 
     // Number of half-orbits
     this->data.n_half = tau_o / (2 * G_theta_theta_p);

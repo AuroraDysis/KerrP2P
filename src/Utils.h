@@ -256,15 +256,13 @@ struct ForwardRayTracingUtils {
                       [&](const tbb::blocked_range<size_t> &r) {
                         ForwardRayTracingParams<Real> local_params(params);
                         Real two_pi = boost::math::constants::two_pi<Real>();
-                        using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
-                            boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
                         for (size_t i = r.begin(); i != r.end(); ++i) {
                           size_t row = theta_roots_closest_index[indices[i]].template get<0>();
                           size_t col = theta_roots_closest_index[indices[i]].template get<1>();
                           local_params.rc = rc_list[col];
                           local_params.lgd = lgd_list[row];
                           local_params.rc_d_to_lambda_q();
-                          int period = RealToInt::convert(phi(row, col) / two_pi);
+                          int period = MY_FLOOR<Real>::convert(phi(row, col) / two_pi);
                           try {
                             auto res = find_result(local_params, period, theta_o, phi_o);
                             res.rc = local_params.rc;

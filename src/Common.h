@@ -66,6 +66,9 @@ constexpr auto to_integral(E e) -> typename std::underlying_type<E>::type {
   return static_cast<typename std::underlying_type<E>::type>(e);
 }
 
+template <typename Real>
+using MY_FLOOR = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>, boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
+
 template<typename Real, typename Complex>
 class ForwardRayTracing;
 

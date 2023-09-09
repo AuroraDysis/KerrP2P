@@ -102,9 +102,7 @@ TEMPLATE_TEST_CASE("Find Root Function", "[root]", Float64) {
 
     params.rc = rc + 0.001;
     params.lgd = lgd - 0.001;
-    using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
-        boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
-    int period = RealToInt::convert(theta_o / boost::math::constants::two_pi<Real>());
+    int period = MY_FLOOR<Real>::convert(theta_o / boost::math::constants::two_pi<Real>());
     auto res = ForwardRayTracingUtils<Real, Complex>::find_result(params, period, theta_o, phi_o);
     CHECK(res.ray_status == RayStatus::NORMAL);
 
