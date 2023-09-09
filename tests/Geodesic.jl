@@ -1,6 +1,7 @@
 # We set E = 1
 
 using UnPack
+using DoubleFloats
 using DifferentialEquations
 
 mutable struct KerrCache{T<:AbstractFloat}
@@ -8,15 +9,14 @@ mutable struct KerrCache{T<:AbstractFloat}
     a::T
     λ::T
     rh::T # horizon radius
-    ro::T # observer radius
 end
 
 function stop_condition_r(u, t, integrator)
-    @unpack rh, ro = integrator.p
-    u[1] <= 1.01 * rh || u[1] >= ro
+    @unpack rh = integrator.p
+    u[1] <= 1.01 * rh
 end
 
-function calc_ray(M::T, a::T, pos::Array{T, 1}, λ::T, η::T, ν_r::Int, ν_θ::Int, ro::T, tend::T, atol::T, rtol::T) where T <: AbstractFloat
+function calc_ray(M::T, a::T, pos::Array{T, 1}, λ::T, η::T, ν_r::Int, ν_θ::Int, tend::T, atol::T, rtol::T) where T <: AbstractFloat
     t, r, θ, ϕ = pos
 
     sinθ, cosθ = sincos(θ)
@@ -47,21 +47,22 @@ function calc_ray(M::T, a::T, pos::Array{T, 1}, λ::T, η::T, ν_r::Int, ν_θ::
     pθ = gθθ * θdot
 
     rh = M + sqrt(M^2 - a^2)
-    cache = KerrCache{T}(M, a, λ, rh, ro)
+    cache = KerrCache{T}(M, a, λ, rh)
 
     u0 = [r, θ, ϕ, pr, pθ]
     prob = ODEProblem(eom_back!, u0, (zero(T), tend), cache)
-    cb = ContinuousCallback(stop_condition_r, igt -> terminate!(igt))
+    cb = ContinuousCallback(stop_condition_r, igt -> terminate!(igt), save_positions=(false,false))
+
     # only save the last step
     method = if atol < 1e-12
         Vern9()
     else
         Vern8()
     end
-    sol = solve(prob, method, abstol=atol, reltol=rtol, save_start = false, saveat = [tend], callback=cb)
+    sol = solve(prob, method, abstol=atol, reltol=rtol, saveat = [tend], callback=cb)
 
-    println(sol.t[end])
-    println(sol[end])
+    println(sol.t)
+    println(sol.u)
 end
 
 function eom_back!(du::Array{T, 1}, u::Array{T, 1}, p::KerrCache{T}, τ::T) where T <: AbstractFloat
@@ -80,13 +81,15 @@ function eom_back!(du::Array{T, 1}, u::Array{T, 1}, p::KerrCache{T}, τ::T) wher
 end
 
 function main()
-    λ = -0.7511316141196980351821846354387491739005901369953212373679122913636
-    η = 26.5724289697094692725198762793446996667830541429568972667550981404403
-    ro = 1000.0
-    tend = 1050.66909989257832358518002933929837920320920210187
-    atol = 1e-10
-    rtol = 1e-10
-    calc_ray(1.0, 0.8, [0.0, 10.0, pi / 2, 0.0], λ, η, -1, -1, ro, tend, atol, rtol)
+    M = df64"1.0"
+    a = df64"0.8"
+    pos = [zero(Double64), Double64(10), Double64(pi) / 2, zero(Double64)]
+    λ = df64"-0.7511316141196980351821846354387491739005901369953212373679122913636"
+    η = df64"26.5724289697094692725198762793446996667830541429568972667550981404403"
+    tend = df64"1050.66909989257832358518002933929837920320920210187"
+    atol = df64"1e-16"
+    rtol = df64"1e-16"
+    calc_ray(M, a, pos, λ, η, -1, -1, tend, atol, rtol)
 end
 
 main()
