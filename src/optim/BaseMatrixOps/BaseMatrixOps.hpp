@@ -28,10 +28,6 @@
 #include "misc/misc_math.hpp"
 #include "core/bmo_core.hpp"
 
-#ifdef BMO_ENABLE_STATS_FEATURES
-    #include "stats/bmo_stats.hpp"
-#endif
-
 #ifdef BMO_ENABLE_EXTRA_FEATURES
     #include "extra/bmo_extra.hpp"
 #endif
