@@ -40,6 +40,8 @@ public:
     } else {
       ellint_sin_phi_ro2 = ((r1 - r3) * (r_o - r4)) / ((r_o - r3) * (r1 - r4));
     }
+    CHECK_VAR_INT_RANGE(ellint_sin_phi_rs2, 0, 1);
+    CHECK_VAR_INT_RANGE(ellint_sin_phi_ro2, 0, 1);
     ellint_m = ((-r2 + r3) * (-r1 + r4)) / ((r1 - r3) * (r2 - r4));
     ellint_k = sqrt(ellint_m);
 
@@ -62,8 +64,6 @@ public:
     ellint_cos_phi2 = 1 - ellint_sin_phi2;
     ellint_cos_phi = sqrt(ellint_cos_phi2);
     ellint_sin_phi = sqrt(ellint_sin_phi2);
-    CHECK_SIN_RANGE(ellint_sin_phi);
-    CHECK_COS_RANGE(ellint_cos_phi);
     ellint_sin_phi3 = ellint_sin_phi2 * ellint_sin_phi;
 
     using boost::math::ellint_rf;

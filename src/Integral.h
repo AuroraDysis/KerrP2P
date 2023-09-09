@@ -1,7 +1,6 @@
 #pragma once
 
-#define CHECK_SIN_RANGE(VAR) if (!this->check_sin_range(VAR, #VAR)) return;
-#define CHECK_COS_RANGE(VAR) if (!this->check_cos_range(VAR, #VAR)) return;
+#define CHECK_VAR_INT_RANGE(VAR, LOW, HIGH) if (!this->check_int_range(VAR, LOW, HIGH, #VAR)) return;
 
 template <typename Real, typename Complex>
 class Integral {
@@ -10,9 +9,9 @@ public:
 
 	explicit Integral(ForwardRayTracing<Real, Complex>& data_) : data(data_) {}
 
-	bool check_sin_range(const Real &sin_x, const char *name) {
-		if (sin_x < -1 || sin_x > 1) {
-			fmt::println(std::cerr, "[{}] lambda = {}, eta = {}, {} = {}, out of range", typeid(*this).name(), data.lambda, data.eta, name, sin_x);
+	bool check_int_range(const Real& x, int low, int high, const char* name) {
+		if (x < low || x > high) {
+			fmt::println(std::cerr, "[{}] lambda = {}, eta = {}, {} = {}, out of range", typeid(*this).name(), data.lambda, data.eta, name, x);
 			data.ray_status = RayStatus::INTERNAL_ERROR;
 			return false;
 		} else
@@ -21,13 +20,12 @@ public:
 		}
 	}
 
-	bool check_cos_range(const Real& cos_x, const char* name) {
-		if (cos_x < -1 || cos_x > 1) {
-			fmt::println(std::cerr, "[{}] lambda = {}, eta = {}, {} = {}, out of range", typeid(*this).name(), data.lambda, data.eta, name, cos_x);
+	bool check_real_range(const Real &x, const Real &low, const Real &high, const char *name) {
+		if (x < low || x > high) {
+			fmt::println(std::cerr, "[{}] lambda = {}, eta = {}, {} = {}, out of range", typeid(*this).name(), data.lambda, data.eta, name, sin_x);
 			data.ray_status = RayStatus::INTERNAL_ERROR;
 			return false;
-		}
-		else
+		} else
 		{
 			return true;
 		}

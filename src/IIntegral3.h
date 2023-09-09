@@ -101,9 +101,9 @@ public:
     const Real &r1 = this->data.r1;
     const Real &r2 = this->data.r2;
     ellint_cos_phi = -1 + (2 * A * (r - r1)) / (A * (r - r1) + B * (r - r2));
-    CHECK_COS_RANGE(ellint_cos_phi);
+    CHECK_VAR_INT_RANGE(ellint_cos_phi, -1, 1);
     ellint_sin_phi = sqrt(1 - MY_SQUARE(ellint_cos_phi));
-    CHECK_SIN_RANGE(ellint_sin_phi);
+    CHECK_VAR_INT_RANGE(ellint_sin_phi, -1, 1);
     ellint_c = 1 / (1 - MY_SQUARE(ellint_cos_phi));
     ellint_phi = acos(ellint_cos_phi);
 

@@ -31,11 +31,11 @@ public:
     const Real &up = this->data.up;
     const Real &um = this->data.um;
     ellint_sin_phi = cos(theta) * one_over_sqrt_up;
-    CHECK_SIN_RANGE(ellint_sin_phi);
+    CHECK_VAR_INT_RANGE(ellint_sin_phi, -1 ,1);
     ellint_sin_theta = (sqrt(1 + ellint_m) * ellint_sin_phi) / sqrt(1 + ellint_m * MY_SQUARE(ellint_sin_phi));
-    CHECK_SIN_RANGE(ellint_sin_theta)
+    CHECK_VAR_INT_RANGE(ellint_sin_theta, -1, 1);
     ellint_cos_theta = sqrt(1 - MY_SQUARE(ellint_sin_theta));
-    CHECK_COS_RANGE(ellint_cos_theta)
+    CHECK_VAR_INT_RANGE(ellint_cos_theta, -1, 1);
     ellint_theta = asin(ellint_sin_theta);
 
     ellint_1_phi = boost::math::ellint_1(ellint_kappa, ellint_theta);
