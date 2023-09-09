@@ -11,7 +11,7 @@ public:
 #else
 private:
 #endif
-  Real ellint_sin_phi_rs, ellint_sin_phi_ro, ellint_phi, ellint_k;
+  Real ellint_sin_phi_rs, ellint_sin_phi_ro, ellint_phi, ellint_cos_phi, ellint_c, ellint_k, ellint_m, ellint1_phi;
   Real E2_coeff, F2_coeff, Pi_p2_coeff, Pi_m2_coeff, Pi_p2_ellint_n, Pi_m2_ellint_n;
 
   Real F2, Pi_p2, Pi_m2, I_p, I_m;
@@ -42,7 +42,8 @@ public:
       ellint_sin_phi_ro = sqrt(((r1 - r3) * (r_o - r4)) / ((r_o - r3) * (r1 - r4)));
     }
     CHECK_SIN_RANGE(ellint_sin_phi_rs);
-    ellint_k = sqrt(((-r2 + r3) * (-r1 + r4)) / ((r1 - r3) * (r2 - r4)));
+    ellint_m = ((-r2 + r3) * (-r1 + r4)) / ((r1 - r3) * (r2 - r4));
+    ellint_k = sqrt(ellint_m);
 
     E2_coeff = sqrt((r1 - r3) * (r2 - r4));
     F2_coeff = 2 / E2_coeff;
@@ -60,10 +61,15 @@ public:
     const Real &rm = this->data.rm;
     const Real &r3 = this->data.r3;
 
+    ellint_cos_phi = sqrt(1 - MY_SQUARE(ellint_sin_phi));
+    ellint_c = 1 / MY_SQUARE(ellint_sin_phi);
     ellint_phi = asin(ellint_sin_phi);
 
     // ellint_k, phi
-    F2 = F2_coeff * ellint_1(ellint_k, ellint_phi);
+    // F2 = F2_coeff * ellint_1(ellint_k, ellint_phi);
+    using boost::math::ellint_rf;
+    ellint1_phi = ellint_rf(ellint_c - 1, ellint_c - ellint_m, ellint_c);
+    F2 = F2_coeff * ellint1_phi;
     Pi_p2 = Pi_p2_coeff * ellint_3(ellint_k, Pi_p2_ellint_n, ellint_phi);
     Pi_m2 = Pi_m2_coeff * ellint_3(ellint_k, Pi_m2_ellint_n, ellint_phi);
     I_p = F2 / (r3 - rp) - Pi_p2;
