@@ -3,7 +3,7 @@
 #include "Common.h"
 #include "Integral.h"
 
-// Radial Antiderivatives for case (2)
+// radial anti-derivatives for case (2)
 template<typename Real, typename Complex>
 class IIntegral2 : public Integral<Real, Complex> {
 #ifdef TESTS
