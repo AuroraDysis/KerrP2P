@@ -71,8 +71,8 @@ public:
     // https://analyticphysics.com/Special%20Functions/A%20Miscellany%20of%20Elliptic%20Integrals.htm
     ellint_m = -up / um;
     ellint_k = sqrt(ellint_m);
-    ellint_kappa = sqrt(ellint_m / (ellint_m + 1));
     ellint_kappa2 = ellint_m / (ellint_m + 1);
+    ellint_kappa = sqrt(ellint_kappa2);
     ellint_one_over_kappa_prime = sqrt(ellint_m + 1);
     ellint_kappa_prime = 1 / ellint_one_over_kappa_prime;
     ellint3_n = up / (up - 1);
