@@ -46,7 +46,8 @@ public:
           two_thirds<Real>() * ellint_m / ellint3_n * ellint_rj(0, 1 - ellint_m, 1, 1 - ellint_m / ellint3_n);
     }
 
-    p1 = sqrt((-1 + alpha2) / (alpha2 + ellint_m - alpha2 * ellint_m));
+    // p_1 > 0 (B65)
+    p1 = sqrt((alpha2 - 1) / (ellint_m + (1 - ellint_m) * alpha2));
     f1 = half<Real>() * p1 * log(abs((ellint_sin_phi + p1 * sqrt(1 - ellint_m * ellint_sin_phi2)) /
                                      (-ellint_sin_phi + p1 * sqrt(1 - ellint_m * ellint_sin_phi2))));
 #ifdef PRINT_DEBUG
