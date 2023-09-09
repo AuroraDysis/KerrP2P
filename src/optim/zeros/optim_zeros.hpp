@@ -21,7 +21,6 @@
 #ifndef OPTIMLIB_ZEROS_INCLUDES
 #define OPTIMLIB_ZEROS_INCLUDES
 
-#include "broyden.hpp"
 #include "broyden_df.hpp"
 
 #endif

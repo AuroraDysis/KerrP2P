@@ -28,18 +28,6 @@ namespace optim
     // misc/utility files
     #include "misc/optim_misc.hpp"
 
-    // stats/rng files
-    #include "stats/optim_stats.hpp"
-
-    // line search
-    #include "line_search/more_thuente.hpp"
-
-    // unconstrained optimization
-    #include "unconstrained/optim_unconstrained.hpp"
-
-    // constrained optimization
-    #include "constrained/sumt.hpp"
-
     // solving systems of nonlinear equations
     #include "zeros/optim_zeros.hpp"
 }
