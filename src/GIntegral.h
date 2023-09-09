@@ -56,7 +56,7 @@ public:
   }
 
 public:
-  explicit GIntegral(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_) {
+  explicit GIntegral(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_, typeid(*this).name()) {
   }
 
   void calc() {

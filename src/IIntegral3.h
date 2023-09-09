@@ -60,7 +60,7 @@ public:
   }
 
 public:
-  explicit IIntegral3(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_) {
+  explicit IIntegral3(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_, typeid(*this).name()) {
   }
 
   void pre_calc() {

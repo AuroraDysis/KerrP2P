@@ -20,7 +20,7 @@ private:
   std::array<Real, 3> integral_rs;
   std::array<Real, 3> integral_ro;
 public:
-  explicit IIntegral2(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_) {
+  explicit IIntegral2(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_, typeid(*this).name()) {
   }
 
   void pre_calc() {
