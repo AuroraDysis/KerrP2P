@@ -99,12 +99,10 @@ private:
   inline static ObjectPool<ForwardRayTracing<Real, Complex>> pool;
 
   void reset_variables() {
-    tau_o = std::numeric_limits<Real>::quiet_NaN();
-    theta_f = std::numeric_limits<Real>::quiet_NaN();
-    phi_f = std::numeric_limits<Real>::quiet_NaN();
-    t_f = std::numeric_limits<Real>::quiet_NaN();
+    ray_status = RayStatus::NORMAL;
+    r1 = r2 = r3 = r4 = tau_o = t_f = theta_f = phi_f = n_half = eta = lambda = q = std::numeric_limits<Real>::quiet_NaN();
+    r1_c = r2_c = r3_c = r4_c = Complex{std::numeric_limits<Real>::quiet_NaN()};
     m = std::numeric_limits<int>::max();
-    n_half = std::numeric_limits<Real>::quiet_NaN();
     std::fill(radial_integrals.begin(), radial_integrals.end(), std::numeric_limits<Real>::quiet_NaN());
     std::fill(angular_integrals.begin(), angular_integrals.end(), std::numeric_limits<Real>::quiet_NaN());
   }
@@ -172,7 +170,6 @@ private:
   }
 
   void reset_by_lambda_q(Real lambda_, Real q_, Sign nu_r_, Sign nu_theta_) {
-    ray_status = RayStatus::NORMAL;
     lambda = std::move(lambda_);
     q = std::move(q_);
     eta = q * q;
@@ -180,7 +177,6 @@ private:
     nu_theta = nu_theta_;
     init_radial_potential_roots();
     init_theta_pm();
-    reset_variables();
 #ifdef PRINT_DEBUG
     fmt::println("lambda: {}, q: {}, nu_r: {}, nu_theta: {}", lambda, q, to_integral(nu_r), to_integral(nu_theta));
 #endif
@@ -266,6 +262,8 @@ public:
   std::shared_ptr<GIntegral<Real, Complex>> G_integral;
 
   void calc_ray(const ForwardRayTracingParams<Real> &params) {
+    reset_variables();
+
     a = params.a;
     r_s = params.r_s;
     theta_s = params.theta_s;
@@ -281,7 +279,6 @@ public:
     fmt::println("rp: {}, rm: {}", rp, rm);
     fmt::println("lambda: {}, q: {}", params.lambda, params.q);
 #endif
-
     if (isnan(params.lambda) || isnan(params.q) || abs(params.lambda) <= 10000 * ErrorLimit<Real>::Value) {
       ray_status = RayStatus::ARGUMENT_ERROR;
       return;
