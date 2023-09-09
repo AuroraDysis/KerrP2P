@@ -8,9 +8,9 @@
 template<typename Real, typename Complex>
 class GIntegral : public Integral<Real, Complex> {
 #ifdef TESTS
-public:
+  public:
 #else
-  private:
+private:
 #endif
   std::array<Real, 3> G_theta_p = {};
   std::array<Real, 3> G_theta_s = {};
@@ -31,7 +31,7 @@ public:
 
     // https://dlmf.nist.gov/19.7.E5
     ellint_sin_phi = cos(theta) * one_over_sqrt_up;
-    CHECK_VAR_INT_RANGE(ellint_sin_phi, -1 ,1);
+    CHECK_VAR_INT_RANGE(ellint_sin_phi, -1, 1);
     ellint_sin_theta = (sqrt(1 + ellint_m) * ellint_sin_phi) / sqrt(1 + ellint_m * MY_SQUARE(ellint_sin_phi));
     ellint_sin_theta2 = MY_SQUARE(ellint_sin_theta);
     CHECK_VAR_INT_RANGE(ellint_sin_theta, -1, 1);
@@ -45,10 +45,11 @@ public:
     ellint_1_phi = ellint_sin_theta * boost::math::ellint_rf(ellint_cos_theta2, ellint_y, 1);
     // ellint_2_phi = boost::math::ellint_2(ellint_kappa, ellint_theta);
     ellint_2_phi = ellint_1_phi - third<Real>() * ellint_kappa2 * ellint_sin_theta2 * ellint_sin_theta *
-								  boost::math::ellint_rd(ellint_cos_theta2, ellint_y, 1);
+                                  boost::math::ellint_rd(ellint_cos_theta2, ellint_y, 1);
     // ellint_3_phi = boost::math::ellint_3(ellint_kappa, ellint_alpha1_2, ellint_theta);
     ellint_3_phi = ellint_1_phi + third<Real>() * ellint_alpha1_2 * ellint_sin_theta2 * ellint_sin_theta *
-								  boost::math::ellint_rj(ellint_cos_theta2, ellint_y, 1, 1 - ellint_alpha1_2 * ellint_sin_theta2);
+                                  boost::math::ellint_rj(ellint_cos_theta2, ellint_y, 1,
+                                                         1 - ellint_alpha1_2 * ellint_sin_theta2);
     G_arr[0] = -one_over_umaa_sqrt * ellint_kappa_prime * ellint_1_phi;
     G_arr[1] = -one_over_umaa_sqrt * ellint_kappa_prime / ellint_alpha1_2 *
                (MY_SQUARE(ellint_kappa_prime) * up *
@@ -110,9 +111,9 @@ public:
     jacobi_sn_k1_prime = 1 / sqrt(1 + ellint_m);
     jacobi_sn_k1 = ellint_k * jacobi_sn_k1_prime;
     this->data.theta_f = acos(-sqrt(up) * to_integral(nu_theta) *
-                        jacobi_sn_k1_prime *
-                        boost::math::jacobi_sd(jacobi_sn_k1, (tau_o + to_integral(nu_theta) * G_theta_theta_s) *
-                                                             sqrt(-MY_SQUARE(a) * um) / jacobi_sn_k1_prime));
+                              jacobi_sn_k1_prime *
+                              boost::math::jacobi_sd(jacobi_sn_k1, (tau_o + to_integral(nu_theta) * G_theta_theta_s) /
+                                                                   (one_over_umaa_sqrt * jacobi_sn_k1_prime)));
 
     // Angular integrals
     Real m_Real = 1 + floor(real((tau_o - G_theta_theta_p + to_integral(nu_theta) * G_theta_theta_s) /
