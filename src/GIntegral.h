@@ -65,7 +65,7 @@ public:
     const Real &a = this->data.a;
     const Real &up = this->data.up;
     const Real &um = this->data.um;
-    auto &tau_o = this->data.tau_o;
+    Real &tau_o = this->data.tau_o;
     const Real &theta_s = this->data.theta_s;
     Sign nu_theta = this->data.nu_theta;
 
