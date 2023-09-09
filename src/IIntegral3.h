@@ -17,18 +17,19 @@ public:
   Real r34_re, r34_im;
   Real A, B, alpha_p, alpha_m, ellint_k, ellint_m, alpha2, ellint1_phi;
   Real alpha_0, R1_alpha_0, R2_alpha_0, Pi_13, Pi_23, I_1, I_2;
-  Real ellint3_n, ellint_c, ellint_3_tmp, f1, ellint3_n1;
+  Real ellint3_n, ellint_c, ellint_3_tmp, f1, p1, ellint3_n1;
   Real F3, R1_alpha_p, R1_alpha_m, I_p, I_m;
 
   std::array<Real, 3> integral_rs;
   std::array<Real, 3> integral_ro;
 
   Real R1(const Real &alpha) {
+    // alpha2 > 1
     alpha2 = MY_SQUARE(alpha);
+    // alpha2 / (alpha2 - 1) > k3 (ellint_m)
     ellint3_n = alpha2 / (alpha2 - 1);
     ellint3_n1 = ellint_m / ellint3_n;
 
-    // \Pi\left(\phi, \alpha^2, k\right)-F(\phi, k)=\frac{1}{3} \alpha^2 R_J\left(c-1, c-k^2, c, c-\alpha^2\right)
     using boost::math::ellint_rc;
     using boost::math::ellint_rj;
 
@@ -36,21 +37,18 @@ public:
     // https://dlmf.nist.gov/19.25.E16
     using boost::math::constants::half_pi;
     using boost::math::constants::two_thirds;
-    ellint_3_tmp = -third<Real>() * ellint3_n1 * ellint_rj(ellint_c - 1, ellint_c - ellint_m, ellint_c, ellint_c - ellint3_n1)
-                   + sqrt((ellint_c - 1) * (ellint_c - ellint_m) / ((ellint3_n - 1) * (1 - ellint3_n1))) *
-                     ellint_rc(ellint_c * (ellint3_n - 1) * (1 - ellint3_n1), (ellint3_n - ellint_c) * (ellint_c - ellint3_n1));
+    ellint_3_tmp =
+        -third<Real>() * ellint3_n1 * ellint_rj(ellint_c - 1, ellint_c - ellint_m, ellint_c, ellint_c - ellint3_n1)
+        + sqrt((ellint_c - 1) * (ellint_c - ellint_m) / ((ellint3_n - 1) * (1 - ellint3_n1))) *
+          ellint_rc(ellint_c * (ellint3_n - 1) * (1 - ellint3_n1), (ellint3_n - ellint_c) * (ellint_c - ellint3_n1));
     if (ellint_phi >= half_pi<Real>()) {
       ellint_3_tmp +=
           two_thirds<Real>() * ellint_m / ellint3_n * ellint_rj(0, 1 - ellint_m, 1, 1 - ellint_m / ellint3_n);
     }
 
-    f1 = half<Real>() * sqrt((-1 + alpha2) / (alpha2 + ellint_m - alpha2 * ellint_m)) *
-         log(abs((ellint_sin_phi + sqrt((-1 + alpha2) /
-                                         (alpha2 + ellint_m - alpha2 * ellint_m)) *
-                                    sqrt(1 - ellint_m * ellint_sin_phi2)) /
-                 (-ellint_sin_phi + sqrt((-1 + alpha2) /
-                                          (alpha2 + ellint_m - alpha2 * ellint_m)) *
-                                     sqrt(1 - ellint_m * ellint_sin_phi2))));
+    p1 = sqrt((-1 + alpha2) / (alpha2 + ellint_m - alpha2 * ellint_m));
+    f1 = half<Real>() * p1 * log(abs((ellint_sin_phi + p1 * sqrt(1 - ellint_m * ellint_sin_phi2)) /
+                                     (-ellint_sin_phi + p1 * sqrt(1 - ellint_m * ellint_sin_phi2))));
 #ifdef PRINT_DEBUG
     fmt::println("R1 - k: {}, n: {}, phi: {}", ellint_k, ellint3_n, ellint_phi);
     fmt::println("R1 - ellint_3: {}, f1: {}", ellint_3_tmp, f1);
@@ -71,7 +69,6 @@ public:
     const Real &r1 = this->data.r1;
     const Real &r2 = this->data.r2;
     const Complex &r3 = this->data.r3_c;
-    const Real &r_o = this->data.r_o;
 
     r34_re = real(r3);
     r34_im = imag(r3);
@@ -80,6 +77,7 @@ public:
     A = sqrt(MY_SQUARE(r34_im) + MY_SQUARE(r34_re - r2));
     B = sqrt(MY_SQUARE(r34_im) + MY_SQUARE(r34_re - r1));
 
+    // k3 \in (0, 1)
     ellint_m = ((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B);
     ellint_k = sqrt(ellint_m);
 
@@ -100,9 +98,11 @@ public:
     const Real &rm = this->data.rm;
     const Real &r1 = this->data.r1;
     const Real &r2 = this->data.r2;
+    // x_3 \in (- 1/alpha_0, 1) \in (-1, 1)
     ellint_cos_phi = -1 + (2 * A * (r - r1)) / (A * (r - r1) + B * (r - r2));
     CHECK_VAR_INT_RANGE(ellint_cos_phi, -1, 1);
     ellint_sin_phi2 = 1 - MY_SQUARE(ellint_cos_phi);
+    // ?
     ellint_sin_phi = sqrt(ellint_sin_phi2);
     ellint_c = 1 / ellint_sin_phi2;
     ellint_phi = acos(ellint_cos_phi);
