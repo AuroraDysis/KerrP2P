@@ -1,11 +1,12 @@
 #pragma once
 
 #include "Common.h"
+#include "Integral.h"
 
 #include <boost/numeric/conversion/converter.hpp>
 
 template<typename Real, typename Complex>
-class GIntegral {
+class GIntegral : public Integral<Real, Complex> {
 #ifdef TESTS
 public:
 #else
@@ -26,22 +27,15 @@ public:
   Real ellint_cos_theta, ellint_sin_theta;
   Real ellint_1_phi, ellint_2_phi, ellint_3_phi;
 
-  ForwardRayTracing<Real, Complex> &data;
-
   void G_theta_phi_t(std::array<Real, 3> &G_arr, const Real &theta) {
     const Real &up = data.up;
     const Real &um = data.um;
     ellint_sin_phi = cos(theta) * one_over_sqrt_up;
-    if (ellint_sin_phi < -1 || ellint_sin_phi > 1) {
-      data.ray_status = RayStatus::INTERNAL_ERROR;
-      return;
-    }
+    CHECK_SIN_RANGE(ellint_sin_phi);
     ellint_sin_theta = (sqrt(1 + ellint_m) * ellint_sin_phi) / sqrt(1 + ellint_m * MY_SQUARE(ellint_sin_phi));
-    if (ellint_sin_theta < -1 || ellint_sin_theta > 1) {
-      data.ray_status = RayStatus::INTERNAL_ERROR;
-      return;
-    }
+    CHECK_SIN_RANGE(ellint_sin_theta)
     ellint_cos_theta = sqrt(1 - MY_SQUARE(ellint_sin_theta));
+    CHECK_COS_RANGE(ellint_cos_theta);)
     ellint_theta = asin(ellint_sin_theta);
 
     ellint_1_phi = boost::math::ellint_1(ellint_kappa, ellint_theta);
@@ -62,7 +56,7 @@ public:
   }
 
 public:
-  explicit GIntegral(ForwardRayTracing<Real, Complex> &parent) : data(parent) {
+  explicit GIntegral(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_) {
   }
 
   void calc() {

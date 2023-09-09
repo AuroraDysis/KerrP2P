@@ -1,26 +1,8 @@
 #include <tuple>
-#include <boost/lexical_cast.hpp>
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/catch_template_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "TestData.h"
-#include "ForwardRayTracing.h"
-#include "Utils.h"
 
 using std::string;
-
-using Float64 = std::tuple<double, std::complex<double>>;
-#ifdef FLOAT128
-using Float128 = std::tuple<boost::multiprecision::float128, boost::multiprecision::complex128>;
-#endif
-using BigFloat = std::tuple<BigFloatReal , BigFloatComplex>;
-
-#if defined(FLOAT128)
-#define TEST_TYPES Float64, Float128, BigFloat
-#else
-#define TEST_TYPES Float64, BigFloat
-#endif
 
 template <typename T>
 std::vector<T> as_vector(boost::property_tree::ptree const& pt, boost::property_tree::ptree::key_type const& key) {
@@ -127,9 +109,9 @@ TEMPLATE_TEST_CASE("Find Root Function", "[root]", Float64) {
 
     Real ERROR_LIMIT = ErrorLimit<Real>::Value * 1000;
 
-    fmt::println("eta: {}, lambad: {}", eta, lambda);
-    fmt::println("eta: {}, lambad: {}", res.eta, res.lambda);
-    fmt::println("delta eta: {}, delta lambad: {}", abs(eta - res.eta), abs(lambda - res.lambda));
+    fmt::println("eta: {}, lambda: {}", eta, lambda);
+    fmt::println("eta: {}, lambda: {}", res.eta, res.lambda);
+    fmt::println("delta eta: {}, delta lambda: {}", abs(eta - res.eta), abs(lambda - res.lambda));
     CHECK(abs(eta - res.eta) < ERROR_LIMIT);
     CHECK(abs(lambda - res.lambda) < ERROR_LIMIT);
 

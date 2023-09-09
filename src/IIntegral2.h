@@ -1,17 +1,16 @@
 #pragma once
 
 #include "Common.h"
+#include "Integral.h"
 
 // Radial Antiderivatives for case (2)
 template<typename Real, typename Complex>
-class IIntegral2 {
+class IIntegral2 : public Integral<Real, Complex> {
 #ifdef TESTS
 public:
 #else
 private:
 #endif
-  ForwardRayTracing<Real, Complex> &data;
-
   Real ellint_phi_rs, ellint_phi_ro, ellint_k;
   Real E2_coeff, F2_coeff, Pi_p2_coeff, Pi_m2_coeff, Pi_p2_ellint_n, Pi_m2_ellint_n;
 
@@ -21,7 +20,7 @@ private:
   std::array<Real, 3> integral_rs;
   std::array<Real, 3> integral_ro;
 public:
-  explicit IIntegral2(ForwardRayTracing<Real, Complex> &parent) : data(parent) {
+  explicit IIntegral2(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_) {
   }
 
   void pre_calc() {
