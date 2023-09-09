@@ -99,8 +99,11 @@ public:
       const Real& r4 = this->data.r4;
       const Real &eta = this->data.eta;
 
-      E2 = E2_coeff * boost::math::ellint_2(ellint_k, ellint_phi);
-      Pi_12 = F2_coeff * boost::math::ellint_3(ellint_k, Pi_12_ellint_n, ellint_phi);
+      using boost::math::ellint_rd;
+      // E2 = E2_coeff * boost::math::ellint_2(ellint_k, ellint_phi);
+      E2 = E2_coeff * (ellint1_phi - third<Real>() * ellint_m * ellint_sin_phi3 * ellint_rd(ellint_cos_phi2, 1 - ellint_m * ellint_sin_phi2, 1));
+      // Pi_12 = F2_coeff * boost::math::ellint_3(ellint_k, Pi_12_ellint_n, ellint_phi);
+      Pi_12 = F2_coeff * (ellint1_phi + third<Real>() * Pi_12_ellint_n * ellint_sin_phi3 * ellint_rj(ellint_cos_phi2, 1 - ellint_m * ellint_sin_phi2, 1, 1 - Pi_12_ellint_n * ellint_sin_phi2));
       I1 = r3 * F2 + (r4 - r3) * Pi_12;
       I2 = -E2 + sqrt(-((eta + MY_SQUARE(a - lambda)) * (MY_SQUARE(a) + (-2 + r) * r)) +
                       MY_SQUARE(MY_SQUARE(a) - a * lambda + MY_SQUARE(r))) / (r - r3) -
