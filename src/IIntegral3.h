@@ -1,19 +1,18 @@
 #pragma once
 
 #include "Common.h"
+#include "Integral.h"
 
 #include <boost/math/special_functions/ellint_rc.hpp>
 
 // Radial Antiderivatives for case (3)
 template<typename Real, typename Complex>
-class IIntegral3 {
+class IIntegral3 : public Integral<Real, Complex> {
 #ifdef TESTS
 public:
 #else
   private:
 #endif
-  ForwardRayTracing<Real, Complex> &data;
-
   Real ellint_phi, ellint_cos_phi, ellint_sin_phi;
   Real r34_re, r34_im;
   Real A, B, alpha_p, alpha_m, ellint_k, ellint_m, alpha2, ellint1_phi;
@@ -61,18 +60,18 @@ public:
   }
 
 public:
-  explicit IIntegral3(ForwardRayTracing<Real, Complex> &parent) : data(parent) {
+  explicit IIntegral3(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_) {
   }
 
   void pre_calc() {
-    const Real &rp = data.rp;
-    const Real &rm = data.rm;
-    const Real &r_s = data.r_s;
+    const Real &rp = this->data.rp;
+    const Real &rm = this->data.rm;
+    const Real &r_s = this->data.r_s;
     // two real roots, both inside horizon, r_1 < r_2 < r_- < r_+ and r_3 = conj(r_4)
-    const Real &r1 = data.r1;
-    const Real &r2 = data.r2;
-    const Complex &r3 = data.r3_c;
-    const Real &r_o = data.r_o;
+    const Real &r1 = this->data.r1;
+    const Real &r2 = this->data.r2;
+    const Complex &r3 = this->data.r3_c;
+    const Real &r_o = this->data.r_o;
 
     r34_re = real(r3);
     r34_im = imag(r3);
@@ -95,12 +94,12 @@ public:
   }
 
   void calc_x(std::array<Real, 3> &integral, const Real &r) {
-    const Real &a = data.a;
-    const Real &lambda = data.lambda;
-    const Real &rp = data.rp;
-    const Real &rm = data.rm;
-    const Real &r1 = data.r1;
-    const Real &r2 = data.r2;
+    const Real &a = this->data.a;
+    const Real &lambda = this->data.lambda;
+    const Real &rp = this->data.rp;
+    const Real &rm = this->data.rm;
+    const Real &r1 = this->data.r1;
+    const Real &r2 = this->data.r2;
     ellint_cos_phi = -1 + (2 * A * (r - r1)) / (A * (r - r1) + B * (r - r2));
     ellint_sin_phi = sqrt(1 - MY_SQUARE(ellint_cos_phi));
     ellint_c = 1 / (1 - MY_SQUARE(ellint_cos_phi));
@@ -118,7 +117,7 @@ public:
             (-(A * r1) - B * r2 + (A + B) * rm));
     integral[0] = F3;
     integral[1] = (a * (I_m * (-(a * lambda) + 2 * rm) + I_p * (a * lambda - 2 * rp))) / (rm - rp);
-    if (data.calc_t_f && !isinf(data.r_o)) {
+    if (this->data.calc_t_f && !isinf(this->data.r_o)) {
       alpha2 = MY_SQUARE(alpha_0);
       R1_alpha_0 = R1(alpha_0);
       using boost::math::ellint_rd;
@@ -155,13 +154,13 @@ public:
   void calc(bool is_plus) {
     pre_calc();
 
-    auto &r_s = data.r_s;
-    auto &r_o = data.r_o;
+    auto &r_s = this->data.r_s;
+    auto &r_o = this->data.r_o;
 
     calc_x(integral_rs, r_s);
     calc_x(integral_ro, r_o);
 
-    auto &radial_integrals = data.radial_integrals;
+    auto &radial_integrals = this->data.radial_integrals;
 
     for (int i = 0; i < 3; ++i) {
       if (is_plus) {

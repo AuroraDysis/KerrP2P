@@ -63,9 +63,10 @@ add_executable(tests tests/Test.cpp
 target_compile_definitions(tests PRIVATE TESTS)
 target_link_libraries(tests PRIVATE ${LIBRARIES} Catch2::Catch2)
 
-include(CTest)
-include(Catch)
-catch_discover_tests(tests)
+# https://github.com/catchorg/Catch2/issues/2382
+# include(CTest)
+# include(Catch)
+# catch_discover_tests(tests EXTRA_ARGS "--data_path" ${CMAKE_CURRENT_SOURCE_DIR}/tests/data)
 endif()
 
 find_package(Python REQUIRED COMPONENTS Interpreter Development)

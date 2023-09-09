@@ -143,16 +143,16 @@ struct HigherPrecision<std::complex<double>> {
 // ErrorLimit
 template <typename T>
 struct ErrorLimit {
-  static const T Value;
+  inline static const T Value;
 };
 
 template <>
-const double ErrorLimit<double>::Value = 1e-10;
+inline const double ErrorLimit<double>::Value = 1e-10;
 
 #ifdef FLOAT128
 template <>
-const boost::multiprecision::float128 ErrorLimit<boost::multiprecision::float128>::Value{"1e-29"};
+inline const boost::multiprecision::float128 ErrorLimit<boost::multiprecision::float128>::Value{"1e-29"};
 #endif
 
 template <>
-const BigFloatReal ErrorLimit<BigFloatReal>::Value{"1e-45"};
+inline const BigFloatReal ErrorLimit<BigFloatReal>::Value{"1e-45"};

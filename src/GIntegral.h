@@ -28,14 +28,14 @@ public:
   Real ellint_1_phi, ellint_2_phi, ellint_3_phi;
 
   void G_theta_phi_t(std::array<Real, 3> &G_arr, const Real &theta) {
-    const Real &up = data.up;
-    const Real &um = data.um;
+    const Real &up = this->data.up;
+    const Real &um = this->data.um;
     ellint_sin_phi = cos(theta) * one_over_sqrt_up;
     CHECK_SIN_RANGE(ellint_sin_phi);
     ellint_sin_theta = (sqrt(1 + ellint_m) * ellint_sin_phi) / sqrt(1 + ellint_m * MY_SQUARE(ellint_sin_phi));
     CHECK_SIN_RANGE(ellint_sin_theta)
     ellint_cos_theta = sqrt(1 - MY_SQUARE(ellint_sin_theta));
-    CHECK_COS_RANGE(ellint_cos_theta);)
+    CHECK_COS_RANGE(ellint_cos_theta)
     ellint_theta = asin(ellint_sin_theta);
 
     ellint_1_phi = boost::math::ellint_1(ellint_kappa, ellint_theta);
@@ -60,12 +60,12 @@ public:
   }
 
   void calc() {
-    const Real &a = data.a;
-    const Real &up = data.up;
-    const Real &um = data.um;
-    auto &tau_o = data.tau_o;
-    const Real &theta_s = data.theta_s;
-    Sign nu_theta = data.nu_theta;
+    const Real &a = this->data.a;
+    const Real &up = this->data.up;
+    const Real &um = this->data.um;
+    auto &tau_o = this->data.tau_o;
+    const Real &theta_s = this->data.theta_s;
+    Sign nu_theta = this->data.nu_theta;
 
     // https://dlmf.nist.gov/19.7#ii
     // https://analyticphysics.com/Special%20Functions/A%20Miscellany%20of%20Elliptic%20Integrals.htm
@@ -84,7 +84,7 @@ public:
     G_theta_p[0] = ellint_kappa_prime * boost::math::ellint_1(ellint_kappa) * one_over_umaa_sqrt;
     G_theta_p[1] =
         (ellint_kappa_prime / (1 - up)) * boost::math::ellint_3(ellint_kappa, ellint3_n) * one_over_umaa_sqrt;
-    if (data.calc_t_f) {
+    if (this->data.calc_t_f) {
       G_theta_p[2] =
           um * (-ellint_one_over_kappa_prime * boost::math::ellint_2(ellint_kappa) * one_over_umaa_sqrt + G_theta_p[0]);
     } else {
@@ -92,7 +92,7 @@ public:
     }
 
     G_theta_phi_t(G_theta_s, theta_s);
-    if (data.ray_status != RayStatus::NORMAL) {
+    if (this->data.ray_status != RayStatus::NORMAL) {
       return;
     }
 
@@ -102,7 +102,7 @@ public:
     // https://dlmf.nist.gov/22.17
     jacobi_sn_k1_prime = 1 / sqrt(1 + ellint_m);
     jacobi_sn_k1 = ellint_k * jacobi_sn_k1_prime;
-    data.theta_f = acos(-sqrt(up) * to_integral(nu_theta) *
+    this->data.theta_f = acos(-sqrt(up) * to_integral(nu_theta) *
                         jacobi_sn_k1_prime *
                         boost::math::jacobi_sd(jacobi_sn_k1, (tau_o + to_integral(nu_theta) * G_theta_theta_s) *
                                                              sqrt(-MY_SQUARE(a) * um) / jacobi_sn_k1_prime));
@@ -114,26 +114,26 @@ public:
     using RealToInt = boost::numeric::converter<int, Real, boost::numeric::conversion_traits<int, Real>,
         boost::numeric::def_overflow_handler, boost::numeric::Floor<Real>>;
     // floor
-    data.m = RealToInt::convert(m_Real);
+    this->data.m = RealToInt::convert(m_Real);
 
     // Number of half-orbits
-    data.n_half = tau_o / (2 * G_theta_theta_p);
+    this->data.n_half = tau_o / (2 * G_theta_theta_p);
 
-    G_theta_phi_t(G_theta_f, data.theta_f);
-    if (data.ray_status != RayStatus::NORMAL) {
+    G_theta_phi_t(G_theta_f, this->data.theta_f);
+    if (this->data.ray_status != RayStatus::NORMAL) {
       return;
     }
 
-    auto &angular_integrals = data.angular_integrals;
+    auto &angular_integrals = this->data.angular_integrals;
     // (-1)^m
-    int m1_m = 1 - ((data.m & 1) << 1);
+    int m1_m = 1 - ((this->data.m & 1) << 1);
 
-    int ix = data.calc_t_f ? 3 : 2;
+    int ix = this->data.calc_t_f ? 3 : 2;
     for (int i = 0; i < ix; ++i) {
       angular_integrals[i] =
-          (2 * data.m) * G_theta_p[i] + to_integral(nu_theta) * (m1_m * G_theta_f[i] - G_theta_s[i]);
+          (2 * this->data.m) * G_theta_p[i] + to_integral(nu_theta) * (m1_m * G_theta_f[i] - G_theta_s[i]);
     }
-    if (!data.calc_t_f) {
+    if (!this->data.calc_t_f) {
       angular_integrals[2] = std::numeric_limits<Real>::quiet_NaN();
     }
 

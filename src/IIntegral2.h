@@ -24,15 +24,15 @@ public:
   }
 
   void pre_calc() {
-    const Real &rp = data.rp;
-    const Real &rm = data.rm;
+    const Real &rp = this->data.rp;
+    const Real &rm = this->data.rm;
 
-    const Real &r1 = data.r1;
-    const Real &r2 = data.r2;
-    const Real &r3 = data.r3;
-    const Real &r4 = data.r4;
-    const Real &r_s = data.r_s;
-    const Real &r_o = data.r_o;
+    const Real &r1 = this->data.r1;
+    const Real &r2 = this->data.r2;
+    const Real &r3 = this->data.r3;
+    const Real &r4 = this->data.r4;
+    const Real &r_s = this->data.r_s;
+    const Real &r_o = this->data.r_o;
 
     ellint_phi_rs = asin(sqrt(((r1 - r3) * (r_s - r4)) / ((r_s - r3) * (r1 - r4))));
     if (isinf(r_o)) {
@@ -52,11 +52,11 @@ public:
   }
 
   void calc_x(std::array<Real, 3>& integral, const Real &ellint_phi, const Real &r) {
-    const Real &a = data.a;
-    const Real &lambda = data.lambda;
-    const Real &rp = data.rp;
-    const Real &rm = data.rm;
-    const Real &r3 = data.r3;
+    const Real &a = this->data.a;
+    const Real &lambda = this->data.lambda;
+    const Real &rp = this->data.rp;
+    const Real &rm = this->data.rm;
+    const Real &r3 = this->data.r3;
 
     // ellint_k, phi
     F2 = F2_coeff * ellint_1(ellint_k, ellint_phi);
@@ -74,12 +74,12 @@ public:
     integral[0] = F2;
     // I_phi
     integral[1] = (a * (-2 * rp * I_p + a * I_p * lambda + (2 * rm - a * lambda) * I_m)) / (rm - rp);
-    if (data.calc_t_f && !isinf(data.r_o)) {
+    if (this->data.calc_t_f && !isinf(this->data.r_o)) {
       // I_t
-      const Real &r4 = data.r4;
-      const Real &r1 = data.r1;
-      const Real &r2 = data.r2;
-      const Real &eta = data.eta;
+      const Real &r4 = this->data.r4;
+      const Real &r1 = this->data.r1;
+      const Real &r2 = this->data.r2;
+      const Real &eta = this->data.eta;
 
       E2 = E2_coeff * boost::math::ellint_2(ellint_k, ellint_phi);
       Pi_12 = F2_coeff * boost::math::ellint_3(ellint_k, Pi_12_ellint_n, ellint_phi);
@@ -100,12 +100,12 @@ public:
 
   void calc(bool is_plus) {
     pre_calc();
-    const Real &r_s = data.r_s;
-    const Real &r_o = data.r_o;
+    const Real &r_s = this->data.r_s;
+    const Real &r_o = this->data.r_o;
     calc_x(integral_rs, ellint_phi_rs, r_s);
     calc_x(integral_ro, ellint_phi_ro, r_o);
 
-    auto &radial_integrals = data.radial_integrals;
+    auto &radial_integrals = this->data.radial_integrals;
 
     if (is_plus) {
       for (int i = 0; i < 3; ++i) {
