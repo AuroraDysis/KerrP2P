@@ -11,8 +11,9 @@ public:
 #else
 private:
 #endif
-  Real ellint_sin_phi_rs2, ellint_sin_phi_ro2, ellint_sin_phi, ellint_sin_phi2, ellint_sin_phi3, ellint_cos_phi, ellint_cos_phi2, ellint_c, ellint_k, ellint_m, ellint1_phi;
+  Real ellint_sin_phi_rs2, ellint_sin_phi_ro2, ellint_sin_phi, ellint_sin_phi3, ellint_cos_phi, ellint_cos_phi2, ellint_c, ellint_k, ellint_m, ellint1_phi;
   Real E2_coeff, F2_coeff, Pi_p2_coeff, Pi_m2_coeff, Pi_p2_ellint_n, Pi_m2_ellint_n;
+  Real ellint_y;
 
   Real F2, Pi_p2, Pi_m2, I_p, I_m;
   Real E2, Pi_12, I1, I2, Pi_12_ellint_n;
@@ -73,12 +74,13 @@ public:
     // F2 = F2_coeff * ellint_1(ellint_k, ellint_phi);
     // https://dlmf.nist.gov/19.20
     // https://www.boost.org/doc/libs/1_83_0/libs/math/doc/html/math_toolkit/ellint/ellint_intro.html
-    ellint1_phi = ellint_sin_phi * ellint_rf(ellint_cos_phi2, 1 - ellint_m * ellint_sin_phi2, 1);
+    ellint_y = 1 - ellint_m * ellint_sin_phi2;
+    ellint1_phi = ellint_sin_phi * ellint_rf(ellint_cos_phi2, ellint_y, 1);
     F2 = F2_coeff * ellint1_phi;
     // Pi_p2 = Pi_p2_coeff * ellint_3(ellint_k, Pi_p2_ellint_n, ellint_phi);
-    Pi_p2 = Pi_p2_coeff * (ellint1_phi + third<Real>() * Pi_p2_ellint_n * ellint_sin_phi3 * ellint_rj(ellint_cos_phi2, 1 - ellint_m * ellint_sin_phi2, 1, 1 - Pi_p2_ellint_n * ellint_sin_phi2));
+    Pi_p2 = Pi_p2_coeff * (ellint1_phi + third<Real>() * Pi_p2_ellint_n * ellint_sin_phi3 * ellint_rj(ellint_cos_phi2, ellint_y, 1, 1 - Pi_p2_ellint_n * ellint_sin_phi2));
     // Pi_m2 = Pi_m2_coeff * ellint_3(ellint_k, Pi_m2_ellint_n, ellint_phi);
-    Pi_m2 = Pi_m2_coeff * (ellint1_phi + third<Real>() * Pi_m2_ellint_n * ellint_sin_phi3 * ellint_rj(ellint_cos_phi2, 1 - ellint_m * ellint_sin_phi2, 1, 1 - Pi_m2_ellint_n * ellint_sin_phi2));
+    Pi_m2 = Pi_m2_coeff * (ellint1_phi + third<Real>() * Pi_m2_ellint_n * ellint_sin_phi3 * ellint_rj(ellint_cos_phi2, ellint_y, 1, 1 - Pi_m2_ellint_n * ellint_sin_phi2));
     I_p = F2 / (r3 - rp) - Pi_p2;
     I_m = F2 / (r3 - rm) - Pi_m2;
 
@@ -100,9 +102,9 @@ public:
 
       using boost::math::ellint_rd;
       // E2 = E2_coeff * boost::math::ellint_2(ellint_k, ellint_phi);
-      E2 = E2_coeff * (ellint1_phi - third<Real>() * ellint_m * ellint_sin_phi3 * ellint_rd(ellint_cos_phi2, 1 - ellint_m * ellint_sin_phi2, 1));
+      E2 = E2_coeff * (ellint1_phi - third<Real>() * ellint_m * ellint_sin_phi3 * ellint_rd(ellint_cos_phi2, ellint_y, 1));
       // Pi_12 = F2_coeff * boost::math::ellint_3(ellint_k, Pi_12_ellint_n, ellint_phi);
-      Pi_12 = F2_coeff * (ellint1_phi + third<Real>() * Pi_12_ellint_n * ellint_sin_phi3 * ellint_rj(ellint_cos_phi2, 1 - ellint_m * ellint_sin_phi2, 1, 1 - Pi_12_ellint_n * ellint_sin_phi2));
+      Pi_12 = F2_coeff * (ellint1_phi + third<Real>() * Pi_12_ellint_n * ellint_sin_phi3 * ellint_rj(ellint_cos_phi2, ellint_y, 1, 1 - Pi_12_ellint_n * ellint_sin_phi2));
       I1 = r3 * F2 + (r4 - r3) * Pi_12;
       I2 = -E2 + sqrt(-((eta + MY_SQUARE(a - lambda)) * (MY_SQUARE(a) + (-2 + r) * r)) +
                       MY_SQUARE(MY_SQUARE(a) - a * lambda + MY_SQUARE(r))) / (r - r3) -
