@@ -122,11 +122,10 @@ public:
     if (this->data.calc_t_f && !isinf(this->data.r_o)) {
       alpha2 = MY_SQUARE(alpha_0);
       R1_alpha_0 = R1(alpha_0);
-      using boost::math::ellint_rd;
       R2_alpha_0 = ((-1 + alpha2) * ellint_m * (1 + alpha_0 * ellint_cos_phi) *
                     (ellint1_phi - 2 * R1_alpha_0) +
                     alpha2 * (1 + alpha_0 * ellint_cos_phi) *
-                    (third<Real>() * ellint_m * ellint_rd(ellint_c - 1, ellint_c - ellint_m, ellint_c) + R1_alpha_0) -
+                    (ellint_2(ellint_k, ellint_phi) - ellint1_phi + R1_alpha_0) -
                     MY_CUBE(alpha_0) * ellint_sin_phi * sqrt(1 - ellint_m * MY_SQUARE(ellint_sin_phi))) /
                    ((-1 + alpha2) * (alpha2 * (-1 + ellint_m) - ellint_m) *
                     (1 + alpha_0 * ellint_cos_phi));
