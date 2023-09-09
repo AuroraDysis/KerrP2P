@@ -47,8 +47,9 @@ endif ()
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/src/optim)
+include_directories(${PROJECT_SOURCE_DIR}/src/optim/BaseMatrixOps)
 
-set(SOURCE_FILES src/Common.h src/ForwardRayTracing.h src/GIntegral.h src/IIntegral2.h src/IIntegral3.h src/ObjectPool.h src/Utils.h src/NelderMead.h "src/Integral.h")
+set(SOURCE_FILES src/Common.h src/ForwardRayTracing.h src/GIntegral.h src/IIntegral2.h src/IIntegral3.h src/ObjectPool.h src/Utils.h src/Integral.h)
 
 add_executable(forward_ray_tracing src/Main.cpp ${SOURCE_FILES})
 target_link_libraries(forward_ray_tracing PRIVATE ${LIBRARIES})
@@ -60,7 +61,8 @@ add_executable(tests tests/Test.cpp
         tests/TestData.h
         tests/TestData.cpp
         ${SOURCE_FILES}
-        tests/Main.cpp "tests/EllipticTest.cpp")
+        tests/Main.cpp
+        tests/EllipticTest.cpp)
 target_compile_definitions(tests PRIVATE TESTS)
 target_link_libraries(tests PRIVATE ${LIBRARIES} Catch2::Catch2)
 

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "ForwardRayTracing.h"
-#include "NelderMead.h"
+
+#define OPTIM_ENABLE_EIGEN_WRAPPERS
+#include "optim/optim.hpp"
 
 #include <oneapi/tbb.h>
 #include <Eigen/Dense>
@@ -60,7 +62,7 @@ public:
     ray_tracing->calc_t_f = false;
   }
 
-  Real operator()(Vector x) {
+  Vector operator()(Vector x, void *opt_data) {
     auto &rc = x[0];
     auto &lgd = x[1];
     params.rc = rc;
@@ -85,7 +87,7 @@ public:
     fmt::println("rc: {}, lgd: {}, theta_f: {}, phi_f: {}", x[0], x[1], ray_tracing->theta_f, ray_tracing->phi_f);
     fmt::println("residual: {}, {}", residual[0], residual[1]);
 #endif
-    return residual.norm();
+    return residual;
   }
 };
 
@@ -104,15 +106,15 @@ struct ForwardRayTracingUtils {
 
   static ForwardRayTracingResult<Real, Complex>
   find_result(ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o) {
-    Eigen::Vector<Real, 2> x = Eigen::Vector<Real, 2>();
+    Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
     x << params.rc, params.lgd;
 
     RootFunctor<Real, Complex> root_functor(params, period, std::move(theta_o), std::move(phi_o));
-
-    NelderMeadOptimizerParams<Real> settings;
-    auto xout = NelderMeadOptimizer(root_functor, x, settings);
-
-    root_functor(xout);
+    optim::algo_settings_t settings;
+    settings.rel_objfn_change_tol = ErrorLimit<double>::Value;
+    settings.rel_sol_change_tol = ErrorLimit<double>::Value;
+    optim::broyden_df(x, root_functor, nullptr, settings);
+    root_functor(x, nullptr);
 
     return root_functor.ray_tracing->to_result();
   }
