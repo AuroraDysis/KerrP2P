@@ -22,9 +22,7 @@ public:
   Real jacobi_sn_k1, jacobi_sn_k1_prime;
   Real one_over_umaa_sqrt;
 
-  Real ellint_sin_phi;
-  Real ellint_theta;
-  Real ellint_cos_theta, ellint_sin_theta, ellint_cos_theta2, ellint_sin_theta2;
+  Real ellint_sin_phi, ellint_cos_theta, ellint_sin_theta, ellint_cos_theta2, ellint_sin_theta2, ellint_y;
   Real ellint_1_phi, ellint_2_phi, ellint_3_phi;
 
   void G_theta_phi_t(std::array<Real, 3> &G_arr, const Real &theta) {
@@ -41,16 +39,16 @@ public:
     ellint_cos_theta2 = 1 - ellint_sin_theta2;
     ellint_cos_theta = sqrt(ellint_cos_theta2);
     CHECK_VAR_INT_RANGE(ellint_cos_theta, 0, 1);
-    ellint_theta = asin(ellint_sin_theta);
 
+    ellint_y = 1 - ellint_kappa2 * ellint_sin_theta2;
     // ellint_1_phi = boost::math::ellint_1(ellint_kappa, ellint_theta);
-    ellint_1_phi = ellint_sin_theta * boost::math::ellint_rf(ellint_cos_theta2, 1 - ellint_kappa2 * ellint_sin_theta2, 1);
+    ellint_1_phi = ellint_sin_theta * boost::math::ellint_rf(ellint_cos_theta2, ellint_y, 1);
     // ellint_2_phi = boost::math::ellint_2(ellint_kappa, ellint_theta);
     ellint_2_phi = ellint_1_phi - third<Real>() * ellint_kappa2 * ellint_sin_theta2 * ellint_sin_theta *
-								  boost::math::ellint_rd(ellint_cos_theta2, 1 - ellint_kappa2 * ellint_sin_theta2, 1);
+								  boost::math::ellint_rd(ellint_cos_theta2, ellint_y, 1);
     // ellint_3_phi = boost::math::ellint_3(ellint_kappa, ellint_alpha1_2, ellint_theta);
     ellint_3_phi = ellint_1_phi + third<Real>() * ellint_alpha1_2 * ellint_sin_theta2 * ellint_sin_theta *
-								  boost::math::ellint_rj(ellint_cos_theta2, 1 - ellint_kappa2 * ellint_sin_theta2, 1, 1 - ellint_alpha1_2 * ellint_sin_theta2);
+								  boost::math::ellint_rj(ellint_cos_theta2, ellint_y, 1, 1 - ellint_alpha1_2 * ellint_sin_theta2);
     G_arr[0] = -one_over_umaa_sqrt * ellint_kappa_prime * ellint_1_phi;
     G_arr[1] = -one_over_umaa_sqrt * ellint_kappa_prime / ellint_alpha1_2 *
                (MY_SQUARE(ellint_kappa_prime) * up *
@@ -59,9 +57,7 @@ public:
     G_arr[2] = um *
                (one_over_umaa_sqrt * ellint_one_over_kappa_prime * (ellint_2_phi -
                                                                     ellint_kappa2 * ellint_sin_theta *
-                                                                    ellint_cos_theta / sqrt(1 - ellint_kappa2 *
-                                                                                                MY_SQUARE(
-                                                                                                    ellint_sin_theta))) +
+                                                                    ellint_cos_theta / sqrt(ellint_y)) +
                 G_arr[0]);
   }
 
