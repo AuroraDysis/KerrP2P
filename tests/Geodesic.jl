@@ -7,10 +7,16 @@ mutable struct KerrCache{T<:AbstractFloat}
     M::T
     a::T
     λ::T
-    rh::T
+    rh::T # horizon radius
+    ro::T # observer radius
 end
 
-function calc_ray(M::T, a::T, pos::Array{T, 1}, λ::T, η::T, ν_r::Int, ν_θ::Int) where T <: AbstractFloat
+function stop_condition_r(u, t, integrator)
+    @unpack rh, ro = integrator.p
+    u[2] <= 1.01 * rh || u[2] >= ro
+end
+
+function calc_ray(M::T, a::T, pos::Array{T, 1}, λ::T, η::T, ν_r::Int, ν_θ::Int, ro::T, atol::T, rtol::T) where T <: AbstractFloat
     t, r, θ, ϕ = pos
 
     sinθ, cosθ = sincos(θ)
@@ -33,27 +39,21 @@ function calc_ray(M::T, a::T, pos::Array{T, 1}, λ::T, η::T, ν_r::Int, ν_θ::
     θdot = ν_θ * sqrt(Theta) / Σ
     ϕdot = (a / Δ * (r^2 + a^2 - a * λ) + λ / sinθ^2 - a) / Σ
 
-    xdot = [tdot, rdot, θdot, ϕdot]
-
-    gdn = zeros(4, 4)
-    gdn[1, 1] = gtt
-    gdn[2, 2] = grr
-    gdn[3, 3] = gθθ
-    gdn[4, 4] = gϕϕ
-    gdn[4, 1] = gdn[1, 4] = gϕt
-    
-    # transpose(xdot) * gdn * xdot ~= 0
+    # null geodesic condition
+    cond = rdot^2 * grr + tdot^2 * gtt + θdot^2 * gθθ + 2 * tdot * ϕdot * gϕt + ϕdot^2 * gϕϕ
+    @assert isapprox(cond, 0.0, atol=10 * eps(T)) "null geodesic condition is not satisfied"
 
     pr = grr * rdot
     pθ = gθθ * θdot
 
     rh = M + sqrt(M^2 - a^2)
-    cache = KerrCache{T}(M, a, λ, rh)
+    cache = KerrCache{T}(M, a, λ, rh, ro)
 
     u0 = [t, r, θ, ϕ, pr, pθ]
-    prob = ODEProblem(eom_back!, u0, (zero(T), T(1000)), cache)
-    # only save the last point
-    sol = solve(prob, Vern8(), reltol=1e-10, abstol=1e-10, saveat=[T(1000)])
+    prob = ODEProblem(eom_back!, u0, (zero(T), typemax(T)), cache)
+    cb = ContinuousCallback(stop_condition_r, igt -> terminate!(igt))
+    # only save the last step
+    sol = solve(prob, Vern8(), reltol=1e-10, abstol=1e-10, save_start = false, save_everystep = false, callback=cb)
 
     print(sol[end])
 end
@@ -75,8 +75,10 @@ end
 function main()
     λ = -0.7511316141196980351821846354387491739005901369953212373679122913636
     η = 26.5724289697094692725198762793446996667830541429568972667550981404403
-
-    calc_ray(1.0, 0.8, [0.0, 10.0, pi / 2, 0.0], λ, η, -1, -1)
+    ro = 1000.0
+    atol = 1e-10
+    rtol = 1e-10
+    calc_ray(1.0, 0.8, [0.0, 10.0, pi / 2, 0.0], λ, η, -1, -1, ro, atol, rtol)
 end
 
 main()
