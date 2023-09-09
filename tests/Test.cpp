@@ -15,6 +15,7 @@ std::vector<T> as_vector(boost::property_tree::ptree const& pt, boost::property_
 TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
   using Real = std::tuple_element_t<0u, TestType>;
   using Complex = std::tuple_element_t<1u, TestType>;
+  fmt::println("[{}, {}] Error limit: {}", typeid(Real).name(), typeid(Complex).name(), ErrorLimit<Real>::Value);
 
   for (const auto &data : TEST_DATA) {
     ForwardRayTracingParams<Real> params;
@@ -57,20 +58,20 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
     Real theta_f = boost::lexical_cast<Real>(data.get<string>("theta_f"));
     Real phi_f = boost::lexical_cast<Real>(data.get<string>("phi_f"));
 
-    Real ERROR_LIMIT = ErrorLimit<Real>::Value;
+    const Real &error_limit = ErrorLimit<Real>::Value;
 
-    CHECK(abs(forward.r1_c - r1) < ERROR_LIMIT);
-    CHECK(abs(forward.r2_c - r2) < ERROR_LIMIT);
-    CHECK(abs(forward.r3_c - r3) < ERROR_LIMIT);
-    CHECK(abs(forward.r4_c - r4) < ERROR_LIMIT);
-    CHECK(abs(forward.radial_integrals[0] - radial_integrals[0]) < ERROR_LIMIT);
-    CHECK(abs(forward.radial_integrals[1] - radial_integrals[1]) < ERROR_LIMIT);
-    CHECK(abs(forward.radial_integrals[2] - radial_integrals[2]) < ERROR_LIMIT);
-    CHECK(abs(forward.angular_integrals[0] - angular_integrals[0]) < ERROR_LIMIT);
-    CHECK(abs(forward.angular_integrals[1] - angular_integrals[1]) < ERROR_LIMIT);
-    CHECK(abs(forward.angular_integrals[2] - angular_integrals[2]) < ERROR_LIMIT);
-    CHECK(abs(forward.theta_f - theta_f) < ERROR_LIMIT);
-    CHECK(abs(forward.phi_f - phi_f) < ERROR_LIMIT);
+    CHECK(abs(forward.r1_c - r1) < error_limit);
+    CHECK(abs(forward.r2_c - r2) < error_limit);
+    CHECK(abs(forward.r3_c - r3) < error_limit);
+    CHECK(abs(forward.r4_c - r4) < error_limit);
+    CHECK(abs(forward.radial_integrals[0] - radial_integrals[0]) < error_limit);
+    CHECK(abs(forward.radial_integrals[1] - radial_integrals[1]) < error_limit);
+    CHECK(abs(forward.radial_integrals[2] - radial_integrals[2]) < error_limit);
+    CHECK(abs(forward.angular_integrals[0] - angular_integrals[0]) < error_limit);
+    CHECK(abs(forward.angular_integrals[1] - angular_integrals[1]) < error_limit);
+    CHECK(abs(forward.angular_integrals[2] - angular_integrals[2]) < error_limit);
+    CHECK(abs(forward.theta_f - theta_f) < error_limit);
+    CHECK(abs(forward.phi_f - phi_f) < error_limit);
   }
 }
 

@@ -11,7 +11,7 @@ public:
 #else
 private:
 #endif
-  Real ellint_phi_rs, ellint_phi_ro, ellint_k;
+  Real ellint_phi_rs, ellint_phi_ro, ellint_sin_phi_rs, ellint_sin_phi_ro, ellint_k;
   Real E2_coeff, F2_coeff, Pi_p2_coeff, Pi_m2_coeff, Pi_p2_ellint_n, Pi_m2_ellint_n;
 
   Real F2, Pi_p2, Pi_m2, I_p, I_m;
@@ -34,12 +34,16 @@ public:
     const Real &r_s = this->data.r_s;
     const Real &r_o = this->data.r_o;
 
-    ellint_phi_rs = asin(sqrt(((r1 - r3) * (r_s - r4)) / ((r_s - r3) * (r1 - r4))));
+    ellint_sin_phi_rs = sqrt(((r1 - r3) * (r_s - r4)) / ((r_s - r3) * (r1 - r4)));
+    CHECK_SIN_RANGE(ellint_sin_phi_rs);
+    ellint_phi_rs = asin(ellint_sin_phi_rs);
     if (isinf(r_o)) {
-      ellint_phi_ro = asin(sqrt((r1 - r3) / (r1 - r4)));
+      ellint_sin_phi_ro = sqrt((r1 - r3) / (r1 - r4));
     } else {
-      ellint_phi_ro = asin(sqrt(((r1 - r3) * (r_o - r4)) / ((r_o - r3) * (r1 - r4))));
+      ellint_sin_phi_ro = sqrt(((r1 - r3) * (r_o - r4)) / ((r_o - r3) * (r1 - r4)));
     }
+    CHECK_SIN_RANGE(ellint_sin_phi_rs);
+    ellint_phi_ro = asin(ellint_sin_phi_ro);
     ellint_k = sqrt(((-r2 + r3) * (-r1 + r4)) / ((r1 - r3) * (r2 - r4)));
 
     E2_coeff = sqrt((r1 - r3) * (r2 - r4));

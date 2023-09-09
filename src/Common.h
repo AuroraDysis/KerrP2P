@@ -143,16 +143,5 @@ struct HigherPrecision<std::complex<double>> {
 // ErrorLimit
 template <typename T>
 struct ErrorLimit {
-  inline static const T Value;
+  inline static const T Value = std::numeric_limits<T>::epsilon() * 1000000;
 };
-
-template <>
-inline const double ErrorLimit<double>::Value = 1e-10;
-
-#ifdef FLOAT128
-template <>
-inline const boost::multiprecision::float128 ErrorLimit<boost::multiprecision::float128>::Value{"1e-29"};
-#endif
-
-template <>
-inline const BigFloatReal ErrorLimit<BigFloatReal>::Value{"1e-45"};

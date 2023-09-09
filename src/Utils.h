@@ -226,7 +226,7 @@ struct ForwardRayTracingUtils {
     }
 
     std::vector<Point> theta_roots_closest_index;
-    theta_roots_closest_index.reserve(std::max(theta_roots_index.size(), cutoff));
+    theta_roots_closest_index.reserve(theta_roots_index.size());
     std::vector<double> distances(theta_roots_index.size());
     bgi::rtree<Point, bgi::quadratic<16>> rtree(phi_roots_index);
     for (size_t i = 0; i < theta_roots_index.size(); i++) {

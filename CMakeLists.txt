@@ -12,6 +12,7 @@ if (WIN32)
     SET(ENABLE_BIGFLOAT_MPFR OFF)
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+    add_definitions(-DNOMINMAX)
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
