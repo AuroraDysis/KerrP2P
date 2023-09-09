@@ -51,10 +51,11 @@ function calc_ray(M::T, a::T, pos::Array{T, 1}, λ::T, η::T, ν_r::Int, ν_θ::
     cache = KerrCache{T}(M, a, λ, rh)
 
     u0 = [t, r, θ, ϕ, pr, pθ]
-    prob = ODEProblem(eom_back!, u0, (zero(T), T(100)), cache)
-    sol = solve(prob, Tsit5(), reltol=1e-8, abstol=1e-8)
+    prob = ODEProblem(eom_back!, u0, (zero(T), T(1000)), cache)
+    # only save the last point
+    sol = solve(prob, Vern8(), reltol=1e-10, abstol=1e-10, saveat=[T(1000)])
 
-    sol
+    print(sol[end])
 end
 
 function eom_back!(du::Array{T, 1}, u::Array{T, 1}, p::KerrCache{T}, t::T) where T <: AbstractFloat
@@ -62,12 +63,12 @@ function eom_back!(du::Array{T, 1}, u::Array{T, 1}, p::KerrCache{T}, t::T) where
     t, r, θ, ϕ, pr, pθ = u
 
     @inbounds begin
-        du[1] = 1 + (4 * r * (a^2 - a * λ + r^2)) / ((a^2 + (-2 + r) * r) * (a^2 + 2 * r^2 + a^2 * cos(2 * θ)))
-        du[2] = (pr * (a^2 + (-2 + r) * r)) / (r^2 + a^2 * cos(θ)^2)
-        du[3] = pθ / (r^2 + a^2 * cos(θ)^2)
-        du[4] = (2 * (a * (-a * λ + 2 * r) + λ * (a^2 + (-2 + r) * r) * csc(θ)^2)) / ((a^2 + (-2 + r) * r) * (a^2 + 2 * r^2 + a^2 * cos(2 * θ)))
-        du[5] = ((pθ^2 + pr^2 * (a^2 - r)) * r - a^2 * pr^2 * (-1 + r) * cos(θ)^2) / (r^2 + a^2 * cos(θ)^2)^2
-        du[6] = (-((2 * a^2 * (a^4 * pr^2 + 4 * a * λ * r + a^2 * (pθ^2 + 2 * (-1 + pr^2 * (-2 + r)) * r) + r * (pθ^2 * (-2 + r) + (pr^2 * (-2 + r)^2 - 2 * r) * r)) * sin(2 * θ))) / ((a^2 + (-2 + r) * r) * (a^2 + 2 * r^2 + a^2 * cos(2 * θ))^2)) + (λ^2 * (cot(θ) * csc(θ)^2 + (4 * a^4 * r * sin(2 * θ)) / ((a^2 + (-2 + r) * r) * (a^2 + 2 * r^2 + a^2 * cos(2 * θ))^2))) / (a^2 + r^2)
+        du[1] = 4 * r .* (-λ .* a + a .^ 2 + r .^ 2) ./ ((a .^ 2 + r .* (r - 2)) .* (a .^ 2 .* cos(2 * θ) + a .^ 2 + 2 * r .^ 2)) + 1
+        du[2] = pr .* (a .^ 2 + r .* (r - 2)) ./ (a .^ 2 .* cos(θ) .^ 2 + r .^ 2)
+        du[3] = pθ ./ (a .^ 2 .* cos(θ) .^ 2 + r .^ 2)
+        du[4] = (2 * λ .* (a .^ 2 + r .* (r - 2)) .* csc(θ) .^ 2 + 2 * a .* (-λ .* a + 2 * r)) ./ ((a .^ 2 + r .* (r - 2)) .* (a .^ 2 .* cos(2 * θ) + a .^ 2 + 2 * r .^ 2))
+        du[5] = (-a .^ 2 .* pr .^ 2 .* (r - 1) .* cos(θ) .^ 2 + r .* (pr .^ 2 .* (a .^ 2 - r) + pθ .^ 2)) ./ (a .^ 2 .* cos(θ) .^ 2 + r .^ 2) .^ 2 + (-6 * λ .^ 2 .* a .^ 4 .* r + 4 * λ .^ 2 .* r .* (a .^ 2 + r .* (r - 2)) .^ 2 .* csc(θ) .^ 2 + 12 * λ .* a .^ 2 .* r .^ 2 .* (λ + a) + 2 * a .^ 4 .* (-λ + a) .^ 2 + 2 * a .^ 2 .* (-λ .^ 2 .* a .^ 2 .* r + a .^ 2 .* (-λ + a) .^ 2 + 2 * a .* r .^ 2 .* (λ + a) + r .^ 4 - 4 * r .^ 3) .* cos(2 * θ) - 6 * a .* r .^ 4 .* (-4 * λ + a) + 8 * a .* r .^ 3 .* (-λ .^ 2 .* a - 4 * λ + a) - 4 * r .^ 6) ./ ((a .^ 2 + r .* (r - 2)) .^ 2 .* (a .^ 2 .* cos(2 * θ) + a .^ 2 + 2 * r .^ 2) .^ 2)
+        du[6] = λ .^ 2 .* (4 * a .^ 4 .* r .* sin(2 * θ) ./ ((a .^ 2 + r .* (r - 2)) .* (a .^ 2 .* cos(2 * θ) + a .^ 2 + 2 * r .^ 2) .^ 2) + cot(θ) .* csc(θ) .^ 2) ./ (a .^ 2 + r .^ 2) - 2 * a .^ 2 .* (4 * λ .* a .* r + a .^ 4 .* pr .^ 2 + a .^ 2 .* (pθ .^ 2 + 2 * r .* (pr .^ 2 .* (r - 2) - 1)) + r .* (pθ .^ 2 .* (r - 2) + r .* (pr .^ 2 .* (r - 2) .^ 2 - 2 * r))) .* sin(2 * θ) ./ ((a .^ 2 + r .* (r - 2)) .* (a .^ 2 .* cos(2 * θ) + a .^ 2 + 2 * r .^ 2) .^ 2)
     end
 end
 
