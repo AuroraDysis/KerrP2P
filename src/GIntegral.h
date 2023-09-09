@@ -30,6 +30,8 @@ public:
   void G_theta_phi_t(std::array<Real, 3> &G_arr, const Real &theta) {
     const Real &up = this->data.up;
     const Real &um = this->data.um;
+
+    // https://dlmf.nist.gov/19.7.E5
     ellint_sin_phi = cos(theta) * one_over_sqrt_up;
     CHECK_VAR_INT_RANGE(ellint_sin_phi, -1 ,1);
     ellint_sin_theta = (sqrt(1 + ellint_m) * ellint_sin_phi) / sqrt(1 + ellint_m * MY_SQUARE(ellint_sin_phi));
@@ -38,7 +40,6 @@ public:
     CHECK_VAR_INT_RANGE(ellint_cos_theta, -1, 1);
     ellint_theta = asin(ellint_sin_theta);
 
-    // https://dlmf.nist.gov/19.7.E5
     ellint_1_phi = boost::math::ellint_1(ellint_kappa, ellint_theta);
     ellint_2_phi = boost::math::ellint_2(ellint_kappa, ellint_theta);
     ellint_3_phi = boost::math::ellint_3(ellint_kappa, ellint_alpha1_2, ellint_theta);
