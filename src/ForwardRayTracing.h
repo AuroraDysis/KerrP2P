@@ -222,7 +222,7 @@ public:
   Real lambda, q, eta;
 
   // auto initialized
-  RayStatus ray_status = RayStatus::NORMAL;
+  RayStatus ray_status;
   Real delta_theta, up, um, theta_p, theta_m;
   Complex r1_c, r2_c, r3_c, r4_c;
   Real r1, r2, r3, r4;
