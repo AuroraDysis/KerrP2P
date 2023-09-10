@@ -284,7 +284,7 @@ internal::broyden_df_impl(
             BMO_MATOPS_ARRAY_DIV_ARRAY(s, (BMO_MATOPS_ARRAY_ADD_SCALAR(BMO_MATOPS_ABS(x), OPTIM_FPN_SMALL_NUMBER))));
 
     // B += (y - B*s) * BMO_MATOPS_TRANSPOSE(s) / BMO_MATOPS_DOT_PROD(s,s); // step 5
-    B += (s - B * y) * BMO_MATOPS_TRANSPOSE(y) / ((y).dot(y) + 1.0e-14);
+    B += (s - B * y) * (y).transpose() / ((y).dot(y) + 1.0e-14);
 
     OPTIM_BROYDEN_DF_TRACE(0, rel_objfn_change, rel_sol_change, x_p, d, objfn_vec_p, lambda, s, y, B);
 
@@ -329,7 +329,7 @@ internal::broyden_df_impl(
         y = objfn_vec_p - objfn_vec;
 
         // B += (y - B*s) * s.t() / BMO_MATOPS_DOT_PROD(s,s);
-        B += (s - B * y) * BMO_MATOPS_TRANSPOSE(y) / ((y).dot(y) + 1.0e-14); // update B
+        B += (s - B * y) * (y).transpose() / ((y).dot(y) + 1.0e-14); // update B
 
         //
 
@@ -463,7 +463,7 @@ internal::broyden_df_impl(
             BMO_MATOPS_ARRAY_DIV_ARRAY(s, (BMO_MATOPS_ARRAY_ADD_SCALAR(BMO_MATOPS_ABS(x), OPTIM_FPN_SMALL_NUMBER))));
 
     // B += (y - B*s) * s.t() / BMO_MATOPS_DOT_PROD(s,s); // step 5
-    B += (s - B * y) * BMO_MATOPS_TRANSPOSE(y) / ((y).dot(y) + 1.0e-14); // update B
+    B += (s - B * y) * (y).transpose() / ((y).dot(y) + 1.0e-14); // update B
 
     OPTIM_BROYDEN_DF_TRACE(0, rel_objfn_change, rel_sol_change, x_p, d, objfn_vec_p, lambda, s, y, B);
 
@@ -506,7 +506,7 @@ internal::broyden_df_impl(
             B = BMO_MATOPS_INV(jacob_objfn(x_p, jacob_data));
         } else {
             // B += (y - B*s) * s.t() / BMO_MATOPS_DOT_PROD(s,s);
-            B += (s - B * y) * BMO_MATOPS_TRANSPOSE(y) / ((y).dot(y) + 1.0e-14); // update B
+            B += (s - B * y) * (y).transpose() / ((y).dot(y) + 1.0e-14); // update B
         }
 
         rel_objfn_change = (((y).array() /
