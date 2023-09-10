@@ -280,8 +280,8 @@ internal::broyden_df_impl(
 
     rel_objfn_change = (((y).array() /
                          (((((objfn_vec).cwiseAbs()).array() + (fp_t(1e-08))).matrix())).array()).matrix()).norm();
-    fp_t rel_sol_change = BMO_MATOPS_L1NORM(
-            BMO_MATOPS_ARRAY_DIV_ARRAY(s, (BMO_MATOPS_ARRAY_ADD_SCALAR(BMO_MATOPS_ABS(x), OPTIM_FPN_SMALL_NUMBER))));
+    fp_t rel_sol_change = (((s).array() / (((((x).cwiseAbs()).array() +
+                                             (fp_t(1e-08))).matrix())).array()).matrix()).array().abs().sum();
 
     // B += (y - B*s) * BMO_MATOPS_TRANSPOSE(s) / BMO_MATOPS_DOT_PROD(s,s); // step 5
     B += (s - B * y) * (y).transpose() / ((y).dot(y) + 1.0e-14);
@@ -420,7 +420,7 @@ internal::broyden_df_impl(
     ColVec_t x = init_out_vals;
     ColVec_t d = bmo::ColVec_t::Zero(n_vals);
 
-    Mat_t B = BMO_MATOPS_INV(jacob_objfn(x, jacob_data)); // inverse Jacobian
+    Mat_t B = (jacob_objfn(x, jacob_data)).inverse(); // inverse Jacobian
 
     ColVec_t objfn_vec = opt_objfn(x, opt_data);
 
