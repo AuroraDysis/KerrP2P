@@ -241,7 +241,7 @@ internal::broyden_df_impl(
     ColVec_t x = init_out_vals;
     ColVec_t d = BMO_MATOPS_ZERO_COLVEC(n_vals);
 
-    Mat_t B = BMO_MATOPS_EYE(n_vals); // initial approx. to Jacobian
+    Mat_t B = bmo::Mat_t::Identity(n_vals, n_vals); // initial approx. to Jacobian
 
     ColVec_t objfn_vec = opt_objfn(x, opt_data);
 
