@@ -129,6 +129,9 @@ void define_numerical_type(pybind11::module_& mod, const char* name, bool is_com
 		.def(py::self -= float())
 		.def(py::self *= float())
 		.def(py::self /= float())
+		.def("assign", [](T& self, const std::string& value) {
+			self.assign(value);
+		})
 		.def("__repr__", [](const T& self) { return self.str(std::numeric_limits<T>::max_digits10); });
 
 	if (is_complex) {
