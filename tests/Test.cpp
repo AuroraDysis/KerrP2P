@@ -75,7 +75,7 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
   }
 }
 
-TEMPLATE_TEST_CASE("Find Root Function", "[root]", Test64) {
+TEMPLATE_TEST_CASE("Find Root Function", "[root]", TEST_TYPES) {
   using Real = std::tuple_element_t<0u, TestType>;
   using Complex = std::tuple_element_t<1u, TestType>;
 

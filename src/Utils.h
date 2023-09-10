@@ -134,18 +134,13 @@ struct ForwardRayTracingUtils {
                                                           : RootFunctor<Real, Complex>(local_params, period,
                                                                                        std::move(theta_o),
                                                                                        std::move(phi_o));
-        AlgoParams<Real> settings;
-        settings.rel_sol_change_tol = ErrorLimit<Real>::Value;
-        // settings.print_level = 0;
+
         BroydenDF<Real, 2> solver;
-        bool success = solver.broyden_df(x, root_functor, nullptr, settings);
-        // fmt::println("broyden_df: {}", success);
-        //if (!success) {
-        //    FindRootResult<Real, Complex> result;
-        //    result.success = false;
-        //    result.fail_reason = "broyden_df not converged";
-        //    return result;
-        //}
+        AlgoParams<Real> settings;
+#ifdef PRINT_DEBUG
+        settings.print_level = 1;
+#endif
+        solver.broyden_df(x, root_functor, nullptr, settings);
 
         auto residual = root_functor(x, nullptr);
         FindRootResult<Real, Complex> result;
