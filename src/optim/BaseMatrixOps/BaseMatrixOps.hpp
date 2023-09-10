@@ -21,17 +21,8 @@
 #ifndef BMO_INCLUDES
 #define BMO_INCLUDES
 
-//
-
 #include "misc/bmo_options.hpp"
 
-#include "misc/misc_math.hpp"
 #include "core/bmo_core.hpp"
-
-#ifdef BMO_ENABLE_EXTRA_FEATURES
-    #include "extra/bmo_extra.hpp"
-#endif
-
-//
 
 #endif
