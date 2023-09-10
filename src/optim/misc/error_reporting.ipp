@@ -22,6 +22,9 @@
  * Error reporting
  */
 
+#define BMO_MATOPS_COUT std::cout
+#define BMO_MATOPS_TRANSPOSE_INPLACE(x) (x).transpose()
+
 inline
 void
 error_reporting(

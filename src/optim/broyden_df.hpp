@@ -25,6 +25,18 @@
 #ifndef _optim_broyden_df_HPP
 #define _optim_broyden_df_HPP
 
+#define BMO_MATOPS_EYE(n) bmo::Mat_t::Identity(n,n)
+#define BMO_MATOPS_L1NORM(x) (x).array().abs().sum()
+#define BMO_MATOPS_L2NORM(x) (x).norm()
+#define BMO_MATOPS_SIZE(x) static_cast<size_t>((x).size())
+#define BMO_MATOPS_TRANSPOSE(x) (x).transpose()
+#define BMO_MATOPS_INV(x) (x).inverse()
+#define BMO_MATOPS_ZERO_COLVEC(n) bmo::ColVec_t::Zero(n)
+#define BMO_MATOPS_DOT_PROD(x, y) (x).dot(y)
+#define BMO_MATOPS_ABS(x) (x).cwiseAbs()
+#define BMO_MATOPS_ARRAY_ADD_SCALAR(x, a) ((x).array() + (a)).matrix()
+#define BMO_MATOPS_ARRAY_DIV_ARRAY(x, y)  ((x).array() / (y).array()).matrix()
+
 /**
  * @brief Derivative-free variant of Broyden's method due to Li and Fukushima (2000)
  *
@@ -166,9 +178,9 @@ namespace internal {
 
         // check: || F(x_k + lambda*d_k) || <= ||F(x_k)||*(1+eta_k) - sigma_1*||lambda*d_k||^2
 
-        fp_t Fx = (opt_objfn(x_vals, opt_data)).norm();
-        fp_t Fx_p = (opt_objfn(x_vals + lambda * direc, opt_data)).norm();
-        fp_t direc_norm2 = (direc).dot(direc);
+        fp_t Fx = BMO_MATOPS_L2NORM(opt_objfn(x_vals, opt_data));
+        fp_t Fx_p = BMO_MATOPS_L2NORM(opt_objfn(x_vals + lambda * direc, opt_data));
+        fp_t direc_norm2 = BMO_MATOPS_DOT_PROD(direc, direc);
 
         fp_t term_2 = sigma_1 * (lambda * lambda) * direc_norm2;
         fp_t term_3 = eta_k * Fx;
@@ -186,7 +198,7 @@ namespace internal {
             ++iter;
             lambda *= beta; // lambda_i = beta^i;
 
-            Fx_p = (opt_objfn(x_vals + lambda * direc, opt_data)).norm();
+            Fx_p = BMO_MATOPS_L2NORM(opt_objfn(x_vals + lambda * direc, opt_data));
             term_2 = sigma_1 * (lambda * lambda) * direc_norm2;
 
             if (Fx_p <= Fx - term_2 + term_3) {
@@ -215,7 +227,7 @@ internal::broyden_df_impl(
 
     bool success = false;
 
-    const size_t n_vals = static_cast<size_t>((init_out_vals).size());
+    const size_t n_vals = BMO_MATOPS_SIZE(init_out_vals);
 
     // Broyden settings
 
@@ -239,13 +251,13 @@ internal::broyden_df_impl(
     // initialization
 
     ColVec_t x = init_out_vals;
-    ColVec_t d = bmo::ColVec_t::Zero(n_vals);
+    ColVec_t d = BMO_MATOPS_ZERO_COLVEC(n_vals);
 
-    Mat_t B = bmo::Mat_t::Identity(n_vals, n_vals); // initial approx. to Jacobian
+    Mat_t B = BMO_MATOPS_EYE(n_vals); // initial approx. to Jacobian
 
     ColVec_t objfn_vec = opt_objfn(x, opt_data);
 
-    fp_t rel_objfn_change = (objfn_vec).norm();
+    fp_t rel_objfn_change = BMO_MATOPS_L2NORM(objfn_vec);
 
     OPTIM_BROYDEN_DF_TRACE(-1, rel_objfn_change, 0.0, x, d, objfn_vec, 0.0, d, d, B);
 
@@ -253,7 +265,7 @@ internal::broyden_df_impl(
         return true;
     }
 
-    fp_t Fx = (objfn_vec).norm();
+    fp_t Fx = BMO_MATOPS_L2NORM(objfn_vec);
 
     //
 
@@ -261,11 +273,11 @@ internal::broyden_df_impl(
 
     ColVec_t objfn_vec_p = opt_objfn(x + d, opt_data);
 
-    fp_t Fx_p = (objfn_vec_p).norm();
+    fp_t Fx_p = BMO_MATOPS_L2NORM(objfn_vec_p);
 
     fp_t lambda;
 
-    if (Fx_p <= rho * Fx - sigma_2 * (d).dot(d)) {
+    if (Fx_p <= rho * Fx - sigma_2 * BMO_MATOPS_DOT_PROD(d, d)) {
         // step 2
         lambda = 1.0;
     } else {
@@ -278,13 +290,13 @@ internal::broyden_df_impl(
     ColVec_t s = x_p - x;
     ColVec_t y = objfn_vec_p - objfn_vec;
 
-    rel_objfn_change = (((y).array() /
-                         (((((objfn_vec).cwiseAbs()).array() + (fp_t(1e-08))).matrix())).array()).matrix()).norm();
-    fp_t rel_sol_change = (((s).array() / (((((x).cwiseAbs()).array() +
-                                             (fp_t(1e-08))).matrix())).array()).matrix()).array().abs().sum();
+    rel_objfn_change = BMO_MATOPS_L2NORM(BMO_MATOPS_ARRAY_DIV_ARRAY(y, (BMO_MATOPS_ARRAY_ADD_SCALAR(
+            BMO_MATOPS_ABS(objfn_vec), OPTIM_FPN_SMALL_NUMBER))));
+    fp_t rel_sol_change = BMO_MATOPS_L1NORM(
+            BMO_MATOPS_ARRAY_DIV_ARRAY(s, (BMO_MATOPS_ARRAY_ADD_SCALAR(BMO_MATOPS_ABS(x), OPTIM_FPN_SMALL_NUMBER))));
 
     // B += (y - B*s) * BMO_MATOPS_TRANSPOSE(s) / BMO_MATOPS_DOT_PROD(s,s); // step 5
-    B += (s - B * y) * (y).transpose() / ((y).dot(y) + 1.0e-14);
+    B += (s - B * y) * BMO_MATOPS_TRANSPOSE(y) / (BMO_MATOPS_DOT_PROD(y, y) + 1.0e-14);
 
     OPTIM_BROYDEN_DF_TRACE(0, rel_objfn_change, rel_sol_change, x_p, d, objfn_vec_p, lambda, s, y, B);
 
@@ -313,9 +325,9 @@ internal::broyden_df_impl(
 
         //
 
-        Fx_p = (objfn_vec_p).norm();
+        Fx_p = BMO_MATOPS_L2NORM(objfn_vec_p);
 
-        if (Fx_p <= rho * Fx - sigma_2 * (d).dot(d)) {
+        if (Fx_p <= rho * Fx - sigma_2 * BMO_MATOPS_DOT_PROD(d, d)) {
             lambda = 1.0;
         } else {
             lambda = df_proc_1(x, d, sigma_1, iter, opt_objfn, opt_data);
@@ -329,15 +341,14 @@ internal::broyden_df_impl(
         y = objfn_vec_p - objfn_vec;
 
         // B += (y - B*s) * s.t() / BMO_MATOPS_DOT_PROD(s,s);
-        B += (s - B * y) * (y).transpose() / ((y).dot(y) + 1.0e-14); // update B
+        B += (s - B * y) * BMO_MATOPS_TRANSPOSE(y) / (BMO_MATOPS_DOT_PROD(y, y) + 1.0e-14); // update B
 
         //
 
-        rel_objfn_change = (((y).array() /
-                             (((((objfn_vec).cwiseAbs()).array() + (fp_t(1e-08))).matrix())).array()).matrix()).norm();
-        rel_sol_change = BMO_MATOPS_L1NORM(
-                BMO_MATOPS_ARRAY_DIV_ARRAY(s,
-                                           (BMO_MATOPS_ARRAY_ADD_SCALAR(BMO_MATOPS_ABS(x), OPTIM_FPN_SMALL_NUMBER))));
+        rel_objfn_change = BMO_MATOPS_L2NORM(BMO_MATOPS_ARRAY_DIV_ARRAY(y, (BMO_MATOPS_ARRAY_ADD_SCALAR(
+                BMO_MATOPS_ABS(objfn_vec), OPTIM_FPN_SMALL_NUMBER))));
+        rel_sol_change = BMO_MATOPS_L1NORM(BMO_MATOPS_ARRAY_DIV_ARRAY(s, (BMO_MATOPS_ARRAY_ADD_SCALAR(BMO_MATOPS_ABS(x),
+                                                                                                      OPTIM_FPN_SMALL_NUMBER))));
 
         x = x_p;
         objfn_vec = objfn_vec_p;
@@ -394,7 +405,7 @@ internal::broyden_df_impl(
 
     bool success = false;
 
-    const size_t n_vals = static_cast<size_t>((init_out_vals).size());
+    const size_t n_vals = BMO_MATOPS_SIZE(init_out_vals);
 
     // Broyden settings
 
@@ -418,13 +429,13 @@ internal::broyden_df_impl(
     // initialization
 
     ColVec_t x = init_out_vals;
-    ColVec_t d = bmo::ColVec_t::Zero(n_vals);
+    ColVec_t d = BMO_MATOPS_ZERO_COLVEC(n_vals);
 
-    Mat_t B = (jacob_objfn(x, jacob_data)).inverse(); // inverse Jacobian
+    Mat_t B = BMO_MATOPS_INV(jacob_objfn(x, jacob_data)); // inverse Jacobian
 
     ColVec_t objfn_vec = opt_objfn(x, opt_data);
 
-    fp_t rel_objfn_change = (objfn_vec).norm();
+    fp_t rel_objfn_change = BMO_MATOPS_L2NORM(objfn_vec);
 
     OPTIM_BROYDEN_DF_TRACE(-1, rel_objfn_change, 0.0, x, d, objfn_vec, 0.0, d, d, B);
 
@@ -432,7 +443,7 @@ internal::broyden_df_impl(
         return true;
     }
 
-    fp_t Fx = (objfn_vec).norm();
+    fp_t Fx = BMO_MATOPS_L2NORM(objfn_vec);
 
     //
 
@@ -440,11 +451,11 @@ internal::broyden_df_impl(
 
     ColVec_t objfn_vec_p = opt_objfn(x + d, opt_data);
 
-    fp_t Fx_p = (objfn_vec_p).norm();
+    fp_t Fx_p = BMO_MATOPS_L2NORM(objfn_vec_p);
 
     fp_t lambda;
 
-    if (Fx_p <= rho * Fx - sigma_2 * (d).dot(d)) {
+    if (Fx_p <= rho * Fx - sigma_2 * BMO_MATOPS_DOT_PROD(d, d)) {
         // step 2
         lambda = 1.0;
     } else {
@@ -457,13 +468,13 @@ internal::broyden_df_impl(
     ColVec_t s = x_p - x;
     ColVec_t y = objfn_vec_p - objfn_vec;
 
-    rel_objfn_change = (((y).array() /
-                         (((((objfn_vec).cwiseAbs()).array() + (fp_t(1e-08))).matrix())).array()).matrix()).norm();
+    rel_objfn_change = BMO_MATOPS_L2NORM(BMO_MATOPS_ARRAY_DIV_ARRAY(y, (BMO_MATOPS_ARRAY_ADD_SCALAR(
+            BMO_MATOPS_ABS(objfn_vec), OPTIM_FPN_SMALL_NUMBER))));
     fp_t rel_sol_change = BMO_MATOPS_L1NORM(
             BMO_MATOPS_ARRAY_DIV_ARRAY(s, (BMO_MATOPS_ARRAY_ADD_SCALAR(BMO_MATOPS_ABS(x), OPTIM_FPN_SMALL_NUMBER))));
 
     // B += (y - B*s) * s.t() / BMO_MATOPS_DOT_PROD(s,s); // step 5
-    B += (s - B * y) * (y).transpose() / ((y).dot(y) + 1.0e-14); // update B
+    B += (s - B * y) * BMO_MATOPS_TRANSPOSE(y) / (BMO_MATOPS_DOT_PROD(y, y) + 1.0e-14); // update B
 
     OPTIM_BROYDEN_DF_TRACE(0, rel_objfn_change, rel_sol_change, x_p, d, objfn_vec_p, lambda, s, y, B);
 
@@ -486,9 +497,9 @@ internal::broyden_df_impl(
 
         //
 
-        Fx_p = (objfn_vec_p).norm();
+        Fx_p = BMO_MATOPS_L2NORM(objfn_vec_p);
 
-        if (Fx_p <= rho * Fx - sigma_2 * (d).dot(d)) {
+        if (Fx_p <= rho * Fx - sigma_2 * BMO_MATOPS_DOT_PROD(d, d)) {
             lambda = 1.0;
         } else {
             lambda = df_proc_1(x, d, sigma_1, iter, opt_objfn, opt_data);
@@ -506,14 +517,13 @@ internal::broyden_df_impl(
             B = BMO_MATOPS_INV(jacob_objfn(x_p, jacob_data));
         } else {
             // B += (y - B*s) * s.t() / BMO_MATOPS_DOT_PROD(s,s);
-            B += (s - B * y) * (y).transpose() / ((y).dot(y) + 1.0e-14); // update B
+            B += (s - B * y) * BMO_MATOPS_TRANSPOSE(y) / (BMO_MATOPS_DOT_PROD(y, y) + 1.0e-14); // update B
         }
 
-        rel_objfn_change = (((y).array() /
-                             (((((objfn_vec).cwiseAbs()).array() + (fp_t(1e-08))).matrix())).array()).matrix()).norm();
-        rel_sol_change = BMO_MATOPS_L1NORM(
-                BMO_MATOPS_ARRAY_DIV_ARRAY(s,
-                                           (BMO_MATOPS_ARRAY_ADD_SCALAR(BMO_MATOPS_ABS(x), OPTIM_FPN_SMALL_NUMBER))));
+        rel_objfn_change = BMO_MATOPS_L2NORM(BMO_MATOPS_ARRAY_DIV_ARRAY(y, (BMO_MATOPS_ARRAY_ADD_SCALAR(
+                BMO_MATOPS_ABS(objfn_vec), OPTIM_FPN_SMALL_NUMBER))));
+        rel_sol_change = BMO_MATOPS_L1NORM(BMO_MATOPS_ARRAY_DIV_ARRAY(s, (BMO_MATOPS_ARRAY_ADD_SCALAR(BMO_MATOPS_ABS(x),
+                                                                                                      OPTIM_FPN_SMALL_NUMBER))));
 
         //
 
