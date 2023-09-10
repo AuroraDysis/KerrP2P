@@ -129,27 +129,29 @@ void define_numerical_type(pybind11::module_& mod, const char* name, bool is_com
 		.def(py::self -= float())
 		.def(py::self *= float())
 		.def(py::self /= float())
-		.def("assign", [](T& self, const std::string& value) {
-		self.assign(value);
-			})
+		.def(-py::self)
+		.def(py::self == py::self)
+		.def(py::self != py::self)
+		.def("assign", [](T& self, const std::string& value) { self.assign(value); })
+		.def("__str__", [](const T& self) { return self.str(std::numeric_limits<T>::max_digits10); })
 		.def("__repr__", [](const T& self) { return self.str(std::numeric_limits<T>::max_digits10); });
 
-			if (is_complex) {
-				t.def_property("real", [](const T& self) { return self.real().str(std::numeric_limits<T>::max_digits10); },
-					[](T& self, const std::string& value) {
-						self.real().assign(value);
-					})
-					.def_property("imag", [](const T& self) { return self.imag().str(std::numeric_limits<T>::max_digits10); },
-						[](T& self, const std::string& value) {
-							self.imag().assign(value);
-						});
-			}
-			else {
-				t.def_property("value", [](const T& self) { return self.str(std::numeric_limits<T>::max_digits10); },
-					[](T& self, const std::string& value) {
-						self.assign(value);
-					});
-			}
+	if (is_complex) {
+		t.def_property("real", [](const T& self) { return self.real().str(std::numeric_limits<T>::max_digits10); },
+			[](T& self, const std::string& value) {
+				self.real().assign(value);
+			})
+			.def_property("imag", [](const T& self) { return self.imag().str(std::numeric_limits<T>::max_digits10); },
+				[](T& self, const std::string& value) {
+					self.imag().assign(value);
+				});
+	}
+	else {
+		t.def_property("value", [](const T& self) { return self.str(std::numeric_limits<T>::max_digits10); },
+			[](T& self, const std::string& value) {
+				self.assign(value);
+			});
+	}
 }
 
 PYBIND11_MODULE(py_forward_ray_tracing, mod) {
