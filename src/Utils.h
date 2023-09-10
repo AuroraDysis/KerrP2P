@@ -132,7 +132,7 @@ struct ForwardRayTracingUtils {
                                                           : RootFunctor<Real, Complex>(params, period,
                                                                                        std::move(theta_o),
                                                                                        std::move(phi_o));
-        algo_settings_t<Real> settings;
+        AlgoParams<Real> settings;
         settings.rel_objfn_change_tol = ErrorLimit<Real>::Value;
         settings.rel_sol_change_tol = ErrorLimit<Real>::Value;
         BroydenDF<Real, 2> solver;
