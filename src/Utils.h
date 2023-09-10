@@ -48,18 +48,28 @@ private:
     const Real theta_o;
     const Real phi_o;
     const int period;
+    const bool fixed_period;
     const Real two_pi = boost::math::constants::two_pi<Real>();
 
 public:
     std::shared_ptr<ForwardRayTracing<Real, Complex>> ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
 
-    RootFunctor(ForwardRayTracingParams<Real> &params_, int period_, Real theta_o_, Real phi_o_) : params(params_),
-                                                                                                   period(period_),
-                                                                                                   theta_o(std::move(
-                                                                                                           theta_o_)),
-                                                                                                   phi_o(
-                                                                                                           std::move(
-                                                                                                                   phi_o_)) {
+    RootFunctor(ForwardRayTracingParams<Real> &params_, Real theta_o_, Real phi_o_)
+            : params(params_),
+              fixed_period(false),
+              theta_o(std::move(
+                      theta_o_)),
+              phi_o(std::move(phi_o_)) {
+        ray_tracing->calc_t_f = false;
+    }
+
+    RootFunctor(ForwardRayTracingParams<Real> &params_, int period_, Real theta_o_, Real phi_o_)
+            : params(params_),
+              period(period_),
+              fixed_period(true),
+              theta_o(std::move(
+                      theta_o_)),
+              phi_o(std::move(phi_o_)) {
         ray_tracing->calc_t_f = false;
     }
 
@@ -78,7 +88,11 @@ public:
 
         Vector residual;
         residual[0] = ray_tracing->theta_f - theta_o;
-        residual[1] = ray_tracing->phi_f - phi_o - period * two_pi;
+        if (fixed_period) {
+            residual[1] = ray_tracing->phi_f - phi_o - period * two_pi;
+        } else {
+            residual[1] = sin((ray_tracing->phi_f - phi_o) * half<Real>());
+        }
 
         if (isnan(residual[0]) || isnan(residual[1])) {
             throw std::runtime_error("Ray tracing failed: residual is NaN");
