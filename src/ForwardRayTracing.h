@@ -122,7 +122,7 @@ public:
             omega_pm = cbrt(omega_pm_1 + sqrt(omega_pm_2)) +
                        cbrt(omega_pm_1 - sqrt(omega_pm_2));
         } else {
-            Complex omega_pm_2_c = Complex{omega_pm_2};
+            Complex omega_pm_2_c{omega_pm_2};
             omega_pm = pow(omega_pm_1 + sqrt(omega_pm_2_c), third<Real>()) +
                        pow(omega_pm_1 - sqrt(omega_pm_2_c), third<Real>());
         }
