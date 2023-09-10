@@ -446,7 +446,7 @@ public:
 			Vector& init_out_vals,
 			RF &opt_objfn
 		) {
-		return broyden_df_impl(init_out_vals, opt_objfn, opt_data, nullptr);
+		return broyden_df_impl(init_out_vals, opt_objfn, nullptr);
 	}
 
 	/**
