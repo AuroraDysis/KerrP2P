@@ -130,26 +130,26 @@ void define_numerical_type(pybind11::module_& mod, const char* name, bool is_com
 		.def(py::self *= float())
 		.def(py::self /= float())
 		.def("assign", [](T& self, const std::string& value) {
-			self.assign(value);
-		})
+		self.assign(value);
+			})
 		.def("__repr__", [](const T& self) { return self.str(std::numeric_limits<T>::max_digits10); });
 
-	if (is_complex) {
-		t.def_property("real", [](const T& self) { return self.real().str(std::numeric_limits<T>::max_digits10); },
-			[](T& self, const std::string& value) {
-				self.real().assign(value);
-			})
-			.def_property("imag", [](const T& self) { return self.imag().str(std::numeric_limits<T>::max_digits10); },
-				[](T& self, const std::string& value) {
-					self.imag().assign(value);
-				});
-	}
-	else {
-		t.def_property("value", [](const T& self) { return self.str(std::numeric_limits<T>::max_digits10); },
-			[](T& self, const std::string& value) {
-				self.assign(value);
-			});
-	}
+			if (is_complex) {
+				t.def_property("real", [](const T& self) { return self.real().str(std::numeric_limits<T>::max_digits10); },
+					[](T& self, const std::string& value) {
+						self.real().assign(value);
+					})
+					.def_property("imag", [](const T& self) { return self.imag().str(std::numeric_limits<T>::max_digits10); },
+						[](T& self, const std::string& value) {
+							self.imag().assign(value);
+						});
+			}
+			else {
+				t.def_property("value", [](const T& self) { return self.str(std::numeric_limits<T>::max_digits10); },
+					[](T& self, const std::string& value) {
+						self.assign(value);
+					});
+			}
 }
 
 PYBIND11_MODULE(py_forward_ray_tracing, mod) {
@@ -171,6 +171,14 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
 	define_all<double, std::complex<double>>(mod, "Float64");
 	define_all<long double, std::complex<long double>>(mod, "LongDouble");
 
+	define_numerical_type<Float128>(mod, "Float128", false);
+	define_numerical_type<Complex128>(mod, "Complex128", true);
+	define_all<Float128, Complex128>(mod, "Float128");
+
+	define_numerical_type<Float256>(mod, "Float256", false);
+	define_numerical_type<Complex256>(mod, "Complex256", true);
+	define_all<Float256, Complex256>(mod, "Float256");
+
 	mod.attr("calc_ray") = mod.attr("calc_ray_Float64");
 	mod.attr("sweep_rc_d") = mod.attr("sweep_rc_d_Float64");
 	mod.attr("find_root_period") = mod.attr("find_root_period_Float64");
@@ -180,12 +188,4 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
 	mod.attr("ForwardRayTracing") = mod.attr("ForwardRayTracingFloat64");
 	mod.attr("FindRootResult") = mod.attr("FindRootResultFloat64");
 	mod.attr("SweepResult") = mod.attr("SweepResultFloat64");
-
-  define_numerical_type<Float128>(mod, "Float128", false);
-  define_numerical_type<Complex128>(mod, "Complex128", true);
-  define_all<Float128, Complex128>(mod, "Float128");
-
-	define_numerical_type<Float256>(mod, "Float256", false);
-	define_numerical_type<Complex256>(mod, "Complex256", true);
-	define_all<Float256, Complex256>(mod, "Float256");
 }
