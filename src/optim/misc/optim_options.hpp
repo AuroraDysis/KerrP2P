@@ -45,21 +45,8 @@ namespace optim
     using rand_engine_t = std::mt19937_64;
 }
 
-#ifndef OPTIM_ENABLE_EIGEN_WRAPPERS
-#define OPTIM_ENABLE_EIGEN_WRAPPERS
-#endif
-
 #include <iostream>
-
-#ifdef OPTIM_USE_RCPP_EIGEN
-#include <RcppEigen.h>
-#else
 #include <Eigen/Dense>
-#endif
-
-#ifndef BMO_ENABLE_EIGEN_WRAPPERS
-#define BMO_ENABLE_EIGEN_WRAPPERS
-#endif
 
 // template<typename eT, int iTr, int iTc>
 // using EigenMat = Eigen::Matrix<eT,iTr,iTc>;
