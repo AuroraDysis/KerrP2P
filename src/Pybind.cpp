@@ -100,12 +100,7 @@ void define_methods(pybind11::module_& mod, const std::string &suffix) {
 
 template <typename Real, typename Complex>
 void define_all(pybind11::module_& mod, const std::string& suffix) {
-    if (suffix.empty()) {
-        define_methods<Real, Complex>(mod, suffix);
-    }
-    else {
-        define_methods<Real, Complex>(mod, "_" + suffix);
-    }
+    define_methods<Real, Complex>(mod, "_" + suffix);
     define_params<Real>(mod, ("ForwardRayTracingParams" + suffix).c_str());
     define_forward_ray_tracing_result<Real, Complex>(mod, ("ForwardRayTracing" + suffix).c_str());
     define_find_root_result<Real, Complex>(mod, ("FindRootResult" + suffix).c_str());
@@ -128,7 +123,6 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
             .value("NEGATIVE", Sign::NEGATIVE)
             .export_values();
 
-    define_all<double, std::complex<double>>(mod, "");
     define_all<double, std::complex<double>>(mod, "Float64");
     define_all<long double, std::complex<long double>>(mod, "LongDouble");
 

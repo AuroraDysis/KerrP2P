@@ -136,13 +136,13 @@ struct ForwardRayTracingUtils {
         settings.rel_objfn_change_tol = ErrorLimit<Real>::Value;
         settings.rel_sol_change_tol = ErrorLimit<Real>::Value;
         BroydenDF<Real, 2> solver;
-        bool success = solver.broyden_df(x, root_functor, nullptr, settings);
-        if (!success) {
-            FindRootResult<Real, Complex> result;
-            result.success = false;
-            result.fail_reason = "broyden_df not converged";
-            return result;
-        }
+        solver.broyden_df(x, root_functor, nullptr, settings);
+        //if (!success) {
+        //    FindRootResult<Real, Complex> result;
+        //    result.success = false;
+        //    result.fail_reason = "broyden_df not converged";
+        //    return result;
+        //}
 
         auto residual = root_functor(x, nullptr);
 
