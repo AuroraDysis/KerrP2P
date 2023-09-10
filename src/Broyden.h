@@ -98,7 +98,7 @@ struct BroydenParams
 };
 
 // 
-template<typename Real>
+template<typename Real, size_t dim>
 struct AlgoParams {
 	using Vector = Eigen::Matrix<Real, Eigen::Dynamic, 1>;
 
@@ -206,7 +206,7 @@ private:
 			void* opt_data,
 			std::function<Mat_t(const Vector& vals_inp, void* jacob_data)> jacob_objfn,
 			void* jacob_data,
-			AlgoParams<Real>* settings_inp
+			AlgoParams<Real, dim>* settings_inp
 		) {
 		// notation: 'p' stands for '+1'.
 
@@ -216,7 +216,7 @@ private:
 
 		// Broyden settings
 
-		AlgoParams<Real> settings;
+		AlgoParams<Real, dim> settings;
 
 		if (settings_inp) {
 			settings = *settings_inp;
@@ -367,7 +367,7 @@ private:
 			Vector& init_out_vals,
 			std::function<Vector(const Vector& vals_inp, void* opt_data)> opt_objfn,
 			void* opt_data,
-			AlgoParams<Real>* settings_inp
+			AlgoParams<Real, dim>* settings_inp
 		) {
 		// notation: 'p' stands for '+1'.
 
@@ -377,7 +377,7 @@ private:
 
 		// Broyden settings
 
-		AlgoParams<Real> settings;
+		AlgoParams<Real, dim> settings;
 
 		if (settings_inp) {
 			settings = *settings_inp;
@@ -528,7 +528,7 @@ private:
 			const size_t iter,
 			const size_t iter_max,
 			const int conv_failure_switch,
-			AlgoParams<Real>* settings_inp
+			AlgoParams<Real, dim>* settings_inp
 		)
 	{
 		success = false;
@@ -593,7 +593,7 @@ private:
 			void* opt_data,
 			bool& success,
 			const int conv_failure_switch,
-			AlgoParams<Real>* settings_inp
+			AlgoParams<Real, dim>* settings_inp
 		)
 	{
 		if (conv_failure_switch == 0 || conv_failure_switch == 1) {
@@ -627,7 +627,7 @@ private:
 			const size_t iter,
 			const size_t iter_max,
 			const int conv_failure_switch,
-			AlgoParams<Real>* settings_inp
+			AlgoParams<Real, dim>* settings_inp
 		)
 	{
 		success = false;
@@ -705,7 +705,7 @@ private:
 			const size_t iter,
 			const size_t iter_max,
 			const int conv_failure_switch,
-			AlgoParams<Real>* settings_inp
+			AlgoParams<Real, dim>* settings_inp
 		)
 	{
 		std::function<Real(const Vector& vals_inp, Vector* grad_out, void* opt_data)> lam_objfn \
@@ -760,7 +760,7 @@ public:
 			Vector& init_out_vals,
 			std::function<Vector(const Vector& vals_inp, void* opt_data)> opt_objfn,
 			void* opt_data,
-			AlgoParams<Real>& settings
+			AlgoParams<Real, dim>& settings
 		) {
 		return broyden_df_impl(init_out_vals, opt_objfn, opt_data, &settings);
 	}
@@ -822,7 +822,7 @@ public:
 			void* opt_data,
 			std::function<Mat_t(const Vector& vals_inp, void* jacob_data)> jacob_objfn,
 			void* jacob_data,
-			AlgoParams<Real>& settings
+			AlgoParams<Real, dim>& settings
 		) {
 		return broyden_df_impl(init_out_vals, opt_objfn, opt_data, jacob_objfn, jacob_data, &settings);
 	}

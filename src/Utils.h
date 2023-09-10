@@ -136,7 +136,7 @@ struct ForwardRayTracingUtils {
                                                                                        std::move(phi_o));
 
         BroydenDF<Real, 2> solver;
-        AlgoParams<Real> settings;
+        AlgoParams<Real, 2> settings;
 #ifdef PRINT_DEBUG
         settings.print_level = 1;
 #endif
