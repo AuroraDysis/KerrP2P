@@ -122,6 +122,18 @@ struct ForwardRayTracingUtils {
         return ray_tracing->to_result();
     }
 
+    static std::vector<ForwardRayTracingResult<Real, Complex>> calc_ray_batch(const std::vector<ForwardRayTracingParams<Real>>& params_list) {
+        std::vector<ForwardRayTracingResult<Real, Complex>> results(params_list.size());
+        oneapi::tbb::parallel_for(oneapi::tbb::blocked_range<size_t>(0u, params_list.size()), [&](const oneapi::tbb::blocked_range<size_t> &r) {
+            for (size_t i = r.begin(); i != r.end(); ++i) {
+				auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
+				ray_tracing->calc_ray(params_list[i]);
+				results[i] = ray_tracing->to_result();
+			}
+        });
+        return results;
+    }
+
     static FindRootResult<Real, Complex>
     find_root_period(const ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o) {
         ForwardRayTracingParams<Real> local_params(params);

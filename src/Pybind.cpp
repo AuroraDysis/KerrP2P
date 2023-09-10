@@ -90,6 +90,8 @@ template<typename Real, typename Complex>
 void define_methods(pybind11::module_& mod, const std::string& suffix) {
 	mod.def(("calc_ray" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::calc_ray,
 		py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
+	mod.def(("calc_ray_batch" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::calc_ray_batch,
+		py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
 	mod.def(("sweep_rc_d" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::sweep_rc_d,
 		py::return_value_policy::move);
 	mod.def(("find_root_period" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::find_root_period,
@@ -182,6 +184,7 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
 	define_all<Float256, Complex256>(mod, "Float256");
 
 	mod.attr("calc_ray") = mod.attr("calc_ray_Float64");
+	mod.attr("calc_ray_batch") = mod.attr("calc_ray_batch_Float64");
 	mod.attr("sweep_rc_d") = mod.attr("sweep_rc_d_Float64");
 	mod.attr("find_root_period") = mod.attr("find_root_period_Float64");
 	mod.attr("find_root") = mod.attr("find_root_Float64");
