@@ -151,6 +151,7 @@ struct ForwardRayTracingUtils {
             return result;
         }
 
+        result.success = true;
         result.root = root_functor.ray_tracing->to_result();
         return result;
     }
