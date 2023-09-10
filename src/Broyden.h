@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include "Common.h"
+
 #include <iostream>
 #include <Eigen/Dense>
 
@@ -40,7 +42,7 @@
 #define BMO_MATOPS_ARRAY_DIV_ARRAY(x, y)  ((x).array() / (y).array()).matrix()
 #define BMO_MATOPS_COUT std::cout
 #define BMO_MATOPS_TRANSPOSE_INPLACE(x) (x).transpose()
-#define OPTIM_FPN_SMALL_NUMBER 1.0e-08
+#define OPTIM_FPN_SMALL_NUMBER (ErrorLimit<Real>::Value * 100)
 
 #ifndef OPTIM_NO_TRACE
 
@@ -107,10 +109,12 @@ struct AlgoParams {
 
 	// error tolerance and maxiumum iterations
 
-	size_t iter_max = 2000;
+	size_t iter_max = 5000;
 
 	Real grad_err_tol = 1E-08;
-	Real rel_sol_change_tol = 1E-14;
+	//  tolerance value controlling convergence based on the relative change in optimal input values
+	Real rel_sol_change_tol = ErrorLimit<Real>::Value;
+	// tolerance value controlling convergence based on the relative change in objective function.
 	Real rel_objfn_change_tol = 1E-08;
 
 	// bounds
