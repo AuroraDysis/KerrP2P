@@ -103,7 +103,12 @@ public:
         const Real &r1 = this->data.r1;
         const Real &r2 = this->data.r2;
         // x_3 \in (- 1/alpha_0, 1) \in (-1, 1)
-        ellint_cos_phi = -1 + (2 * A * (r - r1)) / (A * (r - r1) + B * (r - r2));
+        if (isinf(r)) {
+          ellint_cos_phi = (A - B) / (A + B);
+        } else {
+          ellint_cos_phi = -1 + (2 * A * (r - r1)) / (A * (r - r1) + B * (r - r2));
+        }
+
         CHECK_VAR_INT_RANGE(ellint_cos_phi, -1, 1);
         ellint_sin_phi2 = 1 - MY_SQUARE(ellint_cos_phi);
         // ?
