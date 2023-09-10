@@ -181,19 +181,11 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
 	mod.attr("FindRootResult") = mod.attr("FindRootResultFloat64");
 	mod.attr("SweepResult") = mod.attr("SweepResultFloat64");
 
-#ifdef FLOAT128
-	using boost::multiprecision::float128;
-	using boost::multiprecision::complex128;
+  define_numerical_type<Float128>(mod, "Float128", false);
+  define_numerical_type<Complex128>(mod, "Complex128", true);
+  define_all<Float128, Complex128>(mod, "Float128");
 
-	define_numerical_type<float128>(mod, "Float128", false);
-	define_numerical_type<complex128>(mod, "Complex128", true);
-	define_all<float128, complex128>(mod, "Float128");
-#endif
-
-	using BigFloat = boost::multiprecision::cpp_bin_float_50;
-	using BigComplex = boost::multiprecision::cpp_complex_50;
-
-	define_numerical_type<BigFloat>(mod, "BigFloat", false);
-	define_numerical_type<BigComplex>(mod, "BigComplex", true);
-	define_all<BigFloat, BigComplex>(mod, "BigFloat");
+	define_numerical_type<Float256>(mod, "Float256", false);
+	define_numerical_type<Complex256>(mod, "Complex256", true);
+	define_all<Float256, Complex256>(mod, "Float256");
 }

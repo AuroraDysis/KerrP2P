@@ -86,8 +86,8 @@ using Complex128 = boost::multiprecision::complex128;
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/multiprecision/cpp_complex.hpp>
 
-using Float128 = boost::multiprecision::cpp_bin_float_50;
-using Complex128 = boost::multiprecision::cpp_complex_50;
+using Float128 = boost::multiprecision::cpp_bin_float_quad;
+using Complex128 = boost::multiprecision::cpp_complex_quad;
 #endif
 
 #ifdef BIGFLOAT_MPFR

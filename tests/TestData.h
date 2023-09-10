@@ -13,7 +13,7 @@ inline std::vector<boost::property_tree::ptree> TEST_DATA;
 void get_test_data(std::string &path);
 
 using Test64 = std::tuple<double, std::complex<double>>;
-using Test128 = std::tuple<Float128, Float256>;
+using Test128 = std::tuple<Float128, Complex128>;
 using Test256 = std::tuple<Float256, Complex256>;
 
 #define TEST_TYPES Test64, Test128, Test256
