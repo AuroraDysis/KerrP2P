@@ -78,14 +78,6 @@ namespace optim
   using RowVecUInt_t = Eigen::Matrix<size_t, 1, Eigen::Dynamic>;
 }
 
-#ifndef BMO_ENABLE_EXTRA_FEATURES
-    #define BMO_ENABLE_EXTRA_FEATURES
-#endif
-
-#ifndef BMO_ENABLE_STATS_FEATURES
-    #define BMO_ENABLE_STATS_FEATURES
-#endif
-
 #ifndef BMO_RNG_ENGINE_TYPE
     #define BMO_RNG_ENGINE_TYPE optim::rand_engine_t
 #endif
