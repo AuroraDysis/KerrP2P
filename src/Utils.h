@@ -294,6 +294,7 @@ struct ForwardRayTracingUtils {
         auto &results = sweep_result.results;
         cutoff = std::min(cutoff, indices.size());
         results.reserve(cutoff);
+        std::mutex results_mutex;
         tbb::parallel_for(tbb::blocked_range<size_t>(0u, cutoff),
                           [&](const tbb::blocked_range<size_t> &r) {
                               ForwardRayTracingParams<Real> local_params(params);
@@ -310,9 +311,10 @@ struct ForwardRayTracingUtils {
                                       auto root = *std::move(root_res.root);
                                       root.rc = local_params.rc;
                                       root.lgd = local_params.lgd;
+                                      std::lock_guard<std::mutex> lock(results_mutex);
                                       results.push_back(std::move(root));
                                   } else {
-                                      fmt::print("find root failed: {}\n", root_res.fail_reason);
+                                      fmt::println("find root failed: {}\n", root_res.fail_reason);
                                   }
                               }
                           });
