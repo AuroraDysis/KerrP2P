@@ -29,7 +29,7 @@ namespace optim
     #include "misc/optim_misc.hpp"
 
     // solving systems of nonlinear equations
-    #include "zeros/optim_zeros.hpp"
+    #include "broyden_df.hpp"
 }
 
 #endif
