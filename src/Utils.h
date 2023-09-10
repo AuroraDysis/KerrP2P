@@ -4,6 +4,7 @@
 
 #include "optim/optim.hpp"
 
+#include <optional>
 #include <oneapi/tbb.h>
 #include <Eigen/Dense>
 
