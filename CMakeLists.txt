@@ -4,11 +4,11 @@ project(forward_ray_tracing)
 set(CMAKE_CXX_STANDARD 17)
 
 option(ENABLE_TESTING "Enable Test Builds" ON)
-option(ENABLE_FLOAT128 "Enable float128 precision" OFF)
+option(FLOAT128_NATIVE "Enable float128 native support quadmath" OFF)
 option(ENABLE_BIGFLOAT_MPFR "Enable mpfr support" OFF)
 
 if (WIN32)
-    SET(ENABLE_FLOAT128 OFF)
+    SET(FLOAT128_NATIVE OFF)
     SET(ENABLE_BIGFLOAT_MPFR OFF)
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
@@ -16,7 +16,7 @@ if (WIN32)
 endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    SET(ENABLE_FLOAT128 OFF)
+    SET(FLOAT128_NATIVE OFF)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -29,10 +29,10 @@ set(LIBRARIES Boost::boost Boost::filesystem fmt::fmt Eigen3::Eigen TBB::tbb TBB
 
 # add_definitions(-DPRINT_DEBUG)
 
-if (ENABLE_FLOAT128)
+if (FLOAT128_NATIVE)
     message("Enable float128 precision")
     set(LIBRARIES ${LIBRARIES} quadmath)
-    add_definitions(-DFLOAT128)
+    add_definitions(-DFLOAT128_NATIVE)
 endif()
 
 if (ENABLE_BIGFLOAT_MPFR)

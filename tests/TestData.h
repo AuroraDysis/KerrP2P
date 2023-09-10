@@ -12,14 +12,8 @@
 inline std::vector<boost::property_tree::ptree> TEST_DATA;
 void get_test_data(std::string &path);
 
-using Float64 = std::tuple<double, std::complex<double>>;
-#ifdef FLOAT128
-using Float128 = std::tuple<boost::multiprecision::float128, boost::multiprecision::complex128>;
-#endif
-using BigFloat = std::tuple<BigFloatReal, BigFloatComplex>;
+using Test64 = std::tuple<double, std::complex<double>>;
+using Test128 = std::tuple<Float128, Float256>;
+using Test256 = std::tuple<Float256, Complex256>;
 
-#if defined(FLOAT128)
-#define TEST_TYPES Float64, Float128, BigFloat
-#else
-#define TEST_TYPES Float64, BigFloat
-#endif
+#define TEST_TYPES Test64, Test128, Test256

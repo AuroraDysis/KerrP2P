@@ -76,27 +76,32 @@ using std::real;
 using std::isinf;
 using std::isnan;
 
-#ifdef FLOAT128
+#ifdef FLOAT128_NATIVE
 #include <boost/multiprecision/float128.hpp>
 #include <boost/multiprecision/complex128.hpp>
 
-template <>
-struct fmt::formatter<boost::multiprecision::float128> : fmt::ostream_formatter {};
+using Float128 = boost::multiprecision::float128;
+using Complex128 = boost::multiprecision::complex128;
+#else
+#include <boost/multiprecision/cpp_bin_float.hpp>
+#include <boost/multiprecision/cpp_complex.hpp>
+
+using Float128 = boost::multiprecision::cpp_bin_float_50;
+using Complex128 = boost::multiprecision::cpp_complex_50;
 #endif
 
 #ifdef BIGFLOAT_MPFR
 #include <boost/multiprecision/mpfr.hpp>
 #include <boost/multiprecision/mpc.hpp>
 
-using BigFloatReal = boost::multiprecision::mpfr_float_50;
-using BigFloatComplex = boost::multiprecision::mpc_complex_50;
+using BigFloatReal = boost::multiprecision::mpfr_float_oct
+using BigFloatComplex = boost::multiprecision::mpc_complex_oct;
 #else
-
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/multiprecision/cpp_complex.hpp>
 
-using BigFloatReal = boost::multiprecision::cpp_bin_float_50;
-using BigFloatComplex = boost::multiprecision::cpp_complex_50;;
+using Float256 = boost::multiprecision::cpp_bin_float_oct;
+using Complex256 = boost::multiprecision::cpp_complex_oct;
 #endif
 
 using boost::multiprecision::real;
@@ -113,37 +118,25 @@ struct HigherPrecision {
     using Type = T;
 };
 
-#if defined(FLOAT128)
 template <>
 struct HigherPrecision<double> {
-  using Type = boost::multiprecision::float128;
+    using Type = boost::multiprecision::float128;
 };
 
 template <>
 struct HigherPrecision<std::complex<double>> {
-  using Type = boost::multiprecision::complex128;
+    using Type = boost::multiprecision::complex128;
 };
 
 template <>
 struct HigherPrecision<boost::multiprecision::float128> {
-  using Type = boost::multiprecision::float128;
+    using Type = boost::multiprecision::float128;
 };
 
 template <>
 struct HigherPrecision<std::complex<boost::multiprecision::float128>> {
-  using Type = BigFloatComplex;
+    using Type = Complex256;
 };
-#else
-template<>
-struct HigherPrecision<double> {
-    using Type = BigFloatReal;
-};
-
-template<>
-struct HigherPrecision<std::complex<double>> {
-    using Type = BigFloatComplex;
-};
-#endif
 
 // ErrorLimit
 template<typename T>
