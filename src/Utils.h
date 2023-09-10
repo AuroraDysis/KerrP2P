@@ -129,9 +129,11 @@ struct ForwardRayTracingUtils {
         settings.rel_sol_change_tol = ErrorLimit<double>::Value;
         optim::broyden_df(x, root_functor, nullptr, settings);
         auto residual = root_functor(x, nullptr);
-        if (residual.hasNaN() || residual.norm() > ErrorLimit<double>::Value * 1000) {
+        if (root_functor.ray_tracing->ray_status != RayStatus::NORMAL || residual.hasNaN() ||
+            residual.norm() > ErrorLimit<double>::Value * 1000) {
             throw std::runtime_error("find root failed: residual is too large");
         }
+
         return root_functor.ray_tracing->to_result();
     }
 
@@ -146,7 +148,8 @@ struct ForwardRayTracingUtils {
         settings.rel_sol_change_tol = ErrorLimit<double>::Value;
         optim::broyden_df(x, root_functor, nullptr, settings);
         auto residual = root_functor(x, nullptr);
-        if (residual.norm() > ErrorLimit<double>::Value * 1000) {
+        if (root_functor.ray_tracing->ray_status != RayStatus::NORMAL || residual.hasNaN() ||
+            residual.norm() > ErrorLimit<double>::Value * 1000) {
             fmt::println("find root failed: residual: {}", residual.norm());
         }
         return root_functor.ray_tracing->to_result();
