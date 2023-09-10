@@ -48,7 +48,7 @@ struct FindRootResult {
 template<typename Real, typename Complex>
 class RootFunctor {
 private:
-    using Vector = Eigen::Matrix<Real, 2, 1>;
+    using Vector = Eigen::Vector<Real, 2>;
 
     ForwardRayTracingParams<Real> &params;
     const Real theta_o;
@@ -124,7 +124,7 @@ struct ForwardRayTracingUtils {
 
     static FindRootResult<Real, Complex>
     find_root_period(ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o) {
-        Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
+        Eigen::Vector<Real, 2> x = Eigen::Vector<Real, 2>::Zero(2);
         x << params.rc, params.lgd;
 
         auto root_functor =
@@ -133,8 +133,8 @@ struct ForwardRayTracingUtils {
                                                                                        std::move(theta_o),
                                                                                        std::move(phi_o));
         optim::algo_settings_t settings;
-        settings.rel_objfn_change_tol = ErrorLimit<double>::Value;
-        settings.rel_sol_change_tol = ErrorLimit<double>::Value;
+        settings.rel_objfn_change_tol = ErrorLimit<Real>::Value;
+        settings.rel_sol_change_tol = ErrorLimit<Real>::Value;
         optim::broyden_df(x, root_functor, nullptr, settings);
         auto residual = root_functor(x, nullptr);
 
@@ -146,7 +146,7 @@ struct ForwardRayTracingUtils {
             return result;
         }
 
-        if (residual.norm() > ErrorLimit<double>::Value * 1000) {
+        if (residual.norm() > ErrorLimit<Real>::Value * 1000) {
             result.success = false;
             result.fail_reason = fmt::format("residual: {}", residual.norm());
             return result;

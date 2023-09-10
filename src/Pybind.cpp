@@ -85,6 +85,33 @@ void define_find_root_result(pybind11::module_ &mod, const char *name) {
             .def_readonly("root", &ResultType::root);
 }
 
+template<typename Real, typename Complex>
+void define_methods(pybind11::module_& mod, const std::string &suffix) {
+    mod.def(("calc_ray" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::calc_ray,
+        py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
+    mod.def(("sweep_rc_d" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::sweep_rc_d,
+        py::return_value_policy::move);
+    mod.def(("find_root_period" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::find_root_period,
+        py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
+    mod.def(("find_root" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::find_root,
+        py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
+    mod.def(("clean_cache" + suffix).c_str(), ForwardRayTracing<Real, Complex>::clear_cache);
+}
+
+template <typename Real, typename Complex>
+void define_all(pybind11::module_& mod, const std::string& suffix) {
+    if (suffix.empty()) {
+        define_methods<Real, Complex>(mod, suffix);
+    }
+    else {
+        define_methods<Real, Complex>(mod, "_" + suffix);
+    }
+    define_params<Real>(mod, ("ForwardRayTracingParams" + suffix).c_str());
+    define_forward_ray_tracing_result<Real, Complex>(mod, ("ForwardRayTracing" + suffix).c_str());
+    define_find_root_result<Real, Complex>(mod, ("FindRootResult" + suffix).c_str());
+    define_sweep_result<Real, Complex>(mod, ("SweepResult" + suffix).c_str());
+}
+
 PYBIND11_MODULE(py_forward_ray_tracing, mod) {
     py::enum_<RayStatus>(mod, "RayStatus")
             .value("NORMAL", RayStatus::NORMAL)
@@ -101,24 +128,10 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
             .value("NEGATIVE", Sign::NEGATIVE)
             .export_values();
 
-    mod.def("calc_ray", &ForwardRayTracingUtils<double, std::complex<double>>::calc_ray,
-            py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
-    mod.def("sweep_rc_d", &ForwardRayTracingUtils<double, std::complex<double>>::sweep_rc_d,
-            py::return_value_policy::move);
-    mod.def("find_root_period", &ForwardRayTracingUtils<double, std::complex<double>>::find_root_period,
-            py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
-    mod.def("find_root", &ForwardRayTracingUtils<double, std::complex<double>>::find_root,
-            py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
-    mod.def("clean_cache", ForwardRayTracing<double, std::complex<double>>::clear_cache);
+    define_all<double, std::complex<double>>(mod, "");
+    define_all<double, std::complex<double>>(mod, "Float64");
+    define_all<long double, std::complex<long double>>(mod, "LongDouble");
 
-    define_params<double>(mod, "ForwardRayTracingParamsFloat64");
-    define_params<long double>(mod, "ForwardRayTracingParamsLongDouble");
-    define_forward_ray_tracing_result<double, std::complex<double>>(mod, "ForwardRayTracingFloat64");
-    define_forward_ray_tracing_result<long double, std::complex<long double>>(mod, "ForwardRayTracingLongDouble");
-    define_find_root_result<double, std::complex<double>>(mod, "FindRootResultFloat64");
-    define_find_root_result<long double, std::complex<long double>>(mod, "FindRootResultLongDouble");
-    define_sweep_result<double, std::complex<double>>(mod, "SweepResultFloat64");
-    define_sweep_result<long double, std::complex<long double>>(mod, "SweepResultLongDouble");
 #ifdef FLOAT128
     // define_forward_ray_tracing_result<boost::multiprecision::float128, boost::multiprecision::complex128>(mod, "ForwardRayTracingFloat128");
     // define_sweep_result<boost::multiprecision::float128>(mod, "SweepResultFloat128");
