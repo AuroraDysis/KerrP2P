@@ -97,7 +97,6 @@ struct BroydenParams
 	Real par_sigma_2 = 0.001;
 };
 
-// 
 template<typename Real, size_t dim>
 struct AlgoParams {
 	using Vector = Eigen::Matrix<Real, Eigen::Dynamic, 1>;
@@ -136,7 +135,7 @@ struct AlgoParams {
 	BroydenParams<Real> broyden_settings;
 };
 
-template<typename Real, size_t dim>
+template<typename Real, size_t dim, typename RF>
 struct BroydenDF {
 private:
 	using Mat_t = Eigen::Matrix<Real, dim, dim>;
@@ -155,8 +154,7 @@ private:
 			const Vector& direc,
 			Real sigma_1,
 			size_t k,
-			std::function<Vector(const Vector& vals_inp, void* opt_data)> opt_objfn,
-			void* opt_data
+			RF &opt_objfn
 		) {
 		const Real beta = 0.9;
 		const Real eta_k = df_eta(k);
@@ -164,8 +162,8 @@ private:
 
 		// check: || F(x_k + lambda*d_k) || <= ||F(x_k)||*(1+eta_k) - sigma_1*||lambda*d_k||^2
 
-		Real Fx = BMO_MATOPS_L2NORM(opt_objfn(x_vals, opt_data));
-		Real Fx_p = BMO_MATOPS_L2NORM(opt_objfn(x_vals + lambda * direc, opt_data));
+		Real Fx = BMO_MATOPS_L2NORM(opt_objfn(x_vals));
+		Real Fx_p = BMO_MATOPS_L2NORM(opt_objfn(x_vals + lambda * direc));
 		Real direc_norm2 = BMO_MATOPS_DOT_PROD(direc, direc);
 
 		Real term_2 = sigma_1 * (lambda * lambda) * direc_norm2;
@@ -184,7 +182,7 @@ private:
 			++iter;
 			lambda *= beta; // lambda_i = beta^i;
 
-			Fx_p = BMO_MATOPS_L2NORM(opt_objfn(x_vals + lambda * direc, opt_data));
+			Fx_p = BMO_MATOPS_L2NORM(opt_objfn(x_vals + lambda * direc));
 			term_2 = sigma_1 * (lambda * lambda) * direc_norm2;
 
 			if (Fx_p <= Fx - term_2 + term_3) {
@@ -202,8 +200,7 @@ private:
 		bool
 		broyden_df_impl(
 			Vector& init_out_vals,
-			std::function<Vector(const Vector& vals_inp, void* opt_data)> opt_objfn,
-			void* opt_data,
+			RF &opt_objfn,
 			std::function<Mat_t(const Vector& vals_inp, void* jacob_data)> jacob_objfn,
 			void* jacob_data,
 			AlgoParams<Real, dim>* settings_inp
@@ -240,7 +237,7 @@ private:
 
 		Mat_t B = BMO_MATOPS_INV(jacob_objfn(x, jacob_data)); // inverse Jacobian
 
-		Vector objfn_vec = opt_objfn(x, opt_data);
+		Vector objfn_vec = opt_objfn(x);
 
 		Real rel_objfn_change = BMO_MATOPS_L2NORM(objfn_vec);
 
@@ -256,7 +253,7 @@ private:
 
 		d = -B * objfn_vec; // step 1
 
-		Vector objfn_vec_p = opt_objfn(x + d, opt_data);
+		Vector objfn_vec_p = opt_objfn(x + d);
 
 		Real Fx_p = BMO_MATOPS_L2NORM(objfn_vec_p);
 
@@ -268,7 +265,7 @@ private:
 		}
 		else {
 			// step 3
-			lambda = df_proc_1(x, d, sigma_1, 0, opt_objfn, opt_data);
+			lambda = df_proc_1(x, d, sigma_1, 0, opt_objfn);
 		}
 
 		Vector x_p = x + lambda * d; // step 4
@@ -301,17 +298,17 @@ private:
 
 			// d = arma::solve(B,-objfn_vec);
 			d = -B * objfn_vec;
-			objfn_vec_p = opt_objfn(x + d, opt_data);
+			objfn_vec_p = opt_objfn(x + d);
 
 			//
 
 			Fx_p = BMO_MATOPS_L2NORM(objfn_vec_p);
 
 			if (Fx_p <= rho * Fx - sigma_2 * BMO_MATOPS_DOT_PROD(d, d)) {
-				lambda = 1.0;
+				lambda = 1;
 			}
 			else {
-				lambda = df_proc_1(x, d, sigma_1, iter, opt_objfn, opt_data);
+				lambda = df_proc_1(x, d, sigma_1, iter, opt_objfn);
 			}
 
 			//
@@ -348,7 +345,7 @@ private:
 
 		//
 
-		error_reporting(init_out_vals, x_p, opt_objfn, opt_data,
+		error_reporting(init_out_vals, x_p, opt_objfn,
 			success, rel_objfn_change, rel_objfn_change_tol,
 			iter, iter_max, conv_failure_switch, settings_inp);
 
@@ -365,8 +362,7 @@ private:
 		bool
 		broyden_df_impl(
 			Vector& init_out_vals,
-			std::function<Vector(const Vector& vals_inp, void* opt_data)> opt_objfn,
-			void* opt_data,
+			RF &opt_objfn,
 			AlgoParams<Real, dim>* settings_inp
 		) {
 		// notation: 'p' stands for '+1'.
@@ -401,7 +397,7 @@ private:
 
 		Mat_t B = BMO_MATOPS_EYE(n_vals); // initial approx. to Jacobian
 
-		Vector objfn_vec = opt_objfn(x, opt_data);
+		Vector objfn_vec = opt_objfn(x);
 
 		Real rel_objfn_change = BMO_MATOPS_L2NORM(objfn_vec);
 
@@ -417,7 +413,7 @@ private:
 
 		d = -objfn_vec; // step 1
 
-		Vector objfn_vec_p = opt_objfn(x + d, opt_data);
+		Vector objfn_vec_p = opt_objfn(x + d);
 
 		Real Fx_p = BMO_MATOPS_L2NORM(objfn_vec_p);
 
@@ -429,7 +425,7 @@ private:
 		}
 		else {
 			// step 3
-			lambda = df_proc_1(x, d, sigma_1, 0, opt_objfn, opt_data);
+			lambda = df_proc_1(x, d, sigma_1, 0, opt_objfn);
 		}
 
 		Vector x_p = x + lambda * d; // step 4
@@ -468,7 +464,7 @@ private:
 			// d = arma::solve(B,-objfn_vec);
 			d = -B * objfn_vec;
 
-			objfn_vec_p = opt_objfn(x + d, opt_data);
+			objfn_vec_p = opt_objfn(x + d);
 
 			//
 
@@ -478,7 +474,7 @@ private:
 				lambda = 1.0;
 			}
 			else {
-				lambda = df_proc_1(x, d, sigma_1, iter, opt_objfn, opt_data);
+				lambda = df_proc_1(x, d, sigma_1, iter, opt_objfn);
 			}
 
 			//
@@ -509,13 +505,13 @@ private:
 
 		//
 
-		error_reporting(init_out_vals, x_p, opt_objfn, opt_data, success, rel_objfn_change, rel_objfn_change_tol, iter,
+		error_reporting(init_out_vals, x_p, opt_objfn, success, rel_objfn_change, rel_objfn_change_tol, iter,
 			iter_max, conv_failure_switch, settings_inp);
 
 		return success;
 	}
 
-	inline
+	/*inline
 		void
 		error_reporting(
 			Vector& out_vals,
@@ -612,15 +608,14 @@ private:
 		if (settings_inp) {
 			settings_inp->opt_fn_value = opt_objfn(x_p, nullptr, opt_data);
 		}
-	}
+	}*/
 
 	inline
 		void
 		error_reporting(
 			Vector& out_vals,
 			const Vector& x_p,
-			std::function<Vector(const Vector& vals_inp, void* opt_data)> opt_objfn,
-			void* opt_data,
+			RF &opt_objfn,
 			bool& success,
 			const Real err,
 			const Real err_tol,
@@ -684,7 +679,7 @@ private:
 		}
 
 		if (settings_inp) {
-			settings_inp->opt_root_fn_values = opt_objfn(x_p, opt_data);
+			settings_inp->opt_root_fn_values = opt_objfn(x_p);
 			settings_inp->opt_iter = iter;
 			settings_inp->opt_error_value = err;
 		}
@@ -692,33 +687,33 @@ private:
 
 	//
 
-	inline
-		void
-		error_reporting(
-			Vector& out_vals,
-			const Vector& x_p,
-			std::function<Real(const Vector& vals_inp, Vector* grad_out, Mat_t* hess_out, void* opt_data)> opt_objfn,
-			void* opt_data,
-			bool& success,
-			const Real err,
-			const Real err_tol,
-			const size_t iter,
-			const size_t iter_max,
-			const int conv_failure_switch,
-			AlgoParams<Real, dim>* settings_inp
-		)
-	{
-		std::function<Real(const Vector& vals_inp, Vector* grad_out, void* opt_data)> lam_objfn \
-			= [opt_objfn](const Vector& vals_inp, Vector* grad_out, void* opt_data)
-			-> Real
-			{
-				return opt_objfn(vals_inp, grad_out, nullptr, opt_data);
-			};
+	//inline
+	//	void
+	//	error_reporting(
+	//		Vector& out_vals,
+	//		const Vector& x_p,
+	//		std::function<Real(const Vector& vals_inp, Vector* grad_out, Mat_t* hess_out, void* opt_data)> opt_objfn,
+	//		void* opt_data,
+	//		bool& success,
+	//		const Real err,
+	//		const Real err_tol,
+	//		const size_t iter,
+	//		const size_t iter_max,
+	//		const int conv_failure_switch,
+	//		AlgoParams<Real, dim>* settings_inp
+	//	)
+	//{
+	//	std::function<Real(const Vector& vals_inp, Vector* grad_out, void* opt_data)> lam_objfn \
+	//		= [opt_objfn](const Vector& vals_inp, Vector* grad_out, void* opt_data)
+	//		-> Real
+	//		{
+	//			return opt_objfn(vals_inp, grad_out, nullptr, opt_data);
+	//		};
 
-		//
+	//	//
 
-		error_reporting(out_vals, x_p, lam_objfn, opt_data, success, err, err_tol, iter, iter_max, conv_failure_switch, settings_inp);
-	}
+	//	error_reporting(out_vals, x_p, lam_objfn, opt_data, success, err, err_tol, iter, iter_max, conv_failure_switch, settings_inp);
+	//}
 public:
 	/**
 	 * @brief Derivative-free variant of Broyden's method due to Li and Fukushima (2000)
@@ -735,8 +730,7 @@ public:
 		bool
 		broyden_df(
 			Vector& init_out_vals,
-			std::function<Vector(const Vector& vals_inp, void* opt_data)> opt_objfn,
-			void* opt_data
+			RF &opt_objfn
 		) {
 		return broyden_df_impl(init_out_vals, opt_objfn, opt_data, nullptr);
 	}
@@ -758,11 +752,10 @@ public:
 		bool
 		broyden_df(
 			Vector& init_out_vals,
-			std::function<Vector(const Vector& vals_inp, void* opt_data)> opt_objfn,
-			void* opt_data,
+			RF &opt_objfn,
 			AlgoParams<Real, dim>& settings
 		) {
-		return broyden_df_impl(init_out_vals, opt_objfn, opt_data, &settings);
+		return broyden_df_impl(init_out_vals, opt_objfn, &settings);
 	}
 
 	// derivative-free method with jacobian
@@ -789,8 +782,7 @@ public:
 		bool
 		broyden_df(
 			Vector& init_out_vals,
-			std::function<Vector(const Vector& vals_inp, void* opt_data)> opt_objfn,
-			void* opt_data,
+			RF &opt_objfn,
 			std::function<Mat_t(const Vector& vals_inp, void* jacob_data)> jacob_objfn,
 			void* jacob_data
 		) {
@@ -803,8 +795,6 @@ public:
 	 * @param init_out_vals a column vector of initial values, which will be replaced by the solution upon successful completion of the optimization algorithm.
 	 * @param opt_objfn the function to be minimized, taking three arguments:
 	 *   - \c vals_inp a vector of inputs; and
-	 *   - \c opt_data additional data passed to the user-provided function.
-	 * @param opt_data additional data passed to the user-provided function.
 	 * @param jacob_objfn a function to calculate the Jacobian matrix, taking two arguments:
 	 *   - \c vals_inp a vector of inputs; and
 	 *   - \c jacob_data additional data passed to the Jacobian function.
@@ -818,12 +808,11 @@ public:
 		bool
 		broyden_df(
 			Vector& init_out_vals,
-			std::function<Vector(const Vector& vals_inp, void* opt_data)> opt_objfn,
-			void* opt_data,
+			RF &opt_objfn,
 			std::function<Mat_t(const Vector& vals_inp, void* jacob_data)> jacob_objfn,
 			void* jacob_data,
 			AlgoParams<Real, dim>& settings
 		) {
-		return broyden_df_impl(init_out_vals, opt_objfn, opt_data, jacob_objfn, jacob_data, &settings);
+		return broyden_df_impl(init_out_vals, opt_objfn, jacob_objfn, jacob_data, &settings);
 	}
 };

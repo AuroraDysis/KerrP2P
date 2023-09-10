@@ -80,7 +80,7 @@ public:
         ray_tracing->calc_t_f = false;
     }
 
-    Vector operator()(Vector x, void *opt_data) {
+    Vector operator()(const Vector &x) {
         auto &rc = x[0];
         auto &lgd = x[1];
         params.rc = rc;
@@ -135,14 +135,14 @@ struct ForwardRayTracingUtils {
                                                                                        std::move(theta_o),
                                                                                        std::move(phi_o));
 
-        BroydenDF<Real, 2> solver;
+        BroydenDF<Real, 2, RootFunctor<Real, Complex>> solver;
         AlgoParams<Real, 2> settings;
 #ifdef PRINT_DEBUG
         settings.print_level = 1;
 #endif
-        solver.broyden_df(x, root_functor, nullptr, settings);
+        solver.broyden_df(x, root_functor, settings);
 
-        auto residual = root_functor(x, nullptr);
+        auto residual = root_functor(x);
         FindRootResult<Real, Complex> result;
 
         if (root_functor.ray_tracing->ray_status != RayStatus::NORMAL) {
