@@ -90,7 +90,7 @@ using Float128 = boost::multiprecision::cpp_bin_float_quad;
 using Complex128 = boost::multiprecision::cpp_complex_quad;
 #endif
 
-#ifdef BIGFLOAT_MPFR
+#ifdef ENABLE_MPFR
 #include <boost/multiprecision/mpfr.hpp>
 #include <boost/multiprecision/mpc.hpp>
 
