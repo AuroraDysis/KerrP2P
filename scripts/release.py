@@ -1,6 +1,5 @@
 # ut
 
-from msilib.text import tables
 import os
 import glob
 import shutil
