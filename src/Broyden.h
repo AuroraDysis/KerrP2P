@@ -42,7 +42,14 @@
 #define BMO_MATOPS_ARRAY_DIV_ARRAY(x, y)  ((x).array() / (y).array()).matrix()
 #define BMO_MATOPS_COUT std::cout
 #define BMO_MATOPS_TRANSPOSE_INPLACE(x) (x).transpose()
-#define OPTIM_FPN_SMALL_NUMBER (ErrorLimit<Real>::Value * 100)
+
+
+template <typename Real>
+struct OptimSmallValue {
+	inline static const Real Value = 1;
+};
+
+#define OPTIM_FPN_SMALL_NUMBER OptimSmallValue<Real>::Value
 
 #ifndef OPTIM_NO_TRACE
 
@@ -108,13 +115,12 @@ struct AlgoParams {
 
 	// error tolerance and maxiumum iterations
 
-	size_t iter_max = 5000;
+	size_t iter_max = 2000;
 
-	Real grad_err_tol = 1E-08;
 	//  tolerance value controlling convergence based on the relative change in optimal input values
 	Real rel_sol_change_tol = ErrorLimit<Real>::Value;
 	// tolerance value controlling convergence based on the relative change in objective function.
-	Real rel_objfn_change_tol = 1E-08;
+	Real rel_objfn_change_tol = ErrorLimit<Real>::Value;
 
 	// bounds
 
@@ -144,7 +150,7 @@ private:
 	inline
 		Real
 		df_eta(size_t k) {
-		return 1.0 / (k * k);
+		return Real(1) / (k * k);
 	}
 
 	inline
@@ -257,7 +263,7 @@ private:
 
 		if (Fx_p <= rho * Fx - sigma_2 * BMO_MATOPS_DOT_PROD(d, d)) {
 			// step 2
-			lambda = 1.0;
+			lambda = 1;
 		}
 		else {
 			// step 3
@@ -354,8 +360,8 @@ private:
 			const Vector& x_p,
 			RF &opt_objfn,
 			bool& success,
-			const Real err,
-			const Real err_tol,
+			const Real &err,
+			const Real &err_tol,
 			const size_t iter,
 			const size_t iter_max,
 			const int conv_failure_switch,
