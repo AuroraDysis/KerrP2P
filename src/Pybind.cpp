@@ -96,6 +96,8 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
             py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
     mod.def("sweep_rc_d", &ForwardRayTracingUtils<double, std::complex<double>>::sweep_rc_d,
             py::return_value_policy::move);
+    mod.def("find_root", &ForwardRayTracingUtils<double, std::complex<double>>::find_root,
+            py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
     mod.def("clean_cache", ForwardRayTracing<double, std::complex<double>>::clear_cache);
 
     define_params<double>(mod, "ForwardRayTracingParamsFloat64");

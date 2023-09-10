@@ -56,6 +56,7 @@ public:
 
     RootFunctor(ForwardRayTracingParams<Real> &params_, Real theta_o_, Real phi_o_)
             : params(params_),
+              period(std::numeric_limits<int>::max()),
               fixed_period(false),
               theta_o(std::move(
                       theta_o_)),
@@ -120,7 +121,7 @@ struct ForwardRayTracingUtils {
     }
 
     static ForwardRayTracingResult<Real, Complex>
-    find_result(ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o) {
+    find_root_period(ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o) {
         Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
         x << params.rc, params.lgd;
 
@@ -136,8 +137,24 @@ struct ForwardRayTracingUtils {
         return root_functor.ray_tracing->to_result();
     }
 
-    static ForwardRayTracingResult<Real, Complex> refine_result(ForwardRayTracingResult<Real, Complex> &res) {
+    static ForwardRayTracingResult<Real, Complex>
+    find_root(ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o) {
+        Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
+        x << params.rc, params.lgd;
 
+        RootFunctor<Real, Complex> root_functor(params, std::move(theta_o), std::move(phi_o));
+        optim::algo_settings_t settings;
+        settings.rel_objfn_change_tol = ErrorLimit<double>::Value;
+        settings.rel_sol_change_tol = ErrorLimit<double>::Value;
+        optim::broyden_df(x, root_functor, nullptr, settings);
+        auto residual = root_functor(x, nullptr);
+        if (residual.norm() > ErrorLimit<double>::Value * 1000) {
+            fmt::println("find root failed: residual: {}", residual.norm());
+        }
+        return root_functor.ray_tracing->to_result();
+    }
+
+    static ForwardRayTracingResult<Real, Complex> refine_result(ForwardRayTracingResult<Real, Complex> &res) {
     }
 
     static SweepResult<Real, Complex>
@@ -283,7 +300,7 @@ struct ForwardRayTracingUtils {
                                   local_params.rc_d_to_lambda_q();
                                   int period = MY_FLOOR<Real>::convert(phi(row, col) / two_pi);
                                   try {
-                                      auto res = find_result(local_params, period, theta_o, phi_o);
+                                      auto res = find_root_period(local_params, period, theta_o, phi_o);
                                       res.rc = local_params.rc;
                                       res.lgd = local_params.lgd;
                                       results.push_back(std::move(res));

@@ -60,7 +60,7 @@ void test() {
         params.lgd = lgd - 0.001;
         const Real two_pi = boost::math::constants::two_pi<Real>();
         int period = MY_FLOOR<Real>::convert(theta_o / two_pi);
-        auto res = ForwardRayTracingUtils<Real, Complex>::find_result(params, period, theta_o, phi_o);
+        auto res = ForwardRayTracingUtils<Real, Complex>::find_root_period(params, period, theta_o, phi_o);
         CHECK(res.ray_status == RayStatus::NORMAL);
 
         Real ERROR_LIMIT = ErrorLimit<Real>::Value * 1000;

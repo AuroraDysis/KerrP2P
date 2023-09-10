@@ -103,7 +103,7 @@ TEMPLATE_TEST_CASE("Find Root Function", "[root]", Float64) {
     params.rc = rc + 0.001;
     params.lgd = lgd - 0.001;
     int period = MY_FLOOR<Real>::convert(theta_o / boost::math::constants::two_pi<Real>());
-    auto res = ForwardRayTracingUtils<Real, Complex>::find_result(params, period, theta_o, phi_o);
+    auto res = ForwardRayTracingUtils<Real, Complex>::find_root_period(params, period, theta_o, phi_o);
     CHECK(res.ray_status == RayStatus::NORMAL);
 
     Real ERROR_LIMIT = ErrorLimit<Real>::Value * 1000;
