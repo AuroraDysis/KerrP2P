@@ -123,13 +123,15 @@ struct ForwardRayTracingUtils {
     }
 
     static FindRootResult<Real, Complex>
-    find_root_period(ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o) {
+    find_root_period(const ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o) {
+        ForwardRayTracingParams<Real> local_params(params);
+
         Eigen::Vector<Real, 2> x = Eigen::Vector<Real, 2>::Zero(2);
-        x << params.rc, params.lgd;
+        x << local_params.rc, local_params.lgd;
 
         auto root_functor =
-                period == std::numeric_limits<int>::max() ? RootFunctor<Real, Complex>(params, theta_o, phi_o)
-                                                          : RootFunctor<Real, Complex>(params, period,
+                period == std::numeric_limits<int>::max() ? RootFunctor<Real, Complex>(local_params, theta_o, phi_o)
+                                                          : RootFunctor<Real, Complex>(local_params, period,
                                                                                        std::move(theta_o),
                                                                                        std::move(phi_o));
         AlgoParams<Real> settings;
@@ -146,7 +148,6 @@ struct ForwardRayTracingUtils {
         //}
 
         auto residual = root_functor(x, nullptr);
-
         FindRootResult<Real, Complex> result;
 
         if (root_functor.ray_tracing->ray_status != RayStatus::NORMAL) {
@@ -163,11 +164,17 @@ struct ForwardRayTracingUtils {
 
         result.success = true;
         result.root = root_functor.ray_tracing->to_result();
+
+        auto& root = (*result.root);
+        root.rc = x[0];
+        root.lgd = x[1];
+        root.lgd_sign = local_params.lgd_sign;
+
         return result;
     }
 
     static FindRootResult<Real, Complex>
-    find_root(ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o) {
+    find_root(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o) {
         return find_root_period(params, std::numeric_limits<int>::max(), theta_o, phi_o);
     }
 
@@ -320,8 +327,6 @@ struct ForwardRayTracingUtils {
                                   auto root_res = find_root_period(local_params, period, theta_o, phi_o);
                                   if (root_res.success) {
                                       auto root = *std::move(root_res.root);
-                                      root.rc = local_params.rc;
-                                      root.lgd = local_params.lgd;
                                       std::lock_guard<std::mutex> lock(results_mutex);
                                       results.push_back(std::move(root));
                                   } else {

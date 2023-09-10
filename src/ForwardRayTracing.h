@@ -350,6 +350,8 @@ public:
         result.eta = eta;
         result.lambda = lambda;
         result.q = q;
+        result.rc = std::numeric_limits<Real>::quiet_NaN();
+        result.lgd = std::numeric_limits<Real>::quiet_NaN();
         return result;
     }
 };
