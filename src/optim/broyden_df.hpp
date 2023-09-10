@@ -37,44 +37,38 @@
 #define BMO_MATOPS_ARRAY_DIV_ARRAY(x, y)  ((x).array() / (y).array()).matrix()
 #define BMO_MATOPS_COUT std::cout
 #define BMO_MATOPS_TRANSPOSE_INPLACE(x) (x).transpose()
+#define OPTIM_FPN_SMALL_NUMBER 1.0e-08
 
-template<typename Real>
+template<typename Real, size_t dim>
 struct BroydenDF {
 private:
-    using Mat_t = Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>;
+    using Mat_t = Eigen::Matrix<Real, dim, dim>;
 
-    using ColVec_t = Eigen::Matrix<Real, Eigen::Dynamic, 1>;
-    using RowVec_t = Eigen::Matrix<Real, 1, Eigen::Dynamic>;
+    using ColVec_t = Eigen::Matrix<Real, dim, 1>;
 
-    using ColVecInt_t = Eigen::Matrix<int, Eigen::Dynamic, 1>;
-    using RowVecInt_t = Eigen::Matrix<int, 1, Eigen::Dynamic>;
-
-    using ColVecUInt_t = Eigen::Matrix<size_t, Eigen::Dynamic, 1>;
-    using RowVecUInt_t = Eigen::Matrix<size_t, 1, Eigen::Dynamic>;
-
-    bool
-        broyden_df_impl(
-            ColVec_t& init_out_vals,
-            std::function<ColVec_t(const ColVec_t& vals_inp, void* opt_data)> opt_objfn,
-            void* opt_data,
-            algo_settings_t<Real>* settings_inp
-        );
-
-    bool
-        broyden_df_impl(
-            ColVec_t& init_out_vals,
-            std::function<ColVec_t(const ColVec_t& vals_inp, void* opt_data)> opt_objfn,
-            void* opt_data,
-            std::function<Mat_t(const ColVec_t& vals_inp, void* jacob_data)> jacob_objfn,
-            void* jacob_data,
-            algo_settings_t<Real>* settings_inp
-        );
+//    bool
+//        broyden_df_impl(
+//            ColVec_t& init_out_vals,
+//            std::function<ColVec_t(const ColVec_t& vals_inp, void* opt_data)> opt_objfn,
+//            void* opt_data,
+//            algo_settings_t<Real>* settings_inp
+//        );
+//
+//    bool
+//        broyden_df_impl(
+//            ColVec_t& init_out_vals,
+//            std::function<ColVec_t(const ColVec_t& vals_inp, void* opt_data)> opt_objfn,
+//            void* opt_data,
+//            std::function<Mat_t(const ColVec_t& vals_inp, void* jacob_data)> jacob_objfn,
+//            void* jacob_data,
+//            algo_settings_t<Real>* settings_inp
+//        );
 
     //
 
     inline
         Real
-        df_eta(uint_t k) {
+        df_eta(size_t k) {
         return 1.0 / (k * k);
     }
 
@@ -84,7 +78,7 @@ private:
             const ColVec_t& x_vals,
             const ColVec_t& direc,
             Real sigma_1,
-            uint_t k,
+            size_t k,
             std::function<ColVec_t(const ColVec_t& vals_inp, void* opt_data)> opt_objfn,
             void* opt_data
         ) {
@@ -108,7 +102,7 @@ private:
         // begin loop
 
         size_t iter = 0;
-        uint_t max_iter = 10000;
+        size_t max_iter = 10000;
 
         while (iter < max_iter) {
             ++iter;
@@ -154,7 +148,7 @@ private:
 
         const int print_level = settings.print_level;
 
-        const uint_t conv_failure_switch = settings.conv_failure_switch;
+        const size_t conv_failure_switch = settings.conv_failure_switch;
         const size_t iter_max = settings.iter_max;
         const Real rel_objfn_change_tol = settings.rel_objfn_change_tol;
         const Real rel_sol_change_tol = settings.rel_sol_change_tol;
@@ -314,7 +308,7 @@ private:
         }
 
         const int print_level = settings.print_level;
-        const uint_t conv_failure_switch = settings.conv_failure_switch;
+        const size_t conv_failure_switch = settings.conv_failure_switch;
 
         const size_t iter_max = settings.iter_max;
         const Real rel_objfn_change_tol = settings.rel_objfn_change_tol;
@@ -595,11 +589,11 @@ public:
         error_reporting(
             ColVec_t& out_vals,
             const ColVec_t& x_p,
-            std::function<fp_t(const ColVec_t& vals_inp, ColVec_t* grad_out, void* opt_data)> opt_objfn,
+            std::function<Real(const ColVec_t& vals_inp, ColVec_t* grad_out, void* opt_data)> opt_objfn,
             void* opt_data,
             bool& success,
-            const fp_t err,
-            const fp_t err_tol,
+            const Real err,
+            const Real err_tol,
             const size_t iter,
             const size_t iter_max,
             const int conv_failure_switch,
@@ -664,7 +658,7 @@ public:
         error_reporting(
             ColVec_t& out_vals,
             const ColVec_t& x_p,
-            std::function<fp_t(const ColVec_t& vals_inp, ColVec_t* grad_out, void* opt_data)> opt_objfn,
+            std::function<Real(const ColVec_t& vals_inp, ColVec_t* grad_out, void* opt_data)> opt_objfn,
             void* opt_data,
             bool& success,
             const int conv_failure_switch,
@@ -697,8 +691,8 @@ public:
             std::function<ColVec_t(const ColVec_t& vals_inp, void* opt_data)> opt_objfn,
             void* opt_data,
             bool& success,
-            const fp_t err,
-            const fp_t err_tol,
+            const Real err,
+            const Real err_tol,
             const size_t iter,
             const size_t iter_max,
             const int conv_failure_switch,
@@ -772,20 +766,20 @@ public:
         error_reporting(
             ColVec_t& out_vals,
             const ColVec_t& x_p,
-            std::function<fp_t(const ColVec_t& vals_inp, ColVec_t* grad_out, Mat_t* hess_out, void* opt_data)> opt_objfn,
+            std::function<Real(const ColVec_t& vals_inp, ColVec_t* grad_out, Mat_t* hess_out, void* opt_data)> opt_objfn,
             void* opt_data,
             bool& success,
-            const fp_t err,
-            const fp_t err_tol,
+            const Real err,
+            const Real err_tol,
             const size_t iter,
             const size_t iter_max,
             const int conv_failure_switch,
             algo_settings_t<Real>* settings_inp
         )
     {
-        std::function<fp_t(const ColVec_t& vals_inp, ColVec_t* grad_out, void* opt_data)> lam_objfn \
+        std::function<Real(const ColVec_t& vals_inp, ColVec_t* grad_out, void* opt_data)> lam_objfn \
             = [opt_objfn](const ColVec_t& vals_inp, ColVec_t* grad_out, void* opt_data)
-            -> fp_t
+            -> Real
             {
                 return opt_objfn(vals_inp, grad_out, nullptr, opt_data);
             };

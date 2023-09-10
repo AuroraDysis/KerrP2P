@@ -132,10 +132,11 @@ struct ForwardRayTracingUtils {
                                                           : RootFunctor<Real, Complex>(params, period,
                                                                                        std::move(theta_o),
                                                                                        std::move(phi_o));
-        optim::algo_settings_t settings;
+        optim::algo_settings_t<Real> settings;
         settings.rel_objfn_change_tol = ErrorLimit<Real>::Value;
         settings.rel_sol_change_tol = ErrorLimit<Real>::Value;
-        optim::broyden_df(x, root_functor, nullptr, settings);
+        optim::BroydenDF<Real, 2> solver;
+        solver.broyden_df(x, root_functor, nullptr, settings);
         auto residual = root_functor(x, nullptr);
 
         FindRootResult<Real, Complex> result;
