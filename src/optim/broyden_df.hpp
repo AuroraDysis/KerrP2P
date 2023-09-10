@@ -219,7 +219,7 @@ internal::broyden_df_impl(
     
     bool success = false;
 
-    const size_t n_vals = BMO_MATOPS_SIZE(init_out_vals);
+    const size_t n_vals = static_cast<size_t>((init_out_vals).size());
 
     // Broyden settings
 
@@ -395,7 +395,7 @@ internal::broyden_df_impl(
     
     bool success = false;
 
-    const size_t n_vals = BMO_MATOPS_SIZE(init_out_vals);
+    const size_t n_vals = static_cast<size_t>((init_out_vals).size());
 
     // Broyden settings
 
