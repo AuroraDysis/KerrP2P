@@ -126,6 +126,16 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
     define_all<double, std::complex<double>>(mod, "Float64");
     define_all<long double, std::complex<long double>>(mod, "LongDouble");
 
+    mod.attr("calc_ray") = mod.attr("calc_ray_Float64");
+    mod.attr("sweep_rc_d") = mod.attr("sweep_rc_d_Float64");
+    mod.attr("find_root_period") = mod.attr("find_root_period_Float64");
+    mod.attr("find_root") = mod.attr("find_root_Float64");
+    mod.attr("clean_cache") = mod.attr("clean_cache_Float64");
+    mod.attr("ForwardRayTracingParams" ) = mod.attr("ForwardRayTracingParamsFloat64");
+    mod.attr("ForwardRayTracing") = mod.attr("ForwardRayTracingFloat64");
+    mod.attr("FindRootResult") = mod.attr("FindRootResultFloat64");
+    mod.attr("SweepResult") = mod.attr("SweepResultFloat64");
+
 #ifdef FLOAT128
     // define_forward_ray_tracing_result<boost::multiprecision::float128, boost::multiprecision::complex128>(mod, "ForwardRayTracingFloat128");
     // define_sweep_result<boost::multiprecision::float128>(mod, "SweepResultFloat128");
