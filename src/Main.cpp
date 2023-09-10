@@ -6,10 +6,11 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-using namespace boost::property_tree;
-
 #include "ForwardRayTracing.h"
 #include "Utils.h"
+
+using std::string;
+using namespace boost::property_tree;
 
 inline std::vector<boost::property_tree::ptree> TEST_DATA;
 void get_test_data(std::string &path);
