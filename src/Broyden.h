@@ -24,6 +24,9 @@
 
 #pragma once
 
+#include <iostream>
+#include <Eigen/Dense>
+
 #define BMO_MATOPS_EYE(n) Mat_t::Identity(n,n)
 #define BMO_MATOPS_L1NORM(x) (x).array().abs().sum()
 #define BMO_MATOPS_L2NORM(x) (x).norm()
@@ -38,6 +41,97 @@
 #define BMO_MATOPS_COUT std::cout
 #define BMO_MATOPS_TRANSPOSE_INPLACE(x) (x).transpose()
 #define OPTIM_FPN_SMALL_NUMBER 1.0e-08
+
+#ifndef OPTIM_NO_TRACE
+
+#define OPTIM_BROYDEN_DF_TRACE(iter_in, rel_objfn_change_in, rel_sol_change_in, x_in, d_in, objfn_vec_in,   \
+                               lambda_in, s_in, y_in, B_in)                                                 \
+    if (print_level > 0) {                                                                                  \
+        printf("\n");                                                                                       \
+        std::cout << "  - Iteration:                          " << iter_in << "\n";                         \
+        std::cout << "    Relative change in objective value: " << rel_objfn_change_in << "\n";             \
+        std::cout << "    Relative change in solution:        " << rel_sol_change_in << "\n";               \
+                                                                                                            \
+        if (print_level >= 2) {                                                                             \
+            printf("\n");                                                                                   \
+            std::cout << "    Current values:\n";                                                           \
+            BMO_MATOPS_COUT << BMO_MATOPS_TRANSPOSE(x_in) << "\n";                                          \
+        }                                                                                                   \
+                                                                                                            \
+        if (print_level >= 3) {                                                                             \
+            printf("\n");                                                                                   \
+            std::cout << "    Direction:\n";                                                                \
+            BMO_MATOPS_COUT << BMO_MATOPS_TRANSPOSE(d_in) << "\n";                                          \
+            std::cout << "    f(x):\n";                                                                     \
+            BMO_MATOPS_COUT << BMO_MATOPS_TRANSPOSE(objfn_vec_in) << "\n";                                  \
+        }                                                                                                   \
+                                                                                                            \
+        if (print_level >= 4) {                                                                             \
+            printf("\n");                                                                                   \
+            std::cout << "    lambda: " << lambda_in << "\n";                                               \
+            std::cout << "    s:\n";                                                                        \
+            BMO_MATOPS_COUT << s_in << "\n";                                                                \
+            std::cout << "    y:\n";                                                                        \
+            BMO_MATOPS_COUT << y_in << "\n";                                                                \
+            std::cout << "    B:\n";                                                                        \
+            BMO_MATOPS_COUT << B_in << "\n";                                                                \
+        }                                                                                                   \
+    }
+
+#else
+
+#define OPTIM_BROYDEN_DF_TRACE(iter_in, rel_objfn_change_in, rel_sol_change_in, x_in, d_in, objfn_vec_in,   \
+                               lambda_in, s_in, y_in, B_in)
+
+#endif
+
+
+ // Broyden
+
+template<typename Real>
+struct broyden_settings_t
+{
+    Real par_rho = 0.9;
+    Real par_sigma_1 = 0.001;
+    Real par_sigma_2 = 0.001;
+};
+
+// 
+template<typename Real>
+struct algo_settings_t {
+    using ColVec_t = Eigen::Matrix<Real, Eigen::Dynamic, 1>;
+
+    // print and convergence options
+
+    int print_level = 0;
+    int conv_failure_switch = 0;
+
+    // error tolerance and maxiumum iterations
+
+    size_t iter_max = 2000;
+
+    Real grad_err_tol = 1E-08;
+    Real rel_sol_change_tol = 1E-14;
+    Real rel_objfn_change_tol = 1E-08;
+
+    // bounds
+
+    bool vals_bound = false;
+
+    ColVec_t lower_bounds;
+    ColVec_t upper_bounds;
+
+    // values returned upon successful completion
+
+    Real opt_fn_value;      // will be returned by the optimization algorithm
+    ColVec_t opt_root_fn_values; // will be returned by the root-finding method
+
+    size_t opt_iter;
+    Real opt_error_value;
+
+    // Broyden
+    broyden_settings_t<Real> broyden_settings;
+};
 
 template<typename Real, size_t dim>
 struct BroydenDF {
