@@ -38,6 +38,13 @@ struct SweepResult {
 };
 
 template<typename Real, typename Complex>
+struct FindRootResult {
+    bool success;
+    std::string fail_reason;
+    std::optional<ForwardRayTracingResult<Real, Complex>> root;
+};
+
+template<typename Real, typename Complex>
 class RootFunctor {
 private:
     using Vector = Eigen::Matrix<Real, 2, 1>;
@@ -82,7 +89,7 @@ public:
 
         if (ray_tracing->ray_status != RayStatus::NORMAL) {
             fmt::println("ray status: {}", ray_status_to_str(ray_tracing->ray_status));
-            throw std::runtime_error("Ray tracing failed: ray status is not normal");
+            return Vector::Constant(std::numeric_limits<Real>::quiet_NaN());
         }
 
         Vector residual;
@@ -91,10 +98,6 @@ public:
             residual[1] = ray_tracing->phi_f - phi_o - period * two_pi;
         } else {
             residual[1] = sin((ray_tracing->phi_f - phi_o) * half<Real>());
-        }
-
-        if (isnan(residual[0]) || isnan(residual[1])) {
-            throw std::runtime_error("Ray tracing failed: residual is NaN");
         }
 
 #ifdef PRINT_DEBUG
@@ -118,41 +121,43 @@ struct ForwardRayTracingUtils {
         return ray_tracing->to_result();
     }
 
-    static ForwardRayTracingResult<Real, Complex>
+    static FindRootResult<Real, Complex>
     find_root_period(ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o) {
         Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
         x << params.rc, params.lgd;
 
-        RootFunctor<Real, Complex> root_functor(params, period, std::move(theta_o), std::move(phi_o));
+        auto root_functor =
+                period == std::numeric_limits<int>::max() ? RootFunctor<Real, Complex>(params, theta_o, phi_o)
+                                                          : RootFunctor<Real, Complex>(params, period,
+                                                                                       std::move(theta_o),
+                                                                                       std::move(phi_o));
         optim::algo_settings_t settings;
         settings.rel_objfn_change_tol = ErrorLimit<double>::Value;
         settings.rel_sol_change_tol = ErrorLimit<double>::Value;
         optim::broyden_df(x, root_functor, nullptr, settings);
         auto residual = root_functor(x, nullptr);
-        if (root_functor.ray_tracing->ray_status != RayStatus::NORMAL || residual.hasNaN() ||
-            residual.norm() > ErrorLimit<double>::Value * 1000) {
-            throw std::runtime_error("find root failed: residual is too large");
+
+        FindRootResult<Real, Complex> result;
+
+        if (root_functor.ray_tracing->ray_status != RayStatus::NORMAL) {
+            result.success = false;
+            result.fail_reason = fmt::format("ray status: {}", ray_status_to_str(root_functor.ray_tracing->ray_status));
+            return result;
         }
 
-        return root_functor.ray_tracing->to_result();
+        if (residual.norm() > ErrorLimit<double>::Value * 1000) {
+            result.success = false;
+            result.fail_reason = fmt::format("residual: {}", residual.norm());
+            return result;
+        }
+
+        result.root = root_functor.ray_tracing->to_result();
+        return result;
     }
 
-    static ForwardRayTracingResult<Real, Complex>
+    static FindRootResult<Real, Complex>
     find_root(ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o) {
-        Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
-        x << params.rc, params.lgd;
-
-        RootFunctor<Real, Complex> root_functor(params, std::move(theta_o), std::move(phi_o));
-        optim::algo_settings_t settings;
-        settings.rel_objfn_change_tol = ErrorLimit<double>::Value;
-        settings.rel_sol_change_tol = ErrorLimit<double>::Value;
-        optim::broyden_df(x, root_functor, nullptr, settings);
-        auto residual = root_functor(x, nullptr);
-        if (root_functor.ray_tracing->ray_status != RayStatus::NORMAL || residual.hasNaN() ||
-            residual.norm() > ErrorLimit<double>::Value * 1000) {
-            fmt::println("find root failed: residual: {}", residual.norm());
-        }
-        return root_functor.ray_tracing->to_result();
+        return find_root_period(params, std::numeric_limits<int>::max(), theta_o, phi_o);
     }
 
     static ForwardRayTracingResult<Real, Complex> refine_result(ForwardRayTracingResult<Real, Complex> &res) {
@@ -300,13 +305,14 @@ struct ForwardRayTracingUtils {
                                   local_params.lgd = lgd_list[row];
                                   local_params.rc_d_to_lambda_q();
                                   int period = MY_FLOOR<Real>::convert(phi(row, col) / two_pi);
-                                  try {
-                                      auto res = find_root_period(local_params, period, theta_o, phi_o);
-                                      res.rc = local_params.rc;
-                                      res.lgd = local_params.lgd;
-                                      results.push_back(std::move(res));
-                                  } catch (std::exception &e) {
-                                      fmt::print(stderr, "Error: {}\n", e.what());
+                                  auto root_res = find_root_period(local_params, period, theta_o, phi_o);
+                                  if (root_res.success) {
+                                      auto root = *std::move(root_res.root);
+                                      root.rc = local_params.rc;
+                                      root.lgd = local_params.lgd;
+                                      results.push_back(std::move(root));
+                                  } else {
+                                      fmt::print("find root failed: {}\n", root_res.fail_reason);
                                   }
                               }
                           });

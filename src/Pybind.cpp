@@ -76,6 +76,15 @@ void define_forward_ray_tracing_result(pybind11::module_ &mod, const char *name)
             .def_readonly("ray_status", &ResultType::ray_status);
 }
 
+template<typename Real, typename Complex>
+void define_find_root_result(pybind11::module_ &mod, const char *name) {
+    using ResultType = FindRootResult<Real, Complex>;
+    py::class_<ResultType>(mod, name)
+            .def_readonly("success", &ResultType::success)
+            .def_readonly("fail_reason", &ResultType::fail_reason)
+            .def_readonly("root", &ResultType::root);
+}
+
 PYBIND11_MODULE(py_forward_ray_tracing, mod) {
     py::enum_<RayStatus>(mod, "RayStatus")
             .value("NORMAL", RayStatus::NORMAL)
@@ -106,6 +115,8 @@ PYBIND11_MODULE(py_forward_ray_tracing, mod) {
     define_params<long double>(mod, "ForwardRayTracingParamsLongDouble");
     define_forward_ray_tracing_result<double, std::complex<double>>(mod, "ForwardRayTracingFloat64");
     define_forward_ray_tracing_result<long double, std::complex<long double>>(mod, "ForwardRayTracingLongDouble");
+    define_find_root_result<double, std::complex<double>>(mod, "FindRootResultFloat64");
+    define_find_root_result<long double, std::complex<long double>>(mod, "FindRootResultLongDouble");
     define_sweep_result<double, std::complex<double>>(mod, "SweepResultFloat64");
     define_sweep_result<long double, std::complex<long double>>(mod, "SweepResultLongDouble");
 #ifdef FLOAT128
