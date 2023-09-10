@@ -1,5 +1,5 @@
-// #include <pybind11/numpy.h>
-// #include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
+#include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/operators.h>
@@ -92,13 +92,15 @@ void define_methods(pybind11::module_& mod, const std::string& suffix) {
 		py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
 	mod.def(("calc_ray_batch" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::calc_ray_batch,
 		py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
-	mod.def(("sweep_rc_d" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::sweep_rc_d,
-		py::return_value_policy::move);
 	mod.def(("find_root_period" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::find_root_period,
 		py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
 	mod.def(("find_root" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::find_root,
 		py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
 	mod.def(("clean_cache" + suffix).c_str(), ForwardRayTracing<Real, Complex>::clear_cache);
+	if constexpr (std::is_same_v<Real, double> || std::is_same_v<Real, long double>) {
+		mod.def(("sweep_rc_d" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::sweep_rc_d,
+			py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
+	}
 }
 
 template <typename Real, typename Complex>
@@ -107,7 +109,9 @@ void define_all(pybind11::module_& mod, const std::string& suffix) {
 	define_params<Real>(mod, ("ForwardRayTracingParams" + suffix).c_str());
 	define_forward_ray_tracing_result<Real, Complex>(mod, ("ForwardRayTracing" + suffix).c_str());
 	define_find_root_result<Real, Complex>(mod, ("FindRootResult" + suffix).c_str());
-	define_sweep_result<Real, Complex>(mod, ("SweepResult" + suffix).c_str());
+	if constexpr (std::is_same_v<Real, double> || std::is_same_v<Real, long double>) {
+		define_sweep_result<Real, Complex>(mod, ("SweepResult" + suffix).c_str());
+	}
 }
 
 template <typename T>
