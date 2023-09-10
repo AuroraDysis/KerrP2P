@@ -28,12 +28,6 @@
 #include "misc/optim_trace.hpp"
 
 // utility functions
-#include "determine_bounds_type.hpp"
-#include "bounds_check.hpp"
 #include "error_reporting.hpp"
-#include "jacobian_adjust.hpp"
-#include "numerical_gradient.hpp"
-#include "numerical_hessian.hpp"
-#include "transform_vals.hpp"
 
 #endif
