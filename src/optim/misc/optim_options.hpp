@@ -31,19 +31,19 @@
 
 // floating point number type
 
-#define OPTIM_FPN_TYPE double
-#undef OPTIM_FPN_SMALL_NUMBER
-#define OPTIM_FPN_SMALL_NUMBER fp_t(1e-08)
-
+//#define OPTIM_FPN_TYPE double
+//#undef OPTIM_FPN_SMALL_NUMBER
+//#define OPTIM_FPN_SMALL_NUMBER fp_t(1e-08)
 //
-
-namespace optim
-{
-    using uint_t = unsigned int;
-    using fp_t = OPTIM_FPN_TYPE;
-
-    using rand_engine_t = std::mt19937_64;
-}
+////
+//
+//namespace optim
+//{
+//    using uint_t = unsigned int;
+//    using fp_t = OPTIM_FPN_TYPE;
+//
+//    using rand_engine_t = std::mt19937_64;
+//}
 
 #include <iostream>
 #include <Eigen/Dense>
@@ -51,39 +51,39 @@ namespace optim
 // template<typename eT, int iTr, int iTc>
 // using EigenMat = Eigen::Matrix<eT,iTr,iTc>;
 
-namespace optim
-{
-  using Mat_t = Eigen::Matrix<fp_t, Eigen::Dynamic, Eigen::Dynamic>;
-
-  using ColVec_t = Eigen::Matrix<fp_t, Eigen::Dynamic, 1>;
-  using RowVec_t = Eigen::Matrix<fp_t, 1, Eigen::Dynamic>;
-
-  using ColVecInt_t = Eigen::Matrix<int, Eigen::Dynamic, 1>;
-  using RowVecInt_t = Eigen::Matrix<int, 1, Eigen::Dynamic>;
-
-  using ColVecUInt_t = Eigen::Matrix<size_t, Eigen::Dynamic, 1>;
-  using RowVecUInt_t = Eigen::Matrix<size_t, 1, Eigen::Dynamic>;
-}
-
-#ifndef BMO_RNG_ENGINE_TYPE
-    #define BMO_RNG_ENGINE_TYPE optim::rand_engine_t
-#endif
-
-#ifndef BMO_CORE_TYPES
-    #define BMO_CORE_TYPES
-
-    namespace bmo
-    {
-        using fp_t = OPTIM_FPN_TYPE;
-
-        using ColVec_t = optim::ColVec_t;
-        using RowVec_t = optim::RowVec_t;
-        using ColVecInt_t = optim::ColVecInt_t;
-        using RowVecInt_t = optim::RowVecInt_t;
-        using ColVecUInt_t = optim::ColVecUInt_t;
-
-        using Mat_t = optim::Mat_t;
-    }
-#endif
+//namespace optim
+//{
+//  using Mat_t = Eigen::Matrix<fp_t, Eigen::Dynamic, Eigen::Dynamic>;
+//
+//  using ColVec_t = Eigen::Matrix<fp_t, Eigen::Dynamic, 1>;
+//  using RowVec_t = Eigen::Matrix<fp_t, 1, Eigen::Dynamic>;
+//
+//  using ColVecInt_t = Eigen::Matrix<int, Eigen::Dynamic, 1>;
+//  using RowVecInt_t = Eigen::Matrix<int, 1, Eigen::Dynamic>;
+//
+//  using ColVecUInt_t = Eigen::Matrix<size_t, Eigen::Dynamic, 1>;
+//  using RowVecUInt_t = Eigen::Matrix<size_t, 1, Eigen::Dynamic>;
+//}
+//
+//#ifndef BMO_RNG_ENGINE_TYPE
+//    #define BMO_RNG_ENGINE_TYPE optim::rand_engine_t
+//#endif
+//
+//#ifndef BMO_CORE_TYPES
+//    #define BMO_CORE_TYPES
+//
+//    namespace bmo
+//    {
+//        using fp_t = OPTIM_FPN_TYPE;
+//
+//        using ColVec_t = optim::ColVec_t;
+//        using RowVec_t = optim::RowVec_t;
+//        using ColVecInt_t = optim::ColVecInt_t;
+//        using RowVecInt_t = optim::RowVecInt_t;
+//        using ColVecUInt_t = optim::ColVecUInt_t;
+//
+//        using Mat_t = optim::Mat_t;
+//    }
+//#endif
 
 //#include "BaseMatrixOps/BaseMatrixOps.hpp"

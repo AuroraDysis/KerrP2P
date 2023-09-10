@@ -27,20 +27,18 @@
 
 // Broyden
 
+template<typename Real>
 struct broyden_settings_t
 {
-    fp_t par_rho = 0.9;
-    fp_t par_sigma_1 = 0.001;
-    fp_t par_sigma_2 = 0.001;
+    Real par_rho = 0.9;
+    Real par_sigma_1 = 0.001;
+    Real par_sigma_2 = 0.001;
 };
 
 // 
-
-struct algo_settings_t
-{
-    // RNG seeding
-
-    size_t rng_seed_value = std::random_device{}();
+template<typename Real>
+struct algo_settings_t {
+    using ColVec_t = Eigen::Matrix<Real, Eigen::Dynamic, 1>;
 
     // print and convergence options
 
@@ -51,9 +49,9 @@ struct algo_settings_t
 
     size_t iter_max = 2000;
 
-    fp_t grad_err_tol = 1E-08;
-    fp_t rel_sol_change_tol = 1E-14;
-    fp_t rel_objfn_change_tol = 1E-08;
+    Real grad_err_tol = 1E-08;
+    Real rel_sol_change_tol = 1E-14;
+    Real rel_objfn_change_tol = 1E-08;
 
     // bounds
 
@@ -64,14 +62,14 @@ struct algo_settings_t
 
     // values returned upon successful completion
 
-    fp_t opt_fn_value;      // will be returned by the optimization algorithm
+    Real opt_fn_value;      // will be returned by the optimization algorithm
     ColVec_t opt_root_fn_values; // will be returned by the root-finding method
 
     size_t opt_iter;
-    fp_t opt_error_value;
+    Real opt_error_value;
 
     // Broyden
-    broyden_settings_t broyden_settings;
+    broyden_settings_t<Real> broyden_settings;
 };
 
 #endif

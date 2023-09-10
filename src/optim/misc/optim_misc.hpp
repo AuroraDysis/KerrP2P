@@ -27,7 +27,4 @@
 // trace
 #include "misc/optim_trace.hpp"
 
-// utility functions
-#include "error_reporting.hpp"
-
 #endif
