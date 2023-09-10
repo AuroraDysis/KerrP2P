@@ -2,8 +2,6 @@
 
 #include "ForwardRayTracing.h"
 
-#define OPTIM_ENABLE_EIGEN_WRAPPERS
-
 #include "optim/optim.hpp"
 
 #include <oneapi/tbb.h>
