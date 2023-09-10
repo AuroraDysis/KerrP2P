@@ -15,8 +15,6 @@
     #define BMO_VERSION_PATCH 1
 #endif
 
-//
-
 #ifdef BMO_ENABLE_EIGEN_WRAPPERS
 
     #if EIGEN_VERSION_AT_LEAST(3,4,50)
@@ -28,8 +26,4 @@
     #endif
 
     using scalar_t = bmo::ColVec_t::Scalar;
-#endif
-
-#ifdef BMO_ENABLE_ARMA_WRAPPERS
-    using scalar_t = bmo::ColVec_t::elem_type;
 #endif
