@@ -63,7 +63,7 @@ public:
     }
 
 public:
-    explicit GIntegral(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_, typeid(*this).name()) {
+    explicit GIntegral(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_, TypeName<GIntegral<Real, Complex>>::Get()) {
     }
 
     void calc() {
@@ -153,4 +153,11 @@ public:
         fmt::println("G: {}, {}, {}", angular_integrals[0], angular_integrals[1], angular_integrals[2]);
 #endif
     }
+};
+
+template <typename Real, typename Complex>
+struct TypeName<GIntegral<Real, Complex>> {
+  static std::string Get() {
+    return fmt::format("GIntegral<{}, {}>", TypeName<Real>::Get(), TypeName<Complex>::Get());
+  }
 };

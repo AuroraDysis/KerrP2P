@@ -61,8 +61,7 @@ public:
     }
 
 public:
-    explicit IIntegral3(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_,
-                                                                                           typeid(*this).name()) {
+    explicit IIntegral3(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_, TypeName<IIntegral3<Real, Complex>>::Get()) {
     }
 
     void pre_calc() {
@@ -186,4 +185,11 @@ public:
         fmt::println("I3: {}, {}, {}", radial_integrals[0], radial_integrals[1], radial_integrals[2]);
 #endif
     }
+};
+
+template <typename Real, typename Complex>
+struct TypeName<IIntegral3<Real, Complex>> {
+  static std::string Get() {
+    return fmt::format("IIntegral3<{}, {}>", TypeName<Real>::Get(), TypeName<Complex>::Get());
+  }
 };
