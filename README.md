@@ -3,7 +3,7 @@
 ```yaml
 spack:
   specs:
-    - boost+filesystem
+    - boost+filesystem+program_options
     - catch2
     - fmt
     - gmp

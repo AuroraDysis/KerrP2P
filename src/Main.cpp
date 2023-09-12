@@ -2,156 +2,34 @@
 #include <iostream>
 
 #include <boost/filesystem.hpp>
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
+#include <boost/program_options.hpp>
 
 #include "ForwardRayTracing.h"
 #include "Utils.h"
 
 using std::string;
-using namespace boost::property_tree;
 
-inline std::vector<boost::property_tree::ptree> TEST_DATA;
+int main(int argc, char *argv[]) {
+    namespace po = boost::program_options;
 
-void get_test_data(std::string &path);
+    po::options_description desc("Allowed options");
+    desc.add_options()
+            ("help", "produce help message")
+            ("compression", po::value<int>(), "set compression level");
 
-template<typename T>
-std::vector<T> as_vector(boost::property_tree::ptree const &pt, boost::property_tree::ptree::key_type const &key) {
-    std::vector<T> r;
-    for (auto &item: pt.get_child(key))
-        r.push_back(item.second.get_value<T>());
-    return r;
-}
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
 
-#define CHECK(x) if (!(x)) { \
-  std::cout << "Test failed: " << #x << std::endl; \
-  std::cout << "File: " << __FILE__ << std::endl; \
-  std::cout << "Line: " << __LINE__ << std::endl; \
-  std::cout << "Function: " << __FUNCTION__ << std::endl; \
-  std::cout << "Test data: " << std::endl; \
-  return; \
-}
-
-template<typename Real, typename Complex>
-void test() {
-    for (const auto &data: TEST_DATA) {
-        ForwardRayTracingParams<Real> params;
-        params.a = boost::lexical_cast<Real>(data.get<string>("a"));
-        params.r_s = boost::lexical_cast<Real>(data.get<string>("r_s"));
-        params.theta_s = boost::lexical_cast<Real>(data.get<string>("theta_s"));
-        params.r_o = boost::lexical_cast<Real>(data.get<string>("r_o"));
-        params.nu_r = data.get<int>("nu_r") == 1 ? Sign::POSITIVE : Sign::NEGATIVE;
-        params.nu_theta = data.get<int>("nu_theta") == 1 ? Sign::POSITIVE : Sign::NEGATIVE;
-
-        Real lambda = boost::lexical_cast<Real>(data.get<string>("lambda"));
-        Real eta = boost::lexical_cast<Real>(data.get<string>("eta"));
-
-        Real rc = boost::lexical_cast<Real>(data.get<string>("rc"));
-        Real d = boost::lexical_cast<Real>(data.get<string>("d"));
-        params.lgd_sign = d > 0 ? Sign::POSITIVE : Sign::NEGATIVE;
-        Real lgd = log10(abs(d));
-        params.calc_t_f = false;
-
-        Real theta_o = boost::lexical_cast<Real>(data.get<string>("theta_f"));
-        Real phi_o = boost::lexical_cast<Real>(data.get<string>("phi_f"));
-
-        params.rc = rc + 0.001;
-        params.lgd = lgd - 0.001;
-        const Real two_pi = boost::math::constants::two_pi<Real>();
-        int period = MY_FLOOR<Real>::convert(theta_o / two_pi);
-        auto res = ForwardRayTracingUtils<Real, Complex>::find_root_period(params, period, theta_o, phi_o);
-        CHECK(res.ray_status == RayStatus::NORMAL);
-
-        Real ERROR_LIMIT = ErrorLimit<Real>::Value * 1000;
-
-        fmt::println("eta: {}, lambda: {}", eta, lambda);
-        fmt::println("eta: {}, lambda: {}", res.eta, res.lambda);
-        fmt::println("delta eta: {}, delta lambda: {}", abs(eta - res.eta), abs(lambda - res.lambda));
-        CHECK(abs(eta - res.eta) < ERROR_LIMIT);
-        CHECK(abs(lambda - res.lambda) < ERROR_LIMIT);
-
-        auto r1_vec = as_vector<string>(data, "r1");
-        Complex r1 = Complex(boost::lexical_cast<Real>(r1_vec[0]), boost::lexical_cast<Real>(r1_vec[1]));
-        auto r2_vec = as_vector<string>(data, "r2");
-        Complex r2 = Complex(boost::lexical_cast<Real>(r2_vec[0]), boost::lexical_cast<Real>(r2_vec[1]));
-        auto r3_vec = as_vector<string>(data, "r3");
-        Complex r3 = Complex(boost::lexical_cast<Real>(r3_vec[0]), boost::lexical_cast<Real>(r3_vec[1]));
-        auto r4_vec = as_vector<string>(data, "r4");
-        Complex r4 = Complex(boost::lexical_cast<Real>(r4_vec[0]), boost::lexical_cast<Real>(r4_vec[1]));
-
-        Real theta_f = boost::lexical_cast<Real>(data.get<string>("theta_f"));
-        Real phi_f = boost::lexical_cast<Real>(data.get<string>("phi_f"));
-
-        CHECK(abs(res.r1_c - r1) < ERROR_LIMIT);
-        CHECK(abs(res.r2_c - r2) < ERROR_LIMIT);
-        CHECK(abs(res.r3_c - r3) < ERROR_LIMIT);
-        CHECK(abs(res.r4_c - r4) < ERROR_LIMIT);
-        CHECK(abs(res.theta_f - theta_f) < ERROR_LIMIT);
-        CHECK(abs(res.phi_f - phi_f) < ERROR_LIMIT);
-    }
-}
-
-void test2() {
-    using boost::math::constants::pi;
-    ForwardRayTracingParams<double> params;
-    params.a = 0.8;
-    params.r_s = 10;
-    params.theta_s = 85 * pi<double>() / 180;
-    params.r_o = 1000;
-    params.nu_r = Sign::POSITIVE;
-    params.nu_theta = Sign::POSITIVE;
-    constexpr double theta_o = 17 * pi<double>() / 180;
-    constexpr double phi_o = pi<double>() / 4;
-    params.lgd_sign = Sign::POSITIVE;
-    std::vector<double> rc_list;
-    std::vector<double> lgd_list;
-    rc_list.reserve(1000);
-    lgd_list.reserve(1000);
-    for (int i = 0; i < 1000; ++i) {
-        rc_list.push_back(2 + i * 0.0015);
-    }
-    for (int i = 0; i < 1000; ++i) {
-        lgd_list.push_back(-10 + i * 0.01);
-    }
-    auto sweep_result = ForwardRayTracingUtils<double, std::complex<double>>::sweep_rc_d(params, theta_o, phi_o,
-                                                                                         rc_list,
-                                                                                         lgd_list, 50);
-    fmt::println("count: {}", sweep_result.results.size());
-    for (const auto &res: sweep_result.results) {
-        fmt::println("rc: {}, lgd: {}, eta: {}, lambda: {}", res.rc, res.lgd, res.eta, res.lambda);
-    }
-}
-
-int main(int argc, char **argv) {
-//  if (argc < 2) {
-//    std::cout << "Usage: " << argv[0] << " <path to test data>" << std::endl;
-//    return 1;
-//  }
-//  std::string path = argv[1];
-//  get_test_data(path);
-//
-//  test<double, std::complex<double>>();
-//
-    test2();
-    return 0;
-}
-
-void get_test_data(std::string &path) {
-    using namespace boost::filesystem;
-    std::vector<ptree> test_data;
-
-    if (!is_directory(path) || !exists(path)) {
-        return;
+    if (vm.count("help")) {
+        std::cout << desc << "\n";
+        return 1;
     }
 
-    for (auto &entry: boost::make_iterator_range(directory_iterator(path), {})) {
-        // find .json files and parse them
-        if (entry.path().extension() == ".json") {
-            std::ifstream file(entry.path().string());
-            ptree jsontree;
-            read_json(file, jsontree);
-            TEST_DATA.push_back(std::move(jsontree));
-        }
+    if (vm.count("compression")) {
+        std::cout << "Compression level was set to "
+                  << vm["compression"].as<int>() << ".\n";
+    } else {
+        std::cout << "Compression level was not set.\n";
     }
 }
