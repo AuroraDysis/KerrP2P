@@ -13,9 +13,6 @@
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
-namespace bg = boost::geometry;
-namespace bgi = boost::geometry::index;
-
 template<typename Real, typename Complex>
 struct SweepResult {
     using PointVector = Eigen::Matrix<Real, Eigen::Dynamic, 2>;
@@ -245,6 +242,8 @@ struct ForwardRayTracingUtils {
                                       }
                                   });
 
+        namespace bg = boost::geometry;
+        namespace bgi = boost::geometry::index;
         using Point = bg::model::point<int, 2, bg::cs::cartesian>;
         std::vector<Point> theta_roots_index;
         std::vector<Point> phi_roots_index;
@@ -341,9 +340,7 @@ struct ForwardRayTracingUtils {
                                   }
                               }
                           });
-        // remove duplicate by rc and lgd using std::set
-        // abs(r1.rc - r2.rc) < 10000 * ErrorLimit<Real>::Value &&
-        //                                   abs(r1.lgd - r2.lgd) < 10000 * ErrorLimit<Real>::Value
+
         std::vector<size_t> duplicated_index;
         for (size_t i = 0; i < results.size(); i++) {
             for (size_t j = i + 1; j < results.size(); j++) {
