@@ -30,7 +30,7 @@ public:
 
     bool check_int_range(const Real &x, int low, int high, const char *name) {
         if (x < low || x > high) {
-            print_error(name);
+            print_error(name, x);
             data.ray_status = RayStatus::INTERNAL_ERROR;
             return false;
         } else {
@@ -40,7 +40,7 @@ public:
 
     bool check_real_range(const Real &x, const Real &low, const Real &high, const char *name) {
         if (x < low || x > high) {
-            print_error(name);
+            print_error(name, x);
             data.ray_status = RayStatus::INTERNAL_ERROR;
             return false;
         } else {
