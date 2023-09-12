@@ -337,7 +337,7 @@ struct ForwardRayTracingUtils {
                                       std::lock_guard<std::mutex> lock(results_mutex);
                                       results.push_back(std::move(root));
                                   } else {
-                                      fmt::println("find root failed: {}\n", root_res.fail_reason);
+                                      fmt::println("find root failed, reason: {}\n", root_res.fail_reason);
                                   }
                               }
                           });
