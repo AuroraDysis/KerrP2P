@@ -25,7 +25,7 @@ find_package(fmt CONFIG REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(TBB CONFIG REQUIRED)
 find_package(Boost 1.82.0 COMPONENTS filesystem program_options REQUIRED)
-set(LIBRARIES Boost::boost Boost::filesystem Boost::program_options fmt::fmt Eigen3::Eigen TBB::tbb TBB::tbbmalloc TBB::tbbmalloc_proxy)
+set(LIBRARIES Boost::boost Boost::filesystem fmt::fmt Eigen3::Eigen TBB::tbb TBB::tbbmalloc TBB::tbbmalloc_proxy)
 
 # add_definitions(-DPRINT_DEBUG)
 
@@ -50,7 +50,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 set(SOURCE_FILES src/Common.h src/ForwardRayTracing.h src/GIntegral.h src/IIntegral2.h src/IIntegral3.h src/ObjectPool.h src/Utils.h src/Integral.h src/Broyden.h)
 
 add_executable(forward_ray_tracing src/Main.cpp ${SOURCE_FILES})
-target_link_libraries(forward_ray_tracing PRIVATE ${LIBRARIES})
+target_link_libraries(forward_ray_tracing PRIVATE Boost::program_options ${LIBRARIES})
 
 if (ENABLE_TESTING)
 find_package(Catch2 3 REQUIRED)
