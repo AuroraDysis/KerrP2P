@@ -3,25 +3,34 @@
 #include <string>
 
 #include <boost/filesystem.hpp>
-#include <boost/property_tree/json_parser.hpp>
 
-using namespace boost::property_tree;
+void read_csv(std::vector<std::array<std::string, 9>>& data, const boost::filesystem::path& file_path) {
+	std::ifstream ifs(file_path.string());
+	if (!ifs.is_open()) {
+		return;
+	}
+	std::string line;
+  std::array<std::string, 9> row;
+	while (std::getline(ifs, line)) {
+		std::stringstream ss(line);
+		std::string cell;
+		int i = 0;
+		while (std::getline(ss, cell, ',')) {
+			row[i++] = cell;
+		}
+    data.emplace_back(row);
+	}
+}
 
-void get_test_data(std::string &path) {
-  using namespace boost::filesystem;
-  std::vector<ptree> test_data;
+void get_test_data(std::string& path) {
+    using namespace boost::filesystem;
 
-  if (!is_directory(path) || !exists(path)) {
-    return;
-  }
-
-  for(auto& entry : boost::make_iterator_range(directory_iterator(path), {})) {
-    // find .json files and parse them
-    if (entry.path().extension() == ".json") {
-      std::ifstream file(entry.path().string());
-      ptree jsontree;
-      read_json(file, jsontree);
-      TEST_DATA.push_back(std::move(jsontree));
+    if (!is_directory(path) || !exists(path)) {
+        return;
     }
-  }
+
+    read_csv(TEST_DATA_PP, path / "pp.csv");
+    read_csv(TEST_DATA_PM, path / "pm.csv");
+    read_csv(TEST_DATA_MP, path / "mp.csv");
+    read_csv(TEST_DATA_MM, path / "mm.csv");
 }

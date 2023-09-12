@@ -1,15 +1,21 @@
 #pragma once
 
-#include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-
 #include "Utils.h"
 
-inline std::vector<boost::property_tree::ptree> TEST_DATA;
+#include <vector>
+#include <array>
+#include <string>
+
+inline std::vector<std::array<std::string, 9>> TEST_DATA_PP;
+inline std::vector<std::array<std::string, 9>> TEST_DATA_PM;
+inline std::vector<std::array<std::string, 9>> TEST_DATA_MP;
+inline std::vector<std::array<std::string, 9>> TEST_DATA_MM;
+
 void get_test_data(std::string &path);
 
 using Test64 = std::tuple<double, std::complex<double>>;
