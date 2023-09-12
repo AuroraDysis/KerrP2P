@@ -4,25 +4,25 @@
 
 #include <boost/filesystem.hpp>
 
-void read_csv(std::vector<std::array<std::string, 9>>& data, const boost::filesystem::path& file_path) {
-	std::ifstream ifs(file_path.string());
-	if (!ifs.is_open()) {
-		return;
-	}
-	std::string line;
-  std::array<std::string, 9> row;
-	while (std::getline(ifs, line)) {
-		std::stringstream ss(line);
-		std::string cell;
-		int i = 0;
-		while (std::getline(ss, cell, ',')) {
-			row[i++] = cell;
-		}
-    data.emplace_back(row);
-	}
+void read_csv(std::vector<std::array<std::string, 9>> &data, const boost::filesystem::path &file_path) {
+    std::ifstream ifs(file_path.string());
+    if (!ifs.is_open()) {
+        return;
+    }
+    std::string line;
+    std::array<std::string, 9> row;
+    while (std::getline(ifs, line)) {
+        std::stringstream ss(line);
+        std::string cell;
+        int i = 0;
+        while (std::getline(ss, cell, ',')) {
+            row[i++] = cell;
+        }
+        data.emplace_back(row);
+    }
 }
 
-void get_test_data(std::string& path) {
+void get_test_data(std::string &path) {
     using namespace boost::filesystem;
 
     if (!is_directory(path) || !exists(path)) {

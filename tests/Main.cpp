@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
         get_test_data(data_path);
     }
 
-    if (TEST_DATA_PP.empty() || TEST_DATA_PM.empty() || TEST_DATA_MP.empty() || TEST_DATA_MM.empty()) {
+    if (TEST_DATA_PP.empty() && TEST_DATA_PM.empty() && TEST_DATA_MP.empty() && TEST_DATA_MM.empty()) {
         std::cout << "No test data found. Please set the data path with -d or --data_path" << std::endl;
         return -1;
     }
