@@ -1,5 +1,11 @@
 # ForwardRayTracing
- 
+
+## Quick Start
+
+### Linux
+
+[Spack](https://spack.io/)
+
 ```yaml
 spack:
   specs:
@@ -18,8 +24,21 @@ spack:
     unify: true
 ```
 
-```vcpkg
-git clone https://github.com/Microsoft/vcpkg.git
-.\vcpkg\bootstrap-vcpkg.bat
-.\vcpkg\vcpkg.exe install boost catch2 fmt eigen3 tbb pybind11
+### MacOS
+
+[Homebrew](https://brew.sh/)
+
+```bash
+brew install boost catch2 fmt gmp mpfr mpc eigen tbb python pybind11
 ```
+
+### Windows ()
+
+[vcpkg](https://vcpkg.io/en/index.html)
+
+```bash
+vcpkg.exe install boost catch2 fmt eigen3 tbb python3 pybind11
+```
+
+## Acknowledgements
+
