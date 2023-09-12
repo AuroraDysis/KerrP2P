@@ -4,8 +4,8 @@ project(forward_ray_tracing)
 set(CMAKE_CXX_STANDARD 17)
 
 option(ENABLE_TESTING "Enable Test Builds" ON)
-option(FLOAT128_NATIVE "Enable float128 native support quadmath" OFF)
-option(ENABLE_MPFR "Enable mpfr support" OFF)
+option(FLOAT128_NATIVE "Enable float128 native support quadmath" ON)
+option(ENABLE_MPFR "Enable mpfr support" ON)
 
 if (WIN32)
     SET(FLOAT128_NATIVE OFF)
