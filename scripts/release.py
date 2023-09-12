@@ -7,7 +7,7 @@ import shutil
 SOURCE_PATH = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../'))
 
 def release_on_windows():
-    release_source_path = os.path.join(SOURCE_PATH, 'out/build/x64-Clang-Release')
+    release_source_path = os.path.join(SOURCE_PATH, 'out/build/x64-Release')
     if not os.path.exists(release_source_path):
         print('Release path not found: ', release_source_path)
         return

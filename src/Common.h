@@ -76,32 +76,113 @@ using std::real;
 using std::isinf;
 using std::isnan;
 
+template <typename T>
+struct TypeName
+{
+    static const char* Get()
+    {
+        return typeid(T).name();
+    }
+};
+
 #ifdef FLOAT128_NATIVE
 #include <boost/multiprecision/float128.hpp>
 #include <boost/multiprecision/complex128.hpp>
 
 using Float128 = boost::multiprecision::float128;
 using Complex128 = boost::multiprecision::complex128;
+
+template <>
+struct TypeName<boost::multiprecision::float128>
+{
+    static const char* Get()
+    {
+        return "boost::multiprecision::float128";
+    }
+};
+
+template <>
+struct TypeName<boost::multiprecision::complex128>
+{
+    static const char* Get()
+    {
+		return "boost::multiprecision::complex128";
+	}
+};
 #else
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/multiprecision/cpp_complex.hpp>
 
 using Float128 = boost::multiprecision::cpp_bin_float_quad;
 using Complex128 = boost::multiprecision::cpp_complex_quad;
+
+template <>
+struct TypeName<boost::multiprecision::cpp_bin_float_quad>
+{
+	static const char* Get()
+	{
+		return "boost::multiprecision::cpp_bin_float_quad";
+	}
+};
+
+template <>
+struct TypeName<boost::multiprecision::cpp_complex_quad>
+{
+	static const char* Get()
+	{
+		return "boost::multiprecision::cpp_complex_quad";
+	}
+};
 #endif
 
 #ifdef ENABLE_MPFR
 #include <boost/multiprecision/mpfr.hpp>
 #include <boost/multiprecision/mpc.hpp>
 
-using BigFloatReal = boost::multiprecision::mpfr_float_oct
-using BigFloatComplex = boost::multiprecision::mpc_complex_oct;
+using Float256 = boost::multiprecision::mpfr_float_oct
+using Complex256 = boost::multiprecision::mpc_complex_oct;
+
+template <>
+struct TypeName<boost::multiprecision::mpfr_float_oct>
+{
+    static const char* Get()
+    {
+		return "boost::multiprecision::mpfr_float_oct";
+	}
+};
+
+template <>
+struct TypeName<boost::multiprecision::mpc_complex_oct>
+{
+    static const char* Get()
+    {
+		return "boost::multiprecision::mpc_complex_oct";
+	}
+};
 #else
 #include <boost/multiprecision/cpp_bin_float.hpp>
 #include <boost/multiprecision/cpp_complex.hpp>
 
 using Float256 = boost::multiprecision::cpp_bin_float_oct;
 using Complex256 = boost::multiprecision::cpp_complex_oct;
+
+template <>
+struct TypeName<boost::multiprecision::cpp_bin_float_oct>
+{
+    static const char* Get()
+    {
+		return "boost::multiprecision::cpp_bin_float_oct";
+	}
+};
+
+template <>
+struct TypeName<boost::multiprecision::cpp_complex_oct>
+{
+    static const char* Get()
+    {
+		return "boost::multiprecision::cpp_complex_oct";
+	}
+};
 #endif
 
 using boost::multiprecision::real;

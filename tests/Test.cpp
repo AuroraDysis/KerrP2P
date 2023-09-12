@@ -55,7 +55,7 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
   using Real = std::tuple_element_t<0u, TestType>;
   using Complex = std::tuple_element_t<1u, TestType>;
 
-  fmt::println("[{}, {}] Error limit: {}", typeid(Real).name(), typeid(Complex).name(), ErrorLimit<Real>::Value);
+  fmt::println("[{}, {}] Error limit: {}", TypeName<Real>::Get(), TypeName<Complex>::Get(), ErrorLimit<Real>::Value);
   test_case<Real, Complex>(TEST_DATA_PP, Sign::POSITIVE, Sign::POSITIVE);
   test_case<Real, Complex>(TEST_DATA_PM, Sign::POSITIVE, Sign::NEGATIVE);
   test_case<Real, Complex>(TEST_DATA_MP, Sign::NEGATIVE, Sign::POSITIVE);
