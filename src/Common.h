@@ -201,21 +201,21 @@ struct HigherPrecision {
 
 template <>
 struct HigherPrecision<double> {
-    using Type = boost::multiprecision::float128;
+    using Type = Float128;
 };
 
 template <>
 struct HigherPrecision<std::complex<double>> {
-    using Type = boost::multiprecision::complex128;
+    using Type = Complex128;
 };
 
 template <>
-struct HigherPrecision<boost::multiprecision::float128> {
-    using Type = boost::multiprecision::float128;
+struct HigherPrecision<Float128> {
+    using Type = Float256;
 };
 
 template <>
-struct HigherPrecision<std::complex<boost::multiprecision::float128>> {
+struct HigherPrecision<Complex128> {
     using Type = Complex256;
 };
 
