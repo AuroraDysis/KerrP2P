@@ -7,11 +7,7 @@
 
 template<typename Real, typename Complex>
 class GIntegral : public Integral<Real, Complex> {
-#ifdef TESTS
-public:
-#else
-    private:
-#endif
+private:
     std::array<Real, 3> G_theta_p = {};
     std::array<Real, 3> G_theta_s = {};
     std::array<Real, 3> G_theta_f = {};
@@ -63,7 +59,8 @@ public:
     }
 
 public:
-    explicit GIntegral(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_, TypeName<GIntegral<Real, Complex>>::Get()) {
+    explicit GIntegral(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_,
+                                                                                          TypeName<GIntegral<Real, Complex>>::Get()) {
     }
 
     void calc() {
@@ -155,9 +152,9 @@ public:
     }
 };
 
-template <typename Real, typename Complex>
+template<typename Real, typename Complex>
 struct TypeName<GIntegral<Real, Complex>> {
-  static std::string Get() {
-    return fmt::format("GIntegral<{}, {}>", TypeName<Real>::Get(), TypeName<Complex>::Get());
-  }
+    static std::string Get() {
+        return fmt::format("GIntegral<{}, {}>", TypeName<Real>::Get(), TypeName<Complex>::Get());
+    }
 };

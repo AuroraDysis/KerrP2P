@@ -91,11 +91,7 @@ class ForwardRayTracing {
 
     friend class GIntegral<Real, Complex>;
 
-#ifdef TESTS
-public:
-#else
-    private:
-#endif
+private:
     inline static ObjectPool<ForwardRayTracing<Real, Complex>> pool;
 
     void reset_variables() {

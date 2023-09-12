@@ -6,11 +6,7 @@
 // radial anti-derivatives for case (2)
 template<typename Real, typename Complex>
 class IIntegral2 : public Integral<Real, Complex> {
-#ifdef TESTS
-public:
-#else
-    private:
-#endif
+private:
     Real ellint_sin_phi_rs2, ellint_sin_phi_ro2, ellint_sin_phi, ellint_sin_phi3, ellint_cos_phi, ellint_cos_phi2, ellint_c, ellint_k, ellint_m, ellint1_phi;
     Real E2_coeff, F2_coeff, Pi_p2_coeff, Pi_m2_coeff, Pi_p2_ellint_n, Pi_m2_ellint_n;
     Real ellint_y;
@@ -21,7 +17,8 @@ public:
     std::array<Real, 3> integral_rs;
     std::array<Real, 3> integral_ro;
 public:
-    explicit IIntegral2(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_, TypeName<IIntegral2<Real, Complex>>::Get()) {
+    explicit IIntegral2(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_,
+                                                                                           TypeName<IIntegral2<Real, Complex>>::Get()) {
     }
 
     void pre_calc() {
@@ -152,9 +149,9 @@ public:
     }
 };
 
-template <typename Real, typename Complex>
+template<typename Real, typename Complex>
 struct TypeName<IIntegral2<Real, Complex>> {
-static std::string Get() {
-  return fmt::format("IIntegral2<{}, {}>", TypeName<Real>::Get(), TypeName<Complex>::Get());
-}
+    static std::string Get() {
+        return fmt::format("IIntegral2<{}, {}>", TypeName<Real>::Get(), TypeName<Complex>::Get());
+    }
 };

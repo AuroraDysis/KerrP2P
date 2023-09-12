@@ -8,11 +8,7 @@
 // Radial Antiderivatives for case (3)
 template<typename Real, typename Complex>
 class IIntegral3 : public Integral<Real, Complex> {
-#ifdef TESTS
-public:
-#else
-    private:
-#endif
+private:
     Real ellint_phi, ellint_cos_phi, ellint_sin_phi, ellint_sin_phi2;
     Real r34_re, r34_im;
     Real A, B, alpha_p, alpha_m, ellint_k, ellint_m, alpha2, ellint1_phi;
@@ -61,7 +57,8 @@ public:
     }
 
 public:
-    explicit IIntegral3(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_, TypeName<IIntegral3<Real, Complex>>::Get()) {
+    explicit IIntegral3(ForwardRayTracing<Real, Complex> &data_) : Integral<Real, Complex>(data_,
+                                                                                           TypeName<IIntegral3<Real, Complex>>::Get()) {
     }
 
     void pre_calc() {
@@ -103,9 +100,9 @@ public:
         const Real &r2 = this->data.r2;
         // x_3 \in (- 1/alpha_0, 1) \in (-1, 1)
         if (isinf(r)) {
-          ellint_cos_phi = (A - B) / (A + B);
+            ellint_cos_phi = (A - B) / (A + B);
         } else {
-          ellint_cos_phi = -1 + (2 * A * (r - r1)) / (A * (r - r1) + B * (r - r2));
+            ellint_cos_phi = -1 + (2 * A * (r - r1)) / (A * (r - r1) + B * (r - r2));
         }
 
         CHECK_VAR_INT_RANGE(ellint_cos_phi, -1, 1);
@@ -187,9 +184,9 @@ public:
     }
 };
 
-template <typename Real, typename Complex>
+template<typename Real, typename Complex>
 struct TypeName<IIntegral3<Real, Complex>> {
-  static std::string Get() {
-    return fmt::format("IIntegral3<{}, {}>", TypeName<Real>::Get(), TypeName<Complex>::Get());
-  }
+    static std::string Get() {
+        return fmt::format("IIntegral3<{}, {}>", TypeName<Real>::Get(), TypeName<Complex>::Get());
+    }
 };
