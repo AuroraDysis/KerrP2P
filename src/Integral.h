@@ -7,7 +7,7 @@
 template<typename Real, typename Complex>
 class Integral {
 private:
-    void print_error(const char *name, const Real &x) {
+    void print_error(const char *name, const Real &val) {
         fmt::println(std::cerr,
                      "[{}] a = {}, r_s = {}, theta_s {}, r_o = {}, lambda = {}, eta = {}, {} = {}, out of range",
                      child_class_name,
@@ -16,7 +16,7 @@ private:
                      data.theta_s,
                      data.r_o,
                      data.lambda,
-                     data.eta, name, x);
+                     data.eta, name, val);
     }
 
 public:
@@ -28,9 +28,9 @@ public:
                                                                                                         std::move(
                                                                                                                 child_class_name_)) {}
 
-    bool check_int_range(const Real &x, int low, int high, const char *name) {
-        if (x < low || x > high) {
-            print_error(name, x);
+    bool check_int_range(const Real &val, int low, int high, const char *name) {
+        if (val < low || val > high) {
+            print_error(name, val);
             data.ray_status = RayStatus::INTERNAL_ERROR;
             return false;
         } else {
@@ -38,9 +38,9 @@ public:
         }
     }
 
-    bool check_real_range(const Real &x, const Real &low, const Real &high, const char *name) {
-        if (x < low || x > high) {
-            print_error(name, x);
+    bool check_real_range(const Real &val, const Real &low, const Real &high, const char *name) {
+        if (val < low || val > high) {
+            print_error(name, val);
             data.ray_status = RayStatus::INTERNAL_ERROR;
             return false;
         } else {
