@@ -38,8 +38,9 @@ public:
         } else {
             ellint_sin_phi_ro2 = ((r1 - r3) * (r_o - r4)) / ((r_o - r3) * (r1 - r4));
         }
-        CHECK_VAR_INT_RANGE(ellint_sin_phi_rs2, 0, 1);
-        CHECK_VAR_INT_RANGE(ellint_sin_phi_ro2, 0, 1);
+        CHECK_VAR(ellint_sin_phi_rs2, ellint_sin_phi_rs2 >= 0 && ellint_sin_phi_rs2 <= 1);
+        CHECK_VAR(ellint_sin_phi_ro2, ellint_sin_phi_ro2 >= 0 && ellint_sin_phi_ro2 <= 1);
+
         ellint_m = ((-r2 + r3) * (-r1 + r4)) / ((r1 - r3) * (r2 - r4));
         ellint_k = sqrt(ellint_m);
 

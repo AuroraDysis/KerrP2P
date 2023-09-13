@@ -27,17 +27,18 @@ private:
 
         // https://dlmf.nist.gov/19.7.E5
         ellint_sin_phi = cos(theta) * one_over_sqrt_up;
-        CHECK_VAR_INT_RANGE(ellint_sin_phi, -1, 1);
+        CHECK_VAR(ellint_sin_phi, ellint_sin_phi >= -1 && ellint_sin_phi <= 1);
         ellint_sin_theta = (sqrt(1 + ellint_m) * ellint_sin_phi) / sqrt(1 + ellint_m * MY_SQUARE(ellint_sin_phi));
         ellint_sin_theta2 = MY_SQUARE(ellint_sin_theta);
-        CHECK_VAR_INT_RANGE(ellint_sin_theta, -1, 1);
+
+        CHECK_VAR(ellint_sin_theta, ellint_sin_theta >= -1 && ellint_sin_theta <= 1);
         // arcsin gives -pi/2 to pi/2, so cos(theta) is always positive
         ellint_cos_theta2 = 1 - ellint_sin_theta2;
         ellint_cos_theta = sqrt(ellint_cos_theta2);
-        CHECK_VAR_INT_RANGE(ellint_cos_theta, 0, 1);
 
         ellint_y = 1 - ellint_kappa2 * ellint_sin_theta2;
-        CHECK_VAR_REAL_RANGE(ellint_y, 0, std::numeric_limits<Real>::max());
+        CHECK_VAR(ellint_y, ellint_y > 0);
+
         // ellint_1_phi = boost::math::ellint_1(ellint_kappa, ellint_theta);
         ellint_1_phi = ellint_sin_theta * boost::math::ellint_rf(ellint_cos_theta2, ellint_y, 1);
         // ellint_2_phi = boost::math::ellint_2(ellint_kappa, ellint_theta);

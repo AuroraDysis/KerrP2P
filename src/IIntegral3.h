@@ -19,7 +19,7 @@ private:
     std::array<Real, 3> integral_rs;
     std::array<Real, 3> integral_ro;
 
-    Real R1(const Real &alpha) {
+    void R1(Real &res, const Real &alpha) {
         // alpha2 > 1
         alpha2 = MY_SQUARE(alpha);
         // alpha2 / (alpha2 - 1) > k3 (ellint_m)
@@ -40,7 +40,7 @@ private:
         using boost::math::constants::two_thirds;
 
         ellint_y = ellint_c - ellint_m;
-        CHECK_VAR_REAL_RANGE_2(ellint_y, 0, std::numeric_limits<Real>::max());
+        CHECK_VAR(ellint_y, ellint_y >= 0);
         ellint_3_tmp =
                 -third<Real>() * ellint3_n1 *
                 ellint_rj(ellint_c - 1, ellint_y, ellint_c, ellint_c - ellint3_n1)
@@ -49,7 +49,7 @@ private:
                             (ellint3_n - ellint_c) * (ellint_c - ellint3_n1));
         if (ellint_phi >= half_pi<Real>()) {
             ellint_y = 1 - ellint_m;
-            CHECK_VAR_REAL_RANGE_2(ellint_y, 0, std::numeric_limits<Real>::max());
+            CHECK_VAR(ellint_y, ellint_y >= 0);
             ellint_3_tmp +=
                     two_thirds<Real>() * ellint_m / ellint3_n * ellint_rj(0, ellint_y, 1, 1 - ellint_m / ellint3_n);
         }
@@ -63,7 +63,7 @@ private:
         fmt::println("R1 - ellint_3: {}, f1: {}", ellint_3_tmp, f1);
 #endif
         // sign is different from Mathematica
-        return (ellint_3_tmp + alpha * f1) / (alpha2 - 1);
+        res = (ellint_3_tmp + alpha * f1) / (alpha2 - 1);
     }
 
 public:
@@ -89,7 +89,7 @@ public:
 
         // k3 \in (0, 1)
         ellint_m = ((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B);
-        CHECK_VAR_INT_RANGE(ellint_m, 0, 1);
+        CHECK_VAR(ellint_m, ellint_m >= 0 && ellint_m <= 1);
         ellint_k = sqrt(ellint_m);
 
         alpha_0 = (B + A) / (B - A);
@@ -116,18 +116,18 @@ public:
             ellint_cos_phi = -1 + (2 * A * (r - r1)) / (A * (r - r1) + B * (r - r2));
         }
 
-        CHECK_VAR_INT_RANGE(ellint_cos_phi, -1, 1);
+        CHECK_VAR(ellint_cos_phi, ellint_cos_phi >= -1 && ellint_cos_phi <= 1);
         ellint_sin_phi2 = 1 - MY_SQUARE(ellint_cos_phi);
         // ?
         ellint_sin_phi = sqrt(ellint_sin_phi2);
         ellint_c = 1 / ellint_sin_phi2;
         ellint_phi = acos(ellint_cos_phi);
 
-        R1_alpha_p = R1(alpha_p);
+        R1(R1_alpha_p, alpha_p);
         if (this->data.ray_status != RayStatus::NORMAL) {
             return;
         }
-        R1_alpha_m = R1(alpha_m);
+        R1(R1_alpha_m, alpha_m);
         if (this->data.ray_status != RayStatus::NORMAL) {
             return;
         }
@@ -143,7 +143,7 @@ public:
         integral[1] = (a * (I_m * (-(a * lambda) + 2 * rm) + I_p * (a * lambda - 2 * rp))) / (rm - rp);
         if (this->data.calc_t_f && !isinf(this->data.r_o)) {
             alpha2 = MY_SQUARE(alpha_0);
-            R1_alpha_0 = R1(alpha_0);
+            R1(R1_alpha_0, alpha_0);
 
             if (this->data.ray_status != RayStatus::NORMAL) {
                 return;

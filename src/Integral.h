@@ -3,10 +3,7 @@
 #pragma once
 
 #define CHECK_STATUS if (this->data.ray_status != RayStatus::NORMAL) return;
-
-#define CHECK_VAR_INT_RANGE(VAR, LOW, HIGH) if (!this->check_int_range(VAR, LOW, HIGH, #VAR)) return;
-#define CHECK_VAR_REAL_RANGE(VAR, LOW, HIGH) if (!this->check_real_range(VAR, LOW, HIGH, #VAR)) return;
-#define CHECK_VAR_REAL_RANGE_2(VAR, LOW, HIGH) if (!this->check_real_range(VAR, LOW, HIGH, #VAR)) return VAR;
+#define CHECK_VAR(VAR, COND) if (!this->check_variable(VAR, COND, #VAR)) return;
 
 template<typename Real, typename Complex>
 class Integral {
@@ -32,18 +29,8 @@ public:
                                                                                                         std::move(
                                                                                                                 child_class_name_)) {}
 
-    bool check_int_range(const Real &val, int low, int high, const char *name) {
-        if (val < low || val > high) {
-            print_error(name, val);
-            data.ray_status = RayStatus::INTERNAL_ERROR;
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    bool check_real_range(const Real &val, const Real &low, const Real &high, const char *name) {
-        if (val < low || val > high) {
+    bool check_variable(const Real &val, bool condition, const char *name) {
+        if (!condition) {
             print_error(name, val);
             data.ray_status = RayStatus::INTERNAL_ERROR;
             return false;
