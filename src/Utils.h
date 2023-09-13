@@ -81,7 +81,7 @@ public:
         auto &rc = x[0];
         auto &lgd = x[1];
         params.rc = rc;
-        params.lgd = lgd;
+        params.log_abs_d = lgd;
         params.rc_d_to_lambda_q();
         ray_tracing->calc_ray(params);
 
@@ -99,7 +99,7 @@ public:
         }
 
 #ifdef PRINT_DEBUG
-        fmt::println("rc: {}, lgd: {}, theta_f: {}, phi_f: {}", x[0], x[1], ray_tracing->theta_f, ray_tracing->phi_f);
+        fmt::println("rc: {}, log_abs_d: {}, theta_f: {}, phi_f: {}", x[0], x[1], ray_tracing->theta_f, ray_tracing->phi_f);
         fmt::println("residual: {}, {}", residual[0], residual[1]);
 #endif
         return residual;
@@ -136,7 +136,7 @@ struct ForwardRayTracingUtils {
         ForwardRayTracingParams<Real> local_params(params);
 
         Eigen::Vector<Real, 2> x = Eigen::Vector<Real, 2>::Zero(2);
-        x << local_params.rc, local_params.lgd;
+        x << local_params.rc, local_params.log_abs_d;
 
         auto root_functor =
                 period == std::numeric_limits<int>::max() ? RootFunctor<Real, Complex>(local_params, theta_o, phi_o)
@@ -171,8 +171,8 @@ struct ForwardRayTracingUtils {
 
         auto& root = (*result.root);
         root.rc = x[0];
-        root.lgd = x[1];
-        root.lgd_sign = local_params.lgd_sign;
+        root.log_abs_d = x[1];
+        root.log_abs_d_sign = local_params.log_abs_d_sign;
 
         return result;
     }
@@ -220,7 +220,7 @@ struct ForwardRayTracingUtils {
                                       for (size_t i = r.rows().begin(); i != r.rows().end(); ++i) {
                                           for (size_t j = r.cols().begin(); j != r.cols().end(); ++j) {
                                               local_params.rc = rc_list[j];
-                                              local_params.lgd = lgd_list[i];
+                                              local_params.log_abs_d = lgd_list[i];
                                               local_params.rc_d_to_lambda_q();
                                               ray_tracing->calc_ray(local_params);
                                               if (ray_tracing->ray_status == RayStatus::NORMAL) {
@@ -327,7 +327,7 @@ struct ForwardRayTracingUtils {
                                   size_t row = theta_roots_closest_index[indices[i]].template get<0>();
                                   size_t col = theta_roots_closest_index[indices[i]].template get<1>();
                                   local_params.rc = rc_list[col];
-                                  local_params.lgd = lgd_list[row];
+                                  local_params.log_abs_d = lgd_list[row];
                                   local_params.rc_d_to_lambda_q();
                                   int period = MY_FLOOR<Real>::convert(phi(row, col) / two_pi);
                                   auto root_res = find_root_period(local_params, period, theta_o, phi_o);
@@ -345,7 +345,7 @@ struct ForwardRayTracingUtils {
         for (size_t i = 0; i < results.size(); i++) {
             for (size_t j = i + 1; j < results.size(); j++) {
                 if (abs(results[i].rc - results[j].rc) < 10000 * ErrorLimit<Real>::Value &&
-                    abs(results[i].lgd - results[j].lgd) < 10000 * ErrorLimit<Real>::Value) {
+                    abs(results[i].log_abs_d - results[j].log_abs_d) < 10000 * ErrorLimit<Real>::Value) {
                     duplicated_index.push_back(j);
                     break;
                 }

@@ -15,8 +15,8 @@ struct ForwardRayTracingParams {
     Sign nu_r;
     Sign nu_theta;
 
-    Real rc, lgd;
-    Sign lgd_sign;
+    Real rc, log_abs_d;
+    Sign log_abs_d_sign;
 
     Real lambda, q;
 
@@ -32,8 +32,8 @@ struct ForwardRayTracingParams {
         nu_r = params.nu_r;
         nu_theta = params.nu_theta;
         rc = params.rc;
-        lgd = params.lgd;
-        lgd_sign = params.lgd_sign;
+        log_abs_d = params.log_abs_d;
+        log_abs_d_sign = params.log_abs_d_sign;
         lambda = params.lambda;
         q = params.q;
         calc_t_f = params.calc_t_f;
@@ -60,11 +60,11 @@ struct ForwardRayTracingParams {
         Real coeff = sqrt(
                 MY_SQUARE(-3 + rc) / (MY_SQUARE(a) * MY_SQUARE(-1 + rc)) + eta_c / pow(rc, 4));
 
-        Real d = GET_SIGN(lgd_sign) * pow(static_cast<Real>(10), lgd);
+        Real d = GET_SIGN(log_abs_d_sign) * pow(static_cast<Real>(10), log_abs_d);
         lambda = lambda_c + d * ((3 - rc) / (a * (-1 + rc)) / coeff);
         q = qc + d * (sqrt(eta_c) / MY_SQUARE(rc) / coeff);
 #ifdef PRINT_DEBUG
-        fmt::println("rc: {}, lgd: {}", rc, lgd);
+        fmt::println("rc: {}, lgd: {}", rc, log_abs_d);
         fmt::println("lambda_c: {}, eta_c: {}, qc: {}", lambda_c, eta_c, qc);
         fmt::println("coeff: {}", coeff);
 #endif

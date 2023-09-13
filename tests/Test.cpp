@@ -127,15 +127,15 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
 //
 //    Real rc = boost::lexical_cast<Real>(data.get<string>("rc"));
 //    Real d = boost::lexical_cast<Real>(data.get<string>("d"));
-//    params.lgd_sign = d > 0 ? Sign::POSITIVE : Sign::NEGATIVE;
-//    Real lgd = log10(abs(d));
+//    params.log_abs_d_sign = d > 0 ? Sign::POSITIVE : Sign::NEGATIVE;
+//    Real log_abs_d = log10(abs(d));
 //    params.calc_t_f = false;
 //
 //    Real theta_o = boost::lexical_cast<Real>(data.get<string>("theta_f"));
 //    Real phi_o = boost::lexical_cast<Real>(data.get<string>("phi_f"));
 //
 //    params.rc = rc + 0.001;
-//    params.lgd = lgd - 0.001;
+//    params.log_abs_d = log_abs_d - 0.001;
 //    int period = MY_FLOOR<Real>::convert(theta_o / boost::math::constants::two_pi<Real>());
 //    auto root_res = ForwardRayTracingUtils<Real, Complex>::find_root_period(params, period, theta_o, phi_o);
 //    REQUIRE(root_res.success);
