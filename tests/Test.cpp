@@ -64,10 +64,19 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
     using Complex = std::tuple_element_t<1u, TestType>;
 
     fmt::println("[{}, {}] Error limit: {}", TypeName<Real>::Get(), TypeName<Complex>::Get(), ErrorLimit<Real>::Value);
-    test_case<Real, Complex>(TEST_DATA_PP, Sign::POSITIVE, Sign::POSITIVE);
-    test_case<Real, Complex>(TEST_DATA_PM, Sign::POSITIVE, Sign::NEGATIVE);
-    test_case<Real, Complex>(TEST_DATA_MP, Sign::NEGATIVE, Sign::POSITIVE);
-    test_case<Real, Complex>(TEST_DATA_MM, Sign::NEGATIVE, Sign::NEGATIVE);
+
+    SECTION("nu_r = POSITIVE, nu_theta = POSITIVE") {
+        test_case<Real, Complex>(TEST_DATA_PP, Sign::POSITIVE, Sign::POSITIVE);
+    }
+    SECTION("nu_r = POSITIVE, nu_theta = NEGATIVE") {
+        test_case<Real, Complex>(TEST_DATA_PM, Sign::POSITIVE, Sign::NEGATIVE);
+    }
+    SECTION("nu_r = NEGATIVE, nu_theta = POSITIVE") {
+        test_case<Real, Complex>(TEST_DATA_MP, Sign::NEGATIVE, Sign::POSITIVE);
+    }
+    SECTION("nu_r = NEGATIVE, nu_theta = NEGATIVE") {
+        test_case<Real, Complex>(TEST_DATA_MM, Sign::NEGATIVE, Sign::NEGATIVE);
+    }
 }
 
 //TEMPLATE_TEST_CASE("Find Root Function", "[root]", TEST_TYPES) {
