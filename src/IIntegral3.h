@@ -184,6 +184,10 @@ public:
     void calc(bool is_plus) {
         pre_calc();
 
+        if (this->data.ray_status != RayStatus::NORMAL) {
+            return;
+        }
+
         auto &r_s = this->data.r_s;
         auto &r_o = this->data.r_o;
 
