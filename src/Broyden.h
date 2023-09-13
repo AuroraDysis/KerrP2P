@@ -34,7 +34,6 @@
 #define BMO_MATOPS_L2NORM(x) (x).norm()
 #define BMO_MATOPS_SIZE(x) static_cast<size_t>((x).size())
 #define BMO_MATOPS_TRANSPOSE(x) (x).transpose()
-#define BMO_MATOPS_INV(x) (x).inverse()
 #define BMO_MATOPS_ZERO_COLVEC(n) Vector::Zero(n)
 #define BMO_MATOPS_DOT_PROD(x, y) (x).dot(y)
 #define BMO_MATOPS_ABS(x) (x).cwiseAbs()
