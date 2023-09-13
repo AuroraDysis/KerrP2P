@@ -302,20 +302,14 @@ public:
 
         // Radial integrals
         calcI();
-        if (ray_status != RayStatus::NORMAL) {
-            return;
-        }
+
+        CHECK_STATUS
 
         tau_o = radial_integrals[0];
 
-        if (ray_status != RayStatus::NORMAL) {
-            return;
-        }
-
         G_integral->calc();
-        if (ray_status != RayStatus::NORMAL) {
-            return;
-        }
+
+        CHECK_STATUS
 
         // Final values of phi and t
         phi_f = radial_integrals[1] + lambda * angular_integrals[1];
