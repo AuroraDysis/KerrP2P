@@ -11,7 +11,7 @@ class IIntegral3 : public Integral<Real, Complex> {
 private:
     Real ellint_phi, ellint_cos_phi, ellint_sin_phi, ellint_sin_phi2;
     Real r34_re, r34_im;
-    Real A, B, alpha_p, alpha_m, ellint_k, ellint_m, alpha2, ellint1_phi;
+    Real A, B, alpha_p, alpha_m, ellint_k, ellint_m, alpha2, ellint1_phi, ellint_y;
     Real alpha_0, R1_alpha_0, R2_alpha_0, Pi_13, Pi_23, I_1, I_2;
     Real ellint3_n, ellint_c, ellint_3_tmp, f1, p1, ellint3_n1;
     Real F3, R1_alpha_p, R1_alpha_m, I_p, I_m;
@@ -38,15 +38,20 @@ private:
         // https://dlmf.nist.gov/19.25.E16
         using boost::math::constants::half_pi;
         using boost::math::constants::two_thirds;
+
+        ellint_y = ellint_c - ellint_m;
+        CHECK_VAR_REAL_RANGE_2(ellint_y, 0, std::numeric_limits<Real>::max());
         ellint_3_tmp =
                 -third<Real>() * ellint3_n1 *
-                ellint_rj(ellint_c - 1, ellint_c - ellint_m, ellint_c, ellint_c - ellint3_n1)
+                ellint_rj(ellint_c - 1, ellint_y, ellint_c, ellint_c - ellint3_n1)
                 + sqrt((ellint_c - 1) * (ellint_c - ellint_m) / ((ellint3_n - 1) * (1 - ellint3_n1))) *
                   ellint_rc(ellint_c * (ellint3_n - 1) * (1 - ellint3_n1),
                             (ellint3_n - ellint_c) * (ellint_c - ellint3_n1));
         if (ellint_phi >= half_pi<Real>()) {
+            ellint_y = 1 - ellint_m;
+            CHECK_VAR_REAL_RANGE_2(ellint_y, 0, std::numeric_limits<Real>::max());
             ellint_3_tmp +=
-                    two_thirds<Real>() * ellint_m / ellint3_n * ellint_rj(0, 1 - ellint_m, 1, 1 - ellint_m / ellint3_n);
+                    two_thirds<Real>() * ellint_m / ellint3_n * ellint_rj(0, ellint_y, 1, 1 - ellint_m / ellint3_n);
         }
 
         // p_1 > 0 (B65)
@@ -119,7 +124,13 @@ public:
         ellint_phi = acos(ellint_cos_phi);
 
         R1_alpha_p = R1(alpha_p);
+        if (this->data.ray_status != RayStatus::NORMAL) {
+            return;
+        }
         R1_alpha_m = R1(alpha_m);
+        if (this->data.ray_status != RayStatus::NORMAL) {
+            return;
+        }
         ellint1_phi = ellint_1(ellint_k, ellint_phi);
         F3 = ellint1_phi / sqrt(A * B);
         I_p = -(((A + B) * F3 + (2 * sqrt(A * B) * R1_alpha_p * (-r1 + r2)) /
@@ -133,6 +144,11 @@ public:
         if (this->data.calc_t_f && !isinf(this->data.r_o)) {
             alpha2 = MY_SQUARE(alpha_0);
             R1_alpha_0 = R1(alpha_0);
+
+            if (this->data.ray_status != RayStatus::NORMAL) {
+                return;
+            }
+
             R2_alpha_0 = ((-1 + alpha2) * ellint_m * (1 + alpha_0 * ellint_cos_phi) *
                           (ellint1_phi - 2 * R1_alpha_0) +
                           alpha2 * (1 + alpha_0 * ellint_cos_phi) *
@@ -172,7 +188,16 @@ public:
         auto &r_o = this->data.r_o;
 
         calc_x(integral_rs, r_s);
+
+        if (this->data.ray_status != RayStatus::NORMAL) {
+            return;
+        }
+
         calc_x(integral_ro, r_o);
+
+        if (this->data.ray_status != RayStatus::NORMAL) {
+            return;
+        }
 
         auto &radial_integrals = this->data.radial_integrals;
 

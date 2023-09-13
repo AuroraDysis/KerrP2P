@@ -34,20 +34,22 @@ int main(int argc, char *argv[]) {
     std::vector<std::array<std::string, 9>> data;
     std::ifstream ifs(argv[1]);
     std::string line;
-    std::array<std::string, 9> row;
     while (std::getline(ifs, line)) {
         std::stringstream ss(line);
+        std::array<std::string, 9> row;
         std::string cell;
         int i = 0;
         while (std::getline(ss, cell, ',')) {
             row[i++] = cell;
         }
-        data.emplace_back(row);
+        data.push_back(row);
     }
+    fmt::println("data size: {}", data.size());
 
     size_t i_start = 26062;
     size_t i_end = 26100;
     for (size_t i = i_start; i < i_end; i++) {
+        fmt::println("i: {}", i);
         const auto &item = data[i];
         params.a = boost::lexical_cast<Real>(item[0]);
         params.r_s = boost::lexical_cast<Real>(item[1]);
@@ -58,6 +60,9 @@ int main(int argc, char *argv[]) {
 
         params.lambda = boost::lexical_cast<Real>(item[4]);
         params.q = sqrt(boost::lexical_cast<Real>(item[5]));
+        fmt::println("lambda = {}, q = {}", item[4], item[5]);
+        fmt::println("a: {}, r_s: {}, theta_s: {}, r_o: {}, lambda: {}, q: {}", params.a, params.r_s, params.theta_s,
+                     params.r_o, params.lambda, params.q);
         params.calc_t_f = true;
 
         forward->calc_ray(params);

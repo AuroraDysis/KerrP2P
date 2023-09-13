@@ -37,6 +37,7 @@ private:
         CHECK_VAR_INT_RANGE(ellint_cos_theta, 0, 1);
 
         ellint_y = 1 - ellint_kappa2 * ellint_sin_theta2;
+        CHECK_VAR_REAL_RANGE(ellint_y, 0, std::numeric_limits<Real>::max());
         // ellint_1_phi = boost::math::ellint_1(ellint_kappa, ellint_theta);
         ellint_1_phi = ellint_sin_theta * boost::math::ellint_rf(ellint_cos_theta2, ellint_y, 1);
         // ellint_2_phi = boost::math::ellint_2(ellint_kappa, ellint_theta);
