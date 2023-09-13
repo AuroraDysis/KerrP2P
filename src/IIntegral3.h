@@ -12,9 +12,9 @@ private:
     Real ellint_phi, ellint_cos_phi, ellint_sin_phi, ellint_sin_phi2;
     Real r34_re, r34_im;
     Real A, B, alpha_p, alpha_m, ellint_k, ellint_m, alpha2, ellint1_phi, ellint_y;
-    Real alpha_0, R1_alpha_0, R2_alpha_0, Pi_13, Pi_23, I_1, I_2;
+    Real alpha_0, R1_alpha_0, R2_alpha_0, Pi_13, Pi_23, I1, I2;
     Real ellint3_n, ellint_c, ellint_3_tmp, f1, p1, ellint3_n1;
-    Real F3, R1_alpha_p, R1_alpha_m, I_p, I_m;
+    Real F3, R1_alpha_p, R1_alpha_m, Ip, Im;
 
     std::array<Real, 3> integral_rs;
     std::array<Real, 3> integral_ro;
@@ -118,7 +118,7 @@ public:
 
         CHECK_VAR(ellint_cos_phi, ellint_cos_phi >= -1 && ellint_cos_phi <= 1);
         ellint_sin_phi2 = 1 - MY_SQUARE(ellint_cos_phi);
-        // ?
+
         ellint_sin_phi = sqrt(ellint_sin_phi2);
         ellint_c = 1 / ellint_sin_phi2;
         ellint_phi = acos(ellint_cos_phi);
@@ -133,14 +133,14 @@ public:
         }
         ellint1_phi = ellint_1(ellint_k, ellint_phi);
         F3 = ellint1_phi / sqrt(A * B);
-        I_p = -(((A + B) * F3 + (2 * sqrt(A * B) * R1_alpha_p * (-r1 + r2)) /
+        Ip = -(((A + B) * F3 + (2 * sqrt(A * B) * R1_alpha_p * (-r1 + r2)) /
                                 (A * (r1 - rp) + B * (-r2 + rp))) /
                 (-(A * r1) - B * r2 + (A + B) * rp));
-        I_m = -(((A + B) * F3 + (2 * sqrt(A * B) * R1_alpha_m * (-r1 + r2)) /
+        Im = -(((A + B) * F3 + (2 * sqrt(A * B) * R1_alpha_m * (-r1 + r2)) /
                                 (A * (r1 - rm) + B * (-r2 + rm))) /
                 (-(A * r1) - B * r2 + (A + B) * rm));
         integral[0] = F3;
-        integral[1] = (a * (I_m * (-(a * lambda) + 2 * rm) + I_p * (a * lambda - 2 * rp))) / (rm - rp);
+        integral[1] = (a * (Im * (-(a * lambda) + 2 * rm) + Ip * (a * lambda - 2 * rp))) / (rm - rp);
         if (this->data.calc_t_f && !isinf(this->data.r_o)) {
             alpha2 = MY_SQUARE(alpha_0);
             R1(R1_alpha_0, alpha_0);
@@ -158,25 +158,25 @@ public:
                           (1 + alpha_0 * ellint_cos_phi));
             Pi_13 = (2 * sqrt(A * B) * R1_alpha_0 * (r1 - r2)) / ((A - B) * (A + B));
             Pi_23 = (4 * (A * B) * R2_alpha_0 * MY_SQUARE(r1 - r2)) / MY_SQUARE((A - B) * (A + B));
-            I_1 = (A * r1 + B * r2) * F3 / (A + B) + Pi_13;
-            I_2 =
+            I1 = (A * r1 + B * r2) * F3 / (A + B) + Pi_13;
+            I2 =
                     sqrt(A * B) * Pi_23 +
                     ((A * r1 + B * r2) * (2 * (A + B) * Pi_13 + F3 * (A * r1 + B * r2))) / MY_SQUARE(A + B);
             integral[2] =
-                    4 * F3 + I_2 +
-                    (2 * I_m * rm * (-(a * lambda) + 2 * rm) + 2 * I_p * (a * lambda - 2 * rp) * rp) / (rm - rp) +
-                    2 * I_1;
+                    4 * F3 + I2 +
+                    (2 * Im * rm * (-(a * lambda) + 2 * rm) + 2 * Ip * (a * lambda - 2 * rp) * rp) / (rm - rp) +
+                    2 * I1;
 
 #ifdef PRINT_DEBUG
-            fmt::println("I3 - R1_alpha_0: {}, R2_alpha_0: {}, Pi_13: {}, Pi_23: {}, I_1: {}, I_2: {}", R1_alpha_0,
-                         R2_alpha_0, Pi_13, Pi_23, I_1, I_2);
+            fmt::println("I3 - R1_alpha_0: {}, R2_alpha_0: {}, Pi_13: {}, Pi_23: {}, I1: {}, I2: {}", R1_alpha_0,
+                         R2_alpha_0, Pi_13, Pi_23, I1, I2);
 #endif
         } else {
             integral[2] = std::numeric_limits<Real>::quiet_NaN();
         }
 
 #ifdef PRINT_DEBUG
-        fmt::println("I3 - F3: {}, R1_alpha_p: {}, R1_alpha_m: {}, I_p: {}, I_m: {}", F3, R1_alpha_p, R1_alpha_m, I_p, I_m);
+        fmt::println("I3 - F3: {}, R1_alpha_p: {}, R1_alpha_m: {}, Ip: {}, Im: {}", F3, R1_alpha_p, R1_alpha_m, Ip, Im);
         fmt::println("I3 - I_r: {}, I_phi: {}, I_t: {}", integral[0], integral[1], integral[2]);
 #endif
     }
