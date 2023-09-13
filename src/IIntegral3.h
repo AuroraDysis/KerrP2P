@@ -39,6 +39,16 @@ private:
         using boost::math::constants::half_pi;
         using boost::math::constants::two_thirds;
 
+//        if (ellint3_n > ellint_c) {
+//            // Cauchy Principal Value
+//            ellint_3_tmp =
+//                    -ellint_3(ellint_k, ellint3_n1, ellint_phi) + ellint_1(ellint_k, ellint_phi)
+//                    + sqrt(ellint_c) * ellint_rc((ellint_c - 1) * (ellint_c - ellint_m),
+//                                                 (ellint_c - ellint3_n) * (ellint_c - ellint3_n1));
+//        } else {
+//            ellint_3_tmp = ellint_3(ellint_k, ellint3_n, ellint_phi);
+//        }
+
         ellint_y = ellint_c - ellint_m;
         CHECK_VAR(ellint_y, ellint_y >= 0);
         ellint_3_tmp =
@@ -131,11 +141,11 @@ public:
         ellint1_phi = ellint_1(ellint_k, ellint_phi);
         F3 = ellint1_phi / sqrt(A * B);
         Ip = -(((A + B) * F3 + (2 * sqrt(A * B) * R1_alpha_p * (-r1 + r2)) /
-                                (A * (r1 - rp) + B * (-r2 + rp))) /
-                (-(A * r1) - B * r2 + (A + B) * rp));
+                               (A * (r1 - rp) + B * (-r2 + rp))) /
+               (-(A * r1) - B * r2 + (A + B) * rp));
         Im = -(((A + B) * F3 + (2 * sqrt(A * B) * R1_alpha_m * (-r1 + r2)) /
-                                (A * (r1 - rm) + B * (-r2 + rm))) /
-                (-(A * r1) - B * r2 + (A + B) * rm));
+                               (A * (r1 - rm) + B * (-r2 + rm))) /
+               (-(A * r1) - B * r2 + (A + B) * rm));
         integral[0] = F3;
         integral[1] = (a * (Im * (-(a * lambda) + 2 * rm) + Ip * (a * lambda - 2 * rp))) / (rm - rp);
         if (this->data.calc_t_f && !isinf(this->data.r_o)) {
