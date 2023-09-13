@@ -295,6 +295,11 @@ public:
             return;
         }
 
+        if (r34_is_real && (r_s < r4 || r_o < r4)) {
+            ray_status = RayStatus::R_OUT_OF_RANGE;
+            return;
+        }
+
         // Radial integrals
         calcI();
         if (ray_status != RayStatus::NORMAL) {
