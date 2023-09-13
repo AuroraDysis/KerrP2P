@@ -79,7 +79,7 @@ using std::isnan;
 template <typename T>
 struct TypeName
 {
-    static const char* Get()
+    static std::string Get()
     {
         return typeid(T).name();
     }
@@ -95,18 +95,18 @@ using Complex128 = boost::multiprecision::complex128;
 template <>
 struct TypeName<boost::multiprecision::float128>
 {
-    static const char* Get()
+    static std::string Get()
     {
-        return "boost::multiprecision::float128";
+        return "float128";
     }
 };
 
 template <>
 struct TypeName<boost::multiprecision::complex128>
 {
-    static const char* Get()
+    static std::string Get()
     {
-		return "boost::multiprecision::complex128";
+		return "complex128";
 	}
 };
 #else
@@ -119,18 +119,18 @@ using Complex128 = boost::multiprecision::cpp_complex_quad;
 template <>
 struct TypeName<boost::multiprecision::cpp_bin_float_quad>
 {
-	static const char* Get()
+	static std::string Get()
 	{
-		return "boost::multiprecision::cpp_bin_float_quad";
+		return "cpp_bin_float_quad";
 	}
 };
 
 template <>
 struct TypeName<boost::multiprecision::cpp_complex_quad>
 {
-	static const char* Get()
+	static std::string Get()
 	{
-		return "boost::multiprecision::cpp_complex_quad";
+		return "cpp_complex_quad";
 	}
 };
 #endif
@@ -139,24 +139,27 @@ struct TypeName<boost::multiprecision::cpp_complex_quad>
 #include <boost/multiprecision/mpfr.hpp>
 #include <boost/multiprecision/mpc.hpp>
 
-using Float256 = boost::multiprecision::mpfr_float_oct
-using Complex256 = boost::multiprecision::mpc_complex_oct;
+using mpfr_float_oct = boost::multiprecision::number<boost::multiprecision::mpfr_float_backend<71>>;
+using mpc_complex_oct = boost::multiprecision::number<boost::multiprecision::mpc_complex_backend<71>>;
+
+using Float256 = mpfr_float_oct;
+using Complex256 = mpc_complex_oct;
 
 template <>
-struct TypeName<boost::multiprecision::mpfr_float_oct>
+struct TypeName<boost::multiprecision::number<boost::multiprecision::mpfr_float_backend<71>>>
 {
-    static const char* Get()
+    static std::string Get()
     {
-		return "boost::multiprecision::mpfr_float_oct";
+		return "mpfr_float_oct";
 	}
 };
 
 template <>
-struct TypeName<boost::multiprecision::mpc_complex_oct>
+struct TypeName<mpc_complex_oct>
 {
-    static const char* Get()
+    static std::string Get()
     {
-		return "boost::multiprecision::mpc_complex_oct";
+		return "mpc_complex_oct";
 	}
 };
 #else
@@ -169,18 +172,18 @@ using Complex256 = boost::multiprecision::cpp_complex_oct;
 template <>
 struct TypeName<boost::multiprecision::cpp_bin_float_oct>
 {
-    static const char* Get()
+    static std::string Get()
     {
-		return "boost::multiprecision::cpp_bin_float_oct";
+		return "cpp_bin_float_oct";
 	}
 };
 
 template <>
 struct TypeName<boost::multiprecision::cpp_complex_oct>
 {
-    static const char* Get()
+    static std::string Get()
     {
-		return "boost::multiprecision::cpp_complex_oct";
+		return "cpp_complex_oct";
 	}
 };
 #endif
@@ -194,6 +197,7 @@ struct fmt::formatter<boost::multiprecision::number<T>> : fmt::ostream_formatter
 };
 
 // helper return higher precision type
+
 template<typename T>
 struct HigherPrecision {
     using Type = T;
@@ -218,6 +222,74 @@ template <>
 struct HigherPrecision<Complex128> {
     using Type = Complex256;
 };
+
+#ifdef ENABLE_MPFR
+template <unsigned digits10>
+struct HigherPrecision<boost::multiprecision::number<boost::multiprecision::mpfr_float_backend<digits10>>> {
+    using Type = boost::multiprecision::number<boost::multiprecision::mpfr_float_backend<digits10 + 20>>;
+};
+
+template <unsigned digits10>
+struct HigherPrecision<boost::multiprecision::number<boost::multiprecision::mpc_complex_backend<digits10>>> {
+    using Type = boost::multiprecision::number<boost::multiprecision::mpc_complex_backend<digits10 + 20>>;
+};
+
+template <unsigned digits10>
+struct TypeName<boost::multiprecision::number<boost::multiprecision::mpfr_float_backend<digits10>>>
+{
+    static std::string Get()
+    {
+        return fmt::format("mpfr_float_{}", digits10).c_str();
+    }
+};
+
+template <unsigned digits10>
+struct TypeName<boost::multiprecision::number<boost::multiprecision::mpc_complex_backend<digits10>>>
+{
+    static std::string Get()
+    {
+        return fmt::format("mpc_complex_{}", digits10).c_str();
+    }
+};
+#else
+template <>
+struct HigherPrecision<boost::multiprecision::cpp_bin_float_oct> {
+    using Type = boost::multiprecision::cpp_bin_float_100;
+};
+
+template <>
+struct HigherPrecision<boost::multiprecision::cpp_complex_oct> {
+    using Type = boost::multiprecision::cpp_complex_100;
+};
+
+template <unsigned digits10>
+struct HigherPrecision<boost::multiprecision::cpp_bin_float<digits10>> {
+    using Type = boost::multiprecision::cpp_bin_float<digits10 + 20>;
+};
+
+template <unsigned digits10>
+struct HigherPrecision<boost::multiprecision::cpp_complex<digits10>> {
+    using Type = boost::multiprecision::cpp_complex<digits10 + 20>;
+};
+
+template <unsigned digits10>
+struct TypeName<boost::multiprecision::cpp_bin_float<digits10>>
+{
+    static std::string Get()
+    {
+        return fmt::format("cpp_bin_float_{}", digits10);
+    }
+};
+
+template <unsigned digits10>
+struct TypeName<boost::multiprecision::cpp_complex<digits10>>
+{
+    static std::string Get()
+    {
+        return fmt::format("cpp_complex_{}", digits10);
+    }
+};
+#endif
 
 // ErrorLimit
 template<typename T>
