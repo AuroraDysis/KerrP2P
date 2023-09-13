@@ -36,12 +36,20 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
             params.q = sqrt(boost::lexical_cast<Real>(item[5]));
             params.calc_t_f = true;
 
-            forward->calc_ray(params);
-            // CHECK(forward->ray_status == RayStatus::NORMAL);
+            try {
+                forward->calc_ray(params);
+                // CHECK(forward->ray_status == RayStatus::NORMAL);
 
-            t_f_vec[i] = forward->t_f - boost::lexical_cast<Real>(item[6]);
-            theta_f_vec[i] = forward->theta_f - boost::lexical_cast<Real>(item[7]);
-            phi_f_vec[i] = forward->phi_f - boost::lexical_cast<Real>(item[8]);
+                t_f_vec[i] = forward->t_f - boost::lexical_cast<Real>(item[6]);
+                theta_f_vec[i] = forward->theta_f - boost::lexical_cast<Real>(item[7]);
+                phi_f_vec[i] = forward->phi_f - boost::lexical_cast<Real>(item[8]);
+            } catch (std::exception &ex) {
+                fmt::println("[{}] Exception: {}", i, ex.what());
+
+                t_f_vec[i] = std::numeric_limits<Real>::quiet_NaN();
+                theta_f_vec[i] = std::numeric_limits<Real>::quiet_NaN();
+                phi_f_vec[i] = std::numeric_limits<Real>::quiet_NaN();
+            }
         }
     });
 
