@@ -100,9 +100,8 @@ public:
         }
 
         G_theta_phi_t(G_theta_s, theta_s);
-        if (this->data.ray_status != RayStatus::NORMAL) {
-            return;
-        }
+
+        CHECK_STATUS
 
         const Real &G_theta_theta_s = G_theta_s[0];
         const Real &G_theta_theta_p = G_theta_p[0];
@@ -127,9 +126,8 @@ public:
         this->data.n_half = tau_o / (2 * G_theta_theta_p);
 
         G_theta_phi_t(G_theta_f, this->data.theta_f);
-        if (this->data.ray_status != RayStatus::NORMAL) {
-            return;
-        }
+
+        CHECK_STATUS
 
         auto &angular_integrals = this->data.angular_integrals;
         // (-1)^m
