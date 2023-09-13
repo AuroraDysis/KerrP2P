@@ -2,6 +2,8 @@
 
 #pragma once
 
+#define CHECK_STATUS if (this->data.ray_status != RayStatus::NORMAL) return;
+
 #define CHECK_VAR_INT_RANGE(VAR, LOW, HIGH) if (!this->check_int_range(VAR, LOW, HIGH, #VAR)) return;
 #define CHECK_VAR_REAL_RANGE(VAR, LOW, HIGH) if (!this->check_real_range(VAR, LOW, HIGH, #VAR)) return;
 #define CHECK_VAR_REAL_RANGE_2(VAR, LOW, HIGH) if (!this->check_real_range(VAR, LOW, HIGH, #VAR)) return VAR;

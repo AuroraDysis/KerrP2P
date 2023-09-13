@@ -127,21 +127,22 @@ public:
 
     void calc(bool is_plus) {
         pre_calc();
+
+        CHECK_STATUS
+
         const Real &r_s = this->data.r_s;
-        const Real &r_o = this->data.r_o;
         calc_x(integral_rs, ellint_sin_phi_rs2, r_s);
+
+        CHECK_STATUS
+
+        const Real &r_o = this->data.r_o;
         calc_x(integral_ro, ellint_sin_phi_ro2, r_o);
 
-        auto &radial_integrals = this->data.radial_integrals;
+        CHECK_STATUS
 
-        if (is_plus) {
-            for (int i = 0; i < 3; ++i) {
-                radial_integrals[i] = integral_ro[i] + integral_rs[i];
-            }
-        } else {
-            for (int i = 0; i < 3; ++i) {
-                radial_integrals[i] = integral_ro[i] - integral_rs[i];
-            }
+        auto &radial_integrals = this->data.radial_integrals;
+        for (int i = 0; i < 3; ++i) {
+            radial_integrals[i] = is_plus ? integral_ro[i] + integral_rs[i] : integral_ro[i] - integral_rs[i];
         }
 #ifdef PRINT_DEBUG
         fmt::println("I2: {}, {}, {}", radial_integrals[0], radial_integrals[1], radial_integrals[2]);
