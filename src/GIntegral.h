@@ -108,14 +108,14 @@ public:
         // https://dlmf.nist.gov/22.17
         jacobi_sn_k1_prime = 1 / sqrt(1 + ellint_m);
         jacobi_sn_k1 = ellint_k * jacobi_sn_k1_prime;
-        this->data.theta_f = acos(-sqrt(up) * to_integral(nu_theta) *
+        this->data.theta_f = acos(-sqrt(up) * GET_SIGN(nu_theta) *
                                   jacobi_sn_k1_prime *
                                   boost::math::jacobi_sd(jacobi_sn_k1,
-                                                         (tau_o + to_integral(nu_theta) * G_theta_theta_s) /
+                                                         (tau_o + GET_SIGN(nu_theta) * G_theta_theta_s) /
                                                          (one_over_umaa_sqrt * jacobi_sn_k1_prime)));
 
         // Angular integrals
-        Real m_Real = 1 + floor(real((tau_o - G_theta_theta_p + to_integral(nu_theta) * G_theta_theta_s) /
+        Real m_Real = 1 + floor(real((tau_o - G_theta_theta_p + GET_SIGN(nu_theta) * G_theta_theta_s) /
                                      (2 * G_theta_theta_p)));
 
         // floor
@@ -136,7 +136,7 @@ public:
         int ix = this->data.calc_t_f ? 3 : 2;
         for (int i = 0; i < ix; ++i) {
             angular_integrals[i] =
-                    (2 * this->data.m) * G_theta_p[i] + to_integral(nu_theta) * (m1_m * G_theta_f[i] - G_theta_s[i]);
+                    (2 * this->data.m) * G_theta_p[i] + GET_SIGN(nu_theta) * (m1_m * G_theta_f[i] - G_theta_s[i]);
         }
         if (!this->data.calc_t_f) {
             angular_integrals[2] = std::numeric_limits<Real>::quiet_NaN();

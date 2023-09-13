@@ -62,7 +62,7 @@ enum class Sign : int {
 #define MY_CUBE(x) ((x) * (x) * (x))
 
 template<typename E>
-constexpr auto to_integral(E e) -> typename std::underlying_type<E>::type {
+constexpr auto GET_SIGN(E e) -> typename std::underlying_type<E>::type {
     return static_cast<typename std::underlying_type<E>::type>(e);
 }
 

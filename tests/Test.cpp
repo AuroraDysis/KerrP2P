@@ -12,7 +12,7 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
     if (test_data.empty()) {
         fmt::println(std::cerr,
                      "No test data found, nu_r = {}, nu_theta = {}. Please set the data path with -d or --data_path",
-                     to_integral(nu_r), to_integral(nu_theta));
+                     GET_SIGN(nu_r), GET_SIGN(nu_theta));
         return;
     }
 
@@ -46,7 +46,7 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
     });
 
     // how many elements smaller than error limit
-    fmt::println("nu_r: {}, nu_theta: {}", to_integral(nu_r), to_integral(nu_theta));
+    fmt::println("nu_r: {}, nu_theta: {}", GET_SIGN(nu_r), GET_SIGN(nu_theta));
     fmt::println("t_f: {} / {}, max error: {}", (t_f_vec.array().abs() < ErrorLimit<Real>::Value).count(),
                  t_f_vec.size(), t_f_vec.cwiseAbs().maxCoeff());
     fmt::println("theta_f: {} / {}, max error: {}", (theta_f_vec.array().abs() < ErrorLimit<Real>::Value).count(),

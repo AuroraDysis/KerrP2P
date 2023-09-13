@@ -58,7 +58,7 @@ struct ForwardRayTracingParams {
         Real coeff = sqrt(
                 MY_SQUARE(-3 + rc) / (MY_SQUARE(a) * MY_SQUARE(-1 + rc)) + eta_c / pow(rc, 4));
 
-        Real d = to_integral(lgd_sign) * pow(static_cast<Real>(10), lgd);
+        Real d = GET_SIGN(lgd_sign) * pow(static_cast<Real>(10), lgd);
         lambda = lambda_c + d * ((3 - rc) / (a * (-1 + rc)) / coeff);
         q = qc + d * (sqrt(eta_c) / MY_SQUARE(rc) / coeff);
 #ifdef PRINT_DEBUG
