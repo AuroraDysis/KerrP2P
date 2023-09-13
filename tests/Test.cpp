@@ -20,6 +20,9 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
     Vector theta_f_vec = Vector::Zero(test_data.size());
     Vector phi_f_vec = Vector::Zero(test_data.size());
 
+    std::mutex mtx;
+    std::vector<size_t> error_indices;
+
     oneapi::tbb::parallel_for(tbb::blocked_range<size_t>(0u, test_data.size()), [&](const auto &range) {
         ForwardRayTracingParams<Real> params;
         auto forward = ForwardRayTracing<Real, Complex>::get_from_cache();
@@ -40,9 +43,21 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
                 forward->calc_ray(params);
                 // CHECK(forward->ray_status == RayStatus::NORMAL);
 
-                t_f_vec[i] = forward->t_f - boost::lexical_cast<Real>(item[6]);
-                theta_f_vec[i] = forward->theta_f - boost::lexical_cast<Real>(item[7]);
-                phi_f_vec[i] = forward->phi_f - boost::lexical_cast<Real>(item[8]);
+                if (forward->ray_status != RayStatus::NORMAL) {
+                    fmt::println(std::cerr, "[{}, {}, {}] Ray status: {}", GET_SIGN(nu_r), GET_SIGN(nu_theta), i,
+                                 ray_status_to_str(forward->ray_status));
+                    {
+                        std::lock_guard<std::mutex> lock(mtx);
+                        error_indices.push_back(i);
+                    }
+                    t_f_vec[i] = std::numeric_limits<Real>::quiet_NaN();
+                    theta_f_vec[i] = std::numeric_limits<Real>::quiet_NaN();
+                    phi_f_vec[i] = std::numeric_limits<Real>::quiet_NaN();
+                } else {
+                    t_f_vec[i] = forward->t_f - boost::lexical_cast<Real>(item[6]);
+                    theta_f_vec[i] = forward->theta_f - boost::lexical_cast<Real>(item[7]);
+                    phi_f_vec[i] = forward->phi_f - boost::lexical_cast<Real>(item[8]);
+                }
             } catch (std::exception &ex) {
                 fmt::println("[{}, {}, {}] Exception: {}", GET_SIGN(nu_r), GET_SIGN(nu_theta), i, ex.what());
 
@@ -53,8 +68,15 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
         }
     });
 
+    // sort error_indices
+    std::sort(error_indices.begin(), error_indices.end());
+
     // how many elements smaller than error limit
     fmt::println("nu_r: {}, nu_theta: {}", GET_SIGN(nu_r), GET_SIGN(nu_theta));
+    fmt::println("error indices: {}", error_indices.size());
+    if (!error_indices.empty()) {
+        fmt::println("{}", fmt::join(error_indices, ", "));
+    }
     fmt::println("t_f: {} / {}, max error: {}", (t_f_vec.array().abs() < ErrorLimit<Real>::Value).count(),
                  t_f_vec.size(), t_f_vec.cwiseAbs().maxCoeff());
     fmt::println("theta_f: {} / {}, max error: {}", (theta_f_vec.array().abs() < ErrorLimit<Real>::Value).count(),
