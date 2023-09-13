@@ -6,6 +6,8 @@
 #include "GIntegral.h"
 #include "ObjectPool.h"
 
+#define CHECK_STATUS if (ray_status != RayStatus::NORMAL) return;
+
 template<typename Real>
 struct ForwardRayTracingParams {
     Real a;

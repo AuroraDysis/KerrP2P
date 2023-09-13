@@ -101,7 +101,7 @@ public:
 
         G_theta_phi_t(G_theta_s, theta_s);
 
-        CHECK_STATUS
+        CHECK_DATA_STATUS
 
         const Real &G_theta_theta_s = G_theta_s[0];
         const Real &G_theta_theta_p = G_theta_p[0];
@@ -127,7 +127,7 @@ public:
 
         G_theta_phi_t(G_theta_f, this->data.theta_f);
 
-        CHECK_STATUS
+        CHECK_DATA_STATUS
 
         auto &angular_integrals = this->data.angular_integrals;
         // (-1)^m

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#define CHECK_STATUS if (this->data.ray_status != RayStatus::NORMAL) return;
+#define CHECK_DATA_STATUS if (this->data.ray_status != RayStatus::NORMAL) return;
 #define CHECK_VAR(VAR, COND) if (!this->check_variable(VAR, COND, #VAR)) return;
 
 template<typename Real, typename Complex>

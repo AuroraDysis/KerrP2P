@@ -184,18 +184,18 @@ public:
     void calc(bool is_plus) {
         pre_calc();
 
-        CHECK_STATUS
+        CHECK_DATA_STATUS
 
         auto &r_s = this->data.r_s;
         auto &r_o = this->data.r_o;
 
         calc_x(integral_rs, r_s);
 
-        CHECK_STATUS
+        CHECK_DATA_STATUS
 
         calc_x(integral_ro, r_o);
 
-        CHECK_STATUS
+        CHECK_DATA_STATUS
 
         auto &radial_integrals = this->data.radial_integrals;
         for (int i = 0; i < 3; ++i) {
