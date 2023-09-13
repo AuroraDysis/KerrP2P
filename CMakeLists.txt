@@ -27,7 +27,7 @@ find_package(TBB CONFIG REQUIRED)
 find_package(Boost 1.82.0 COMPONENTS filesystem program_options REQUIRED)
 set(LIBRARIES Boost::boost Boost::filesystem fmt::fmt Eigen3::Eigen TBB::tbb TBB::tbbmalloc TBB::tbbmalloc_proxy)
 
-# add_definitions(-DPRINT_DEBUG)
+add_definitions(-DPRINT_DEBUG)
 
 if (FLOAT128_NATIVE)
     message("Enable float128 precision")
