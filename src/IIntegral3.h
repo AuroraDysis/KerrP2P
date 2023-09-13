@@ -182,12 +182,11 @@ public:
         CHECK_DATA_STATUS
 
         auto &r_s = this->data.r_s;
-        auto &r_o = this->data.r_o;
-
         calc_x(integral_rs, r_s);
 
         CHECK_DATA_STATUS
 
+        auto &r_o = this->data.r_o;
         calc_x(integral_ro, r_o);
 
         CHECK_DATA_STATUS
