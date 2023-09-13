@@ -86,7 +86,7 @@ public:
         I_m = F2 / (r3 - rm) - Pi_m2;
 
 #ifdef PRINT_DEBUG
-        fmt::println("I2 - ellint_phi: {}, ellint_k: {}", ellint_phi, ellint_k);
+        fmt::println("I2 - ellint_sin_phi2: {}, ellint_k: {}", ellint_sin_phi2, ellint_k);
         fmt::println("I2 - F2: {}, E2: {}, Pi_p2: {}, Pi_m2: {}, I_p: {}, I_m: {}", F2, E2, Pi_p2, Pi_m2, I_p, I_m);
 #endif
 

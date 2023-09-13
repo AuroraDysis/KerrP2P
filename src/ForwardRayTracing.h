@@ -177,7 +177,7 @@ private:
         init_radial_potential_roots();
         init_theta_pm();
 #ifdef PRINT_DEBUG
-        fmt::println("lambda: {}, q: {}, nu_r: {}, nu_theta: {}", lambda, q, to_integral(nu_r), to_integral(nu_theta));
+        fmt::println("lambda: {}, q: {}, nu_r: {}, nu_theta: {}", lambda, q, GET_SIGN(nu_r), GET_SIGN(nu_theta));
 #endif
     }
 

@@ -26,6 +26,11 @@ private:
         ellint3_n = alpha2 / (alpha2 - 1);
         ellint3_n1 = ellint_m / ellint3_n;
 
+#ifdef PRINT_DEBUG
+        fmt::println("R1 - ellint_phi: {}, ellint_m: {}, ellint3_n: {}", ellint_phi, ellint_m, ellint3_n);
+        fmt::println("R1 - ellint_c: {}, ellint3_n1: {}, alpha2: {}", ellint_c, ellint3_n1, alpha2);
+#endif
+
         using boost::math::ellint_rc;
         using boost::math::ellint_rj;
 
@@ -79,6 +84,7 @@ public:
 
         // k3 \in (0, 1)
         ellint_m = ((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B);
+        CHECK_VAR_INT_RANGE(ellint_m, 0, 1);
         ellint_k = sqrt(ellint_m);
 
         alpha_0 = (B + A) / (B - A);

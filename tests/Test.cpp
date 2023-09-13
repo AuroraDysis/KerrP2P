@@ -44,7 +44,7 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
                 theta_f_vec[i] = forward->theta_f - boost::lexical_cast<Real>(item[7]);
                 phi_f_vec[i] = forward->phi_f - boost::lexical_cast<Real>(item[8]);
             } catch (std::exception &ex) {
-                fmt::println("[{}] Exception: {}", i, ex.what());
+                fmt::println("[{}, {}, {}] Exception: {}", GET_SIGN(nu_r), GET_SIGN(nu_theta), i, ex.what());
 
                 t_f_vec[i] = std::numeric_limits<Real>::quiet_NaN();
                 theta_f_vec[i] = std::numeric_limits<Real>::quiet_NaN();
