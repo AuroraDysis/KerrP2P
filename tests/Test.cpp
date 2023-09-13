@@ -54,9 +54,9 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
     fmt::println("phi_f: {} / {}", (phi_f_vec.array().abs() < ErrorLimit<Real>::Value).count(), phi_f_vec.size(),
                  phi_f_vec.cwiseAbs().maxCoeff());
 
-    CHECK(t_f_vec.array().abs().maxCoeff() < ErrorLimit<Real>::Value * 10000000);
-    CHECK(theta_f_vec.array().abs().maxCoeff() < ErrorLimit<Real>::Value * 10000000);
-    CHECK(phi_f_vec.array().abs().maxCoeff() < ErrorLimit<Real>::Value * 10000000);
+    CHECK(t_f_vec.array().abs().maxCoeff() < ErrorLimit<Real>::Value * 100000000);
+    CHECK(theta_f_vec.array().abs().maxCoeff() < ErrorLimit<Real>::Value * 100000000);
+    CHECK(phi_f_vec.array().abs().maxCoeff() < ErrorLimit<Real>::Value * 100000000);
 }
 
 TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {

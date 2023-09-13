@@ -86,6 +86,20 @@ struct TypeName {
     }
 };
 
+template<>
+struct TypeName<double> {
+    static std::string Get() {
+        return "double";
+    }
+};
+
+template<>
+struct TypeName<std::complex<double>> {
+    static std::string Get() {
+        return "complex<double>";
+    }
+};
+
 #ifdef FLOAT128_NATIVE
 #include <boost/multiprecision/float128.hpp>
 #include <boost/multiprecision/complex128.hpp>
