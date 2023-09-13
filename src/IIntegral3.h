@@ -74,7 +74,6 @@ public:
     void pre_calc() {
         const Real &rp = this->data.rp;
         const Real &rm = this->data.rm;
-        const Real &r_s = this->data.r_s;
         // two real roots, both inside horizon, r_1 < r_2 < r_- < r_+ and r_3 = conj(r_4)
         const Real &r1 = this->data.r1;
         const Real &r2 = this->data.r2;
@@ -124,13 +123,11 @@ public:
         ellint_phi = acos(ellint_cos_phi);
 
         R1(R1_alpha_p, alpha_p);
-        if (this->data.ray_status != RayStatus::NORMAL) {
-            return;
-        }
+        CHECK_DATA_STATUS
+
         R1(R1_alpha_m, alpha_m);
-        if (this->data.ray_status != RayStatus::NORMAL) {
-            return;
-        }
+        CHECK_DATA_STATUS
+
         ellint1_phi = ellint_1(ellint_k, ellint_phi);
         F3 = ellint1_phi / sqrt(A * B);
         Ip = -(((A + B) * F3 + (2 * sqrt(A * B) * R1_alpha_p * (-r1 + r2)) /
@@ -143,11 +140,9 @@ public:
         integral[1] = (a * (Im * (-(a * lambda) + 2 * rm) + Ip * (a * lambda - 2 * rp))) / (rm - rp);
         if (this->data.calc_t_f && !isinf(this->data.r_o)) {
             alpha2 = MY_SQUARE(alpha_0);
-            R1(R1_alpha_0, alpha_0);
 
-            if (this->data.ray_status != RayStatus::NORMAL) {
-                return;
-            }
+            R1(R1_alpha_0, alpha_0);
+            CHECK_DATA_STATUS
 
             R2_alpha_0 = ((-1 + alpha2) * ellint_m * (1 + alpha_0 * ellint_cos_phi) *
                           (ellint1_phi - 2 * R1_alpha_0) +
