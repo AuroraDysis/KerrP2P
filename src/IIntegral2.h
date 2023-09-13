@@ -11,7 +11,7 @@ private:
     Real E2_coeff, F2_coeff, Pi_p2_coeff, Pi_m2_coeff, Pi_p2_ellint_n, Pi_m2_ellint_n;
     Real ellint_y;
 
-    Real F2, Pi_p2, Pi_m2, I_p, I_m;
+    Real F2, Pi_p2, Pi_m2, Ip, Im;
     Real E2, Pi_12, I1, I2, Pi_12_ellint_n;
 
     std::array<Real, 3> integral_rs;
@@ -82,18 +82,18 @@ public:
         Pi_m2 = Pi_m2_coeff * (ellint1_phi + third<Real>() * Pi_m2_ellint_n * ellint_sin_phi3 *
                                              ellint_rj(ellint_cos_phi2, ellint_y, 1,
                                                        1 - Pi_m2_ellint_n * ellint_sin_phi2));
-        I_p = F2 / (r3 - rp) - Pi_p2;
-        I_m = F2 / (r3 - rm) - Pi_m2;
+        Ip = F2 / (r3 - rp) - Pi_p2;
+        Im = F2 / (r3 - rm) - Pi_m2;
 
 #ifdef PRINT_DEBUG
         fmt::println("I2 - ellint_sin_phi2: {}, ellint_k: {}", ellint_sin_phi2, ellint_k);
-        fmt::println("I2 - F2: {}, E2: {}, Pi_p2: {}, Pi_m2: {}, I_p: {}, I_m: {}", F2, E2, Pi_p2, Pi_m2, I_p, I_m);
+        fmt::println("I2 - F2: {}, E2: {}, Pi_p2: {}, Pi_m2: {}, Ip: {}, Im: {}", F2, E2, Pi_p2, Pi_m2, Ip, Im);
 #endif
 
         // I_r
         integral[0] = F2;
         // I_phi
-        integral[1] = (a * (-2 * rp * I_p + a * I_p * lambda + (2 * rm - a * lambda) * I_m)) / (rm - rp);
+        integral[1] = (a * (-2 * rp * Ip + a * Ip * lambda + (2 * rm - a * lambda) * Im)) / (rm - rp);
         if (this->data.calc_t_f && !isinf(this->data.r_o)) {
             // I_t
             const Real &r1 = this->data.r1;
@@ -114,8 +114,8 @@ public:
                             MY_SQUARE(MY_SQUARE(a) - a * lambda + MY_SQUARE(r))) / (r - r3) -
                  (F2 * (r2 * r3 + r1 * r4)) * half<Real>();
             integral[2] = 4 * F2 + 2 * I1 + I2 +
-                          (-2 * a * I_m * lambda * rm + 4 * I_m * MY_SQUARE(rm) +
-                           2 * I_p * (a * lambda - 2 * rp) * rp) /
+                          (-2 * a * Im * lambda * rm + 4 * Im * MY_SQUARE(rm) +
+                           2 * Ip * (a * lambda - 2 * rp) * rp) /
                           (rm - rp);
 #ifdef PRINT_DEBUG
             fmt::println("I2 - E2: {}, Pi_12: {}, I1: {}, I2: {}", E2, Pi_12, I1, I2);
