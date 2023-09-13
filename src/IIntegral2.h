@@ -7,7 +7,7 @@
 template<typename Real, typename Complex>
 class IIntegral2 : public Integral<Real, Complex> {
 private:
-    Real ellint_sin_phi_rs2, ellint_sin_phi_ro2, ellint_sin_phi, ellint_sin_phi3, ellint_cos_phi, ellint_cos_phi2, ellint_c, ellint_k, ellint_m, ellint1_phi;
+    Real ellint_sin_phi_rs2, ellint_sin_phi_ro2, ellint_sin_phi, ellint_sin_phi3, ellint_cos_phi2, ellint_c, ellint_k, ellint_m, ellint1_phi;
     Real E2_coeff, F2_coeff, Pi_p2_coeff, Pi_m2_coeff, Pi_p2_ellint_n, Pi_m2_ellint_n;
     Real ellint_y;
 
@@ -61,7 +61,6 @@ public:
         const Real &r3 = this->data.r3;
 
         ellint_cos_phi2 = 1 - ellint_sin_phi2;
-        ellint_cos_phi = sqrt(ellint_cos_phi2);
         ellint_sin_phi = sqrt(ellint_sin_phi2);
         ellint_sin_phi3 = ellint_sin_phi2 * ellint_sin_phi;
 
