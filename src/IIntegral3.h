@@ -22,6 +22,8 @@ private:
     void R1(Real &res, const Real &alpha) {
         // alpha2 > 1
         alpha2 = MY_SQUARE(alpha);
+        CHECK_VAR(alpha2, alpha2 > 1);
+
         // alpha2 / (alpha2 - 1) > 1
         ellint3_n = alpha2 / (alpha2 - 1);
         ellint3_n1 = ellint_m / ellint3_n;
@@ -83,7 +85,7 @@ public:
 
         // k3 \in (0, 1)
         ellint_m = ((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B);
-        CHECK_VAR(ellint_m, ellint_m >= 0 && ellint_m <= 1);
+        CHECK_VAR(ellint_m, ellint_m > 0 && ellint_m < 1);
         ellint_k = sqrt(ellint_m);
 
         alpha_0 = (B + A) / (B - A);
