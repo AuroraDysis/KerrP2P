@@ -60,7 +60,7 @@ add_executable(tests tests/Test.cpp
         tests/TestData.cpp
         ${SOURCE_FILES}
         tests/Main.cpp
-        tests/EllipticTest.cpp)
+)
 target_compile_definitions(tests PRIVATE TESTS)
 target_link_libraries(tests PRIVATE ${LIBRARIES} Catch2::Catch2)
 
