@@ -34,22 +34,11 @@ private:
         using boost::math::ellint_rc;
         using boost::math::ellint_rj;
 
-        // https://dlmf.nist.gov/19.25.E14
-        // https://dlmf.nist.gov/19.25.E16
         using boost::math::constants::half_pi;
         using boost::math::constants::two_thirds;
 
-//        if (ellint3_n > ellint_c) {
-//            Real coeff = sqrt((ellint3_n - ellint_m) * (ellint3_n - 1) / ellint3_n);
-//            // Cauchy Principal Value
-//            ellint_3_tmp =
-//                    -ellint_3(ellint_k, ellint_m / ellint3_n, ellint_phi) + ellint_1(ellint_k, ellint_phi)
-//                    + 1 / (2 * coeff) * log((coeff * tan(ellint_phi) + sqrt(1 - ellint_m * ellint_sin_phi2)) / (-coeff * tan(ellint_phi) + sqrt(1 - ellint_m * ellint_sin_phi2)));
-//
-//        } else {
-//            ellint_3_tmp = ellint_3(ellint_k, ellint3_n, ellint_phi);
-//        }
-
+        // https://dlmf.nist.gov/19.25.E14
+        // https://dlmf.nist.gov/19.25.E16
         ellint_y = ellint_c - ellint_m;
         CHECK_VAR(ellint_y, ellint_y >= 0);
         ellint_3_tmp =
