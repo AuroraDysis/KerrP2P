@@ -20,9 +20,7 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
     Vector theta_f_vec = Vector::Zero(test_data.size());
     Vector phi_f_vec = Vector::Zero(test_data.size());
 
-    std::mutex mtx;
-    std::vector<size_t> error_indices;
-
+    tbb::concurrent_vector<size_t> error_indices;
     oneapi::tbb::parallel_for(tbb::blocked_range<size_t>(0u, test_data.size()), [&](const auto &range) {
         ForwardRayTracingParams<Real> params;
         auto forward = ForwardRayTracing<Real, Complex>::get_from_cache();
@@ -46,10 +44,7 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
                 if (forward->ray_status != RayStatus::NORMAL) {
                     fmt::println(std::cerr, "[{}, {}, {}] Ray status: {}", GET_SIGN(nu_r), GET_SIGN(nu_theta), i,
                                  ray_status_to_str(forward->ray_status));
-                    {
-                        std::lock_guard<std::mutex> lock(mtx);
-                        error_indices.push_back(i);
-                    }
+                    error_indices.push_back(i);
                     t_f_vec[i] = std::numeric_limits<Real>::quiet_NaN();
                     theta_f_vec[i] = std::numeric_limits<Real>::quiet_NaN();
                     phi_f_vec[i] = std::numeric_limits<Real>::quiet_NaN();
