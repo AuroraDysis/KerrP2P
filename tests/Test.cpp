@@ -9,6 +9,8 @@ template<typename Real, typename Complex>
 void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Sign nu_theta) {
     using Vector = Eigen::Matrix<Real, Eigen::Dynamic, 1>;
 
+    const Real error_limit = ErrorLimit<Real>::Value * 100000000;
+
     if (test_data.empty()) {
         fmt::println(std::cerr,
                      "No test data found, nu_r = {}, nu_theta = {}. Please set the data path with -d or --data_path",
@@ -21,6 +23,7 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
     Vector phi_f_vec = Vector::Zero(test_data.size());
 
     tbb::concurrent_vector<size_t> error_indices;
+    tbb::concurrent_vector<size_t> possible_error_indices;
     oneapi::tbb::parallel_for(tbb::blocked_range<size_t>(0u, test_data.size()), [&](const auto &range) {
         ForwardRayTracingParams<Real> params;
         auto forward = ForwardRayTracing<Real, Complex>::get_from_cache();
@@ -51,6 +54,10 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
                     t_f_vec[i] = abs(forward->t_f - boost::lexical_cast<Real>(item[6]));
                     theta_f_vec[i] = abs(forward->theta_f - boost::lexical_cast<Real>(item[7]));
                     phi_f_vec[i] = abs(forward->phi_f - boost::lexical_cast<Real>(item[8]));
+
+                    if (t_f_vec[i] > 10 * error_limit) {
+                        possible_error_indices.push_back(i);
+                    }
                 }
             } catch (std::exception &ex) {
                 fmt::println("[{}, {}, {}] Exception: {}", GET_SIGN(nu_r), GET_SIGN(nu_theta), i, ex.what());
@@ -71,7 +78,10 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
     if (!error_indices.empty()) {
         fmt::println("error indices: {}", fmt::join(error_indices, ", "));
     }
-
+    fmt::println("possible error count: {}", possible_error_indices.size());
+    if (!possible_error_indices.empty()) {
+        fmt::println("possible error indices: {}", fmt::join(possible_error_indices, ", "));
+    }
     fmt::println("t_f: {} / {}, max error: {}", (t_f_vec.array() < ErrorLimit<Real>::Value).count(),
                  t_f_vec.size(), t_f_vec.maxCoeff());
     fmt::println("theta_f: {} / {}, max error: {}", (theta_f_vec.array() < ErrorLimit<Real>::Value).count(),
@@ -79,9 +89,9 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
     fmt::println("phi_f: {} / {}, max error: {}", (phi_f_vec.array() < ErrorLimit<Real>::Value).count(), phi_f_vec.size(),
                  phi_f_vec.maxCoeff());
 
-    CHECK(t_f_vec.array().maxCoeff() < ErrorLimit<Real>::Value * 100000000);
-    CHECK(theta_f_vec.array().maxCoeff() < ErrorLimit<Real>::Value * 100000000);
-    CHECK(phi_f_vec.array().maxCoeff() < ErrorLimit<Real>::Value * 100000000);
+    CHECK(t_f_vec.array().maxCoeff() < error_limit);
+    CHECK(theta_f_vec.array().maxCoeff() < error_limit);
+    CHECK(phi_f_vec.array().maxCoeff() < error_limit);
 }
 
 TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
