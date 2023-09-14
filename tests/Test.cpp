@@ -68,9 +68,9 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
 
     // how many elements smaller than error limit
     fmt::println("nu_r: {}, nu_theta: {}", GET_SIGN(nu_r), GET_SIGN(nu_theta));
-    fmt::println("error indices: {}", error_indices.size());
+    fmt::println("error count: {}", error_indices.size());
     if (!error_indices.empty()) {
-        fmt::println("{}", fmt::join(error_indices, ", "));
+        fmt::println("error indices: {}", fmt::join(error_indices, ", "));
     }
 
     fmt::println("t_f: {} / {}, max error: {}", (t_f_vec.array() < ErrorLimit<Real>::Value).count(),
