@@ -79,9 +79,9 @@ public:
 
     Vector operator()(const Vector &x) {
         auto &rc = x[0];
-        auto &lgd = x[1];
+        auto &log_abs_d = x[1];
         params.rc = rc;
-        params.log_abs_d = lgd;
+        params.log_abs_d = log_abs_d;
         params.rc_d_to_lambda_q();
         ray_tracing->calc_ray(params);
 

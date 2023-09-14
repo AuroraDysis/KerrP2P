@@ -66,7 +66,7 @@ struct ForwardRayTracingParams {
         lambda = lambda_c + d * ((3 - rc) / (a * (-1 + rc)) / coeff);
         q = qc + d * (sqrt(eta_c) / MY_SQUARE(rc) / coeff);
 #ifdef PRINT_DEBUG
-        fmt::println("rc: {}, lgd: {}", rc, log_abs_d);
+        fmt::println("rc: {}, log_abs_d: {}", rc, log_abs_d);
         fmt::println("lambda_c: {}, eta_c: {}, qc: {}", lambda_c, eta_c, qc);
         fmt::println("coeff: {}", coeff);
 #endif
@@ -82,8 +82,8 @@ struct ForwardRayTracingResult {
     int m;
     Real n_half;
     Real eta, lambda, q;
-    Real rc, lgd;
-    Sign lgd_sign;
+    Real rc, log_abs_d;
+    Sign log_abs_d_sign;
     RayStatus ray_status;
 };
 
@@ -350,7 +350,7 @@ public:
         result.lambda = lambda;
         result.q = q;
         result.rc = std::numeric_limits<Real>::quiet_NaN();
-        result.lgd = std::numeric_limits<Real>::quiet_NaN();
+        result.log_abs_d = std::numeric_limits<Real>::quiet_NaN();
         return result;
     }
 };
