@@ -85,6 +85,10 @@ public:
         A = sqrt(MY_SQUARE(r34_im) + MY_SQUARE(r34_re - r2));
         B = sqrt(MY_SQUARE(r34_im) + MY_SQUARE(r34_re - r1));
 
+#ifdef PRINT_DEBUG
+        fmt::println("I3 - A: {}, B: {}", A, B);
+#endif
+
         // k3 \in (0, 1)
         ellint_m = ((A + B + r1 - r2) * (A + B - r1 + r2)) / (4 * A * B);
         CHECK_VAR(ellint_m, ellint_m > 0 && ellint_m < 1);
@@ -95,8 +99,7 @@ public:
         alpha_m = (B * (rm - r2) + A * (rm - r1)) / (B * (rm - r2) - A * (rm - r1));
 
 #ifdef PRINT_DEBUG
-        fmt::println("I3 - A: {}, B: {}, ellint_k: {}", A, B, ellint_k);
-        fmt::println("I3 - alpha_p: {}, alpha_m: {}", alpha_p, alpha_m);
+        fmt::println("I3 - ellint_k: {}, alpha_p: {}, alpha_m: {}, alpha_0: {}", ellint_k, alpha_p, alpha_m, alpha_0);
 #endif
     }
 
