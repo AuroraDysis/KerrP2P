@@ -54,9 +54,9 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
                     theta_f_vec[i] = std::numeric_limits<Real>::quiet_NaN();
                     phi_f_vec[i] = std::numeric_limits<Real>::quiet_NaN();
                 } else {
-                    t_f_vec[i] = forward->t_f - boost::lexical_cast<Real>(item[6]);
-                    theta_f_vec[i] = forward->theta_f - boost::lexical_cast<Real>(item[7]);
-                    phi_f_vec[i] = forward->phi_f - boost::lexical_cast<Real>(item[8]);
+                    t_f_vec[i] = abs(forward->t_f - boost::lexical_cast<Real>(item[6]));
+                    theta_f_vec[i] = abs(forward->theta_f - boost::lexical_cast<Real>(item[7]));
+                    phi_f_vec[i] = abs(forward->phi_f - boost::lexical_cast<Real>(item[8]));
                 }
             } catch (std::exception &ex) {
                 fmt::println("[{}, {}, {}] Exception: {}", GET_SIGN(nu_r), GET_SIGN(nu_theta), i, ex.what());
@@ -77,16 +77,17 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
     if (!error_indices.empty()) {
         fmt::println("{}", fmt::join(error_indices, ", "));
     }
-    fmt::println("t_f: {} / {}, max error: {}", (t_f_vec.array().abs() < ErrorLimit<Real>::Value).count(),
-                 t_f_vec.size(), t_f_vec.cwiseAbs().maxCoeff());
-    fmt::println("theta_f: {} / {}, max error: {}", (theta_f_vec.array().abs() < ErrorLimit<Real>::Value).count(),
-                 theta_f_vec.size(), theta_f_vec.cwiseAbs().maxCoeff());
-    fmt::println("phi_f: {} / {}", (phi_f_vec.array().abs() < ErrorLimit<Real>::Value).count(), phi_f_vec.size(),
-                 phi_f_vec.cwiseAbs().maxCoeff());
 
-    CHECK(t_f_vec.array().abs().maxCoeff() < ErrorLimit<Real>::Value * 100000000);
-    CHECK(theta_f_vec.array().abs().maxCoeff() < ErrorLimit<Real>::Value * 100000000);
-    CHECK(phi_f_vec.array().abs().maxCoeff() < ErrorLimit<Real>::Value * 100000000);
+    fmt::println("t_f: {} / {}, max error: {}", (t_f_vec.array() < ErrorLimit<Real>::Value).count(),
+                 t_f_vec.size(), t_f_vec.maxCoeff());
+    fmt::println("theta_f: {} / {}, max error: {}", (theta_f_vec.array() < ErrorLimit<Real>::Value).count(),
+                 theta_f_vec.size(), theta_f_vec.maxCoeff());
+    fmt::println("phi_f: {} / {}", (phi_f_vec.array() < ErrorLimit<Real>::Value).count(), phi_f_vec.size(),
+                 phi_f_vec.maxCoeff());
+
+    CHECK(t_f_vec.array().maxCoeff() < ErrorLimit<Real>::Value * 100000000);
+    CHECK(theta_f_vec.array().maxCoeff() < ErrorLimit<Real>::Value * 100000000);
+    CHECK(phi_f_vec.array().maxCoeff() < ErrorLimit<Real>::Value * 100000000);
 }
 
 TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
