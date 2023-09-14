@@ -39,7 +39,6 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
 
             try {
                 forward->calc_ray(params);
-                // CHECK(forward->ray_status == RayStatus::NORMAL);
 
                 if (forward->ray_status != RayStatus::NORMAL) {
                     fmt::println(std::cerr, "[{}, {}, {}] Ray status: {}", GET_SIGN(nu_r), GET_SIGN(nu_theta), i,

@@ -119,15 +119,17 @@ struct ForwardRayTracingUtils {
         return ray_tracing->to_result();
     }
 
-    static std::vector<ForwardRayTracingResult<Real, Complex>> calc_ray_batch(const std::vector<ForwardRayTracingParams<Real>>& params_list) {
+    static std::vector<ForwardRayTracingResult<Real, Complex>>
+    calc_ray_batch(const std::vector<ForwardRayTracingParams<Real>> &params_list) {
         std::vector<ForwardRayTracingResult<Real, Complex>> results(params_list.size());
-        oneapi::tbb::parallel_for(oneapi::tbb::blocked_range<size_t>(0u, params_list.size()), [&](const oneapi::tbb::blocked_range<size_t> &r) {
-            for (size_t i = r.begin(); i != r.end(); ++i) {
-				auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
-				ray_tracing->calc_ray(params_list[i]);
-				results[i] = ray_tracing->to_result();
-			}
-        });
+        oneapi::tbb::parallel_for(oneapi::tbb::blocked_range<size_t>(0u, params_list.size()),
+                                  [&](const oneapi::tbb::blocked_range<size_t> &r) {
+                                      for (size_t i = r.begin(); i != r.end(); ++i) {
+                                          auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
+                                          ray_tracing->calc_ray(params_list[i]);
+                                          results[i] = ray_tracing->to_result();
+                                      }
+                                  });
         return results;
     }
 
@@ -169,7 +171,7 @@ struct ForwardRayTracingUtils {
         result.success = true;
         result.root = root_functor.ray_tracing->to_result();
 
-        auto& root = (*result.root);
+        auto &root = (*result.root);
         root.rc = x[0];
         root.log_abs_d = x[1];
         root.log_abs_d_sign = local_params.log_abs_d_sign;
@@ -245,29 +247,35 @@ struct ForwardRayTracingUtils {
         namespace bg = boost::geometry;
         namespace bgi = boost::geometry::index;
         using Point = bg::model::point<int, 2, bg::cs::cartesian>;
-        std::vector<Point> theta_roots_index;
-        std::vector<Point> phi_roots_index;
-        int d_row, d_col, d_row_lambda, d_col_lambda;
-        for (size_t i = 1; i < lgd_size; i++) {
-            for (size_t j = 1; j < rc_size; j++) {
-                d_row = sgn(delta_theta(i, j)) * sgn(delta_theta(i, j - 1));
-                d_col = sgn(delta_theta(i, j)) * sgn(delta_theta(i - 1, j));
-                if (!isnan(delta_theta(i, j)) && !isnan(delta_theta(i, j - 1)) && !isnan(delta_theta(i - 1, j)) &&
-                    (d_row <= 0 || d_col <= 0)) {
-                    theta_roots_index.emplace_back(i, j);
-                }
-                d_row = sgn(delta_phi(i, j)) * sgn(delta_phi(i, j - 1));
-                d_col = sgn(delta_phi(i, j)) * sgn(delta_phi(i - 1, j));
-                d_row_lambda = sgn(lambda(i, j)) * sgn(lambda(i, j - 1));
-                d_col_lambda = sgn(lambda(i, j)) * sgn(lambda(i - 1, j));
-                if (!isnan(delta_phi(i, j)) && !isnan(delta_phi(i, j - 1)) && !isnan(delta_phi(i - 1, j)) &&
-                    !isnan(lambda(i, j)) && !isnan(lambda(i, j - 1)) && !isnan(lambda(i - 1, j)) && d_row_lambda > 0 &&
-                    d_col_lambda > 0 &&
-                    (d_row <= 0 || d_col <= 0)) {
-                    phi_roots_index.emplace_back(i, j);
-                }
-            }
-        }
+        tbb::concurrent_vector<Point> theta_roots_index;
+        tbb::concurrent_vector<Point> phi_roots_index;
+        oneapi::tbb::parallel_for(oneapi::tbb::blocked_range2d<size_t>(0u, lgd_size, 0u, rc_size),
+                                  [&](const oneapi::tbb::blocked_range2d<size_t, size_t> &r) {
+                                      int d_row, d_col, d_row_lambda, d_col_lambda;
+                                      for (size_t i = r.rows().begin(); i != r.rows().end(); ++i) {
+                                          for (size_t j = r.cols().begin(); j != r.cols().end(); ++j) {
+                                              d_row = sgn(delta_theta(i, j)) * sgn(delta_theta(i, j - 1));
+                                              d_col = sgn(delta_theta(i, j)) * sgn(delta_theta(i - 1, j));
+                                              if (!isnan(delta_theta(i, j)) && !isnan(delta_theta(i, j - 1)) &&
+                                                  !isnan(delta_theta(i - 1, j)) &&
+                                                  (d_row <= 0 || d_col <= 0)) {
+                                                  theta_roots_index.emplace_back(i, j);
+                                              }
+                                              d_row = sgn(delta_phi(i, j)) * sgn(delta_phi(i, j - 1));
+                                              d_col = sgn(delta_phi(i, j)) * sgn(delta_phi(i - 1, j));
+                                              d_row_lambda = sgn(lambda(i, j)) * sgn(lambda(i, j - 1));
+                                              d_col_lambda = sgn(lambda(i, j)) * sgn(lambda(i - 1, j));
+                                              if (!isnan(delta_phi(i, j)) && !isnan(delta_phi(i, j - 1)) &&
+                                                  !isnan(delta_phi(i - 1, j)) &&
+                                                  !isnan(lambda(i, j)) && !isnan(lambda(i, j - 1)) &&
+                                                  !isnan(lambda(i - 1, j)) && d_row_lambda > 0 &&
+                                                  d_col_lambda > 0 &&
+                                                  (d_row <= 0 || d_col <= 0)) {
+                                                  phi_roots_index.emplace_back(i, j);
+                                              }
+                                          }
+                                      }
+                                  });
 
         if (theta_roots_index.empty() && phi_roots_index.empty()) {
             return sweep_result;
