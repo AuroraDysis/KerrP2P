@@ -77,7 +77,7 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
                  t_f_vec.size(), t_f_vec.maxCoeff());
     fmt::println("theta_f: {} / {}, max error: {}", (theta_f_vec.array() < ErrorLimit<Real>::Value).count(),
                  theta_f_vec.size(), theta_f_vec.maxCoeff());
-    fmt::println("phi_f: {} / {}", (phi_f_vec.array() < ErrorLimit<Real>::Value).count(), phi_f_vec.size(),
+    fmt::println("phi_f: {} / {}, max error: {}", (phi_f_vec.array() < ErrorLimit<Real>::Value).count(), phi_f_vec.size(),
                  phi_f_vec.maxCoeff());
 
     CHECK(t_f_vec.array().maxCoeff() < ErrorLimit<Real>::Value * 100000000);
