@@ -22,7 +22,7 @@ private:
     void R1(Real &res, const Real &alpha) {
         // alpha2 > 1
         alpha2 = MY_SQUARE(alpha);
-        // alpha2 / (alpha2 - 1) > k3 (ellint_m)
+        // alpha2 / (alpha2 - 1) > 1
         ellint3_n = alpha2 / (alpha2 - 1);
         ellint3_n1 = ellint_m / ellint3_n;
 
@@ -59,10 +59,8 @@ private:
                   ellint_rc(ellint_c * (ellint3_n - 1) * (1 - ellint3_n1),
                             (ellint3_n - ellint_c) * (ellint_c - ellint3_n1));
         if (ellint_phi >= half_pi<Real>()) {
-            ellint_y = 1 - ellint_m;
-            CHECK_VAR(ellint_y, ellint_y >= 0);
-            ellint_3_tmp +=
-                    two_thirds<Real>() * ellint_m / ellint3_n * ellint_rj(0, ellint_y, 1, 1 - ellint_m / ellint3_n);
+            // Cauchy principal value: https://dlmf.nist.gov/19.25.E4
+            ellint_3_tmp += two_thirds<Real>() * ellint3_n1 * ellint_rj(0, 1 - ellint_m, 1, 1 - ellint3_n1);
         }
 
         // p_1 > 0 (B65)
