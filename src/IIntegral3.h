@@ -11,7 +11,7 @@ class IIntegral3 : public Integral<Real, Complex> {
 private:
     Real ellint_phi, ellint_cos_phi, ellint_sin_phi, ellint_sin_phi2;
     Real r34_re, r34_im;
-    Real A, B, alpha_p, alpha_m, ellint_k, ellint_m, alpha2, ellint1_phi, ellint_c;
+    Real A, B, alpha_p, alpha_m, ellint_k, ellint_m, alpha2, ellint1_phi;
     Real alpha_0, R1_alpha_0, R2_alpha_0, Pi_13, Pi_23, I1, I2;
     Real ellint3_n, ellint_3_tmp, f1, p1, ellint3_n1;
     Real F3, R1_alpha_p, R1_alpha_m, Ip, Im;
@@ -44,9 +44,10 @@ private:
         // https://dlmf.nist.gov/19.20.E6
         ellint_3_tmp = -third<Real>() * ellint3_n1 * ellint_sin_phi2 * ellint_sin_phi *
                        ellint_rj(1 - ellint_sin_phi2, 1 - ellint_m * ellint_sin_phi2, 1, 1 - ellint3_n1 * ellint_sin_phi2);
-        ellint_3_tmp += sqrt((ellint_c - 1) * (ellint_c - ellint_m) / ((ellint3_n - 1) * (1 - ellint3_n1))) *
-                        ellint_rc(ellint_c * (ellint3_n - 1) * (1 - ellint3_n1),
-                                  (ellint3_n - ellint_c) * (ellint_c - ellint3_n1));
+        // https://dlmf.nist.gov/19.20.E1
+        ellint_3_tmp += sqrt((1 - ellint_sin_phi2) * (1 - ellint_m * ellint_sin_phi2) / ((ellint3_n - 1) * (1 - ellint3_n1))) *
+                        ellint_rc(ellint_sin_phi2 * (ellint3_n - 1) * (1 - ellint3_n1),
+                                  (ellint3_n * ellint_sin_phi2 - 1) * (1 - ellint3_n1 * ellint_sin_phi2));
         if (ellint_phi >= half_pi<Real>()) {
             // Cauchy principal value: https://dlmf.nist.gov/19.25.E4
             ellint_3_tmp += two_thirds<Real>() * ellint3_n1 * ellint_rj(0, 1 - ellint_m, 1, 1 - ellint3_n1);
@@ -117,7 +118,6 @@ public:
         ellint_sin_phi2 = 1 - MY_SQUARE(ellint_cos_phi);
 
         ellint_sin_phi = sqrt(ellint_sin_phi2);
-        ellint_c = 1 / ellint_sin_phi2;
         ellint_phi = acos(ellint_cos_phi);
 
         R1(R1_alpha_p, alpha_p);
