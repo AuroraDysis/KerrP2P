@@ -55,7 +55,7 @@ void test_case(std::vector<std::array<std::string, 9>> &test_data, Sign nu_r, Si
                     theta_f_vec[i] = abs(forward->theta_f - boost::lexical_cast<Real>(item[7]));
                     phi_f_vec[i] = abs(forward->phi_f - boost::lexical_cast<Real>(item[8]));
 
-                    if (t_f_vec[i] > 10 * error_limit) {
+                    if (t_f_vec[i] > 10 * error_limit || theta_f_vec[i] > 10 * error_limit || phi_f_vec[i] > 10 * error_limit) {
                         possible_error_indices.push_back(i);
                     }
                 }
