@@ -40,11 +40,12 @@ private:
         using boost::math::constants::two_thirds;
 
 //        if (ellint3_n > ellint_c) {
+//            Real coeff = sqrt((ellint3_n - ellint_m) * (ellint3_n - 1) / ellint3_n);
 //            // Cauchy Principal Value
 //            ellint_3_tmp =
-//                    -ellint_3(ellint_k, ellint3_n1, ellint_phi) + ellint_1(ellint_k, ellint_phi)
-//                    + sqrt(ellint_c) * ellint_rc((ellint_c - 1) * (ellint_c - ellint_m),
-//                                                 (ellint_c - ellint3_n) * (ellint_c - ellint3_n1));
+//                    -ellint_3(ellint_k, ellint_m / ellint3_n, ellint_phi) + ellint_1(ellint_k, ellint_phi)
+//                    + 1 / (2 * coeff) * log((coeff * tan(ellint_phi) + sqrt(1 - ellint_m * ellint_sin_phi2)) / (-coeff * tan(ellint_phi) + sqrt(1 - ellint_m * ellint_sin_phi2)));
+//
 //        } else {
 //            ellint_3_tmp = ellint_3(ellint_k, ellint3_n, ellint_phi);
 //        }
