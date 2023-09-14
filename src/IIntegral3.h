@@ -37,13 +37,10 @@ private:
         using boost::math::constants::half_pi;
         using boost::math::constants::two_thirds;
 
-        // https://dlmf.nist.gov/19.25.E14
         // https://dlmf.nist.gov/19.25.E16
-        ellint_y = ellint_c - ellint_m;
-        CHECK_VAR(ellint_y, ellint_y >= 0);
         ellint_3_tmp =
                 -third<Real>() * ellint3_n1 *
-                ellint_rj(ellint_c - 1, ellint_y, ellint_c, ellint_c - ellint3_n1)
+                ellint_rj(ellint_c - 1, ellint_c - ellint_m, ellint_c, ellint_c - ellint3_n1)
                 + sqrt((ellint_c - 1) * (ellint_c - ellint_m) / ((ellint3_n - 1) * (1 - ellint3_n1))) *
                   ellint_rc(ellint_c * (ellint3_n - 1) * (1 - ellint3_n1),
                             (ellint3_n - ellint_c) * (ellint_c - ellint3_n1));
