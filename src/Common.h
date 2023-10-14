@@ -207,6 +207,10 @@ template<typename T>
 struct fmt::formatter<boost::multiprecision::number<T>> : fmt::ostream_formatter {
 };
 
+template<>
+struct fmt::formatter<Float128> : fmt::ostream_formatter {
+};
+
 // helper return higher precision type
 
 template<typename T>
