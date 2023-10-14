@@ -44,7 +44,7 @@ struct ForwardRayTracingParams {
     void rc_d_to_lambda_q() {
         Real r_up = 2 * cos(acos(a) * third<Real>());
         Real r_down = 2 * cos(acos(-a) * third<Real>());
-        r_down = MY_SQUARE(r_down);
+        r_up = MY_SQUARE(r_up);
         r_down = MY_SQUARE(r_down);
 
         if (rc < r_down || rc > r_up) {
