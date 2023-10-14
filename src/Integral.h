@@ -9,15 +9,15 @@ template<typename Real, typename Complex>
 class Integral {
 private:
     void print_error(const char *name, const Real &val) {
-        fmt::println(std::cerr,
-                     "[{}] a = {}, r_s = {}, theta_s {}, r_o = {}, lambda = {}, eta = {}, {} = {}, out of range",
-                     child_class_name,
-                     data.a,
-                     data.r_s,
-                     data.theta_s,
-                     data.r_o,
-                     data.lambda,
-                     data.eta, name, val);
+      fmt::println(std::cerr,
+                   "[{}] a = {}, r_s = {}, theta_s {}, r_o = {}, lambda = {}, eta = {}, {} = {}, '{}' out of range",
+                   child_class_name,
+                   data.a,
+                   data.r_s,
+                   data.theta_s,
+                   data.r_o,
+                   data.lambda,
+                   data.eta, name, val, name);
     }
 
 public:
