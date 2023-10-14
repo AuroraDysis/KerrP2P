@@ -8,6 +8,15 @@
 
 #define CHECK_STATUS if (ray_status != RayStatus::NORMAL) return;
 
+template <typename Real>
+std::pair<Real, Real> get_rc_range(const Real &a) {
+  Real r_up = 2 * cos(acos(a) * third<Real>());
+  Real r_down = 2 * cos(acos(-a) * third<Real>());
+  r_up = MY_SQUARE(r_up);
+  r_down = MY_SQUARE(r_down);
+  return {r_down, r_up};
+}
+
 template<typename Real>
 struct ForwardRayTracingParams {
     Real a;
@@ -42,10 +51,7 @@ struct ForwardRayTracingParams {
     }
 
     void rc_d_to_lambda_q() {
-        Real r_up = 2 * cos(acos(a) * third<Real>());
-        Real r_down = 2 * cos(acos(-a) * third<Real>());
-        r_up = MY_SQUARE(r_up);
-        r_down = MY_SQUARE(r_down);
+        auto [r_down, r_up] = get_rc_range(a);
 
         if (rc < r_down || rc > r_up) {
             fmt::println("rc out of range: rc = {}, r_down: {}, r_up: {}", rc, r_down, r_up);

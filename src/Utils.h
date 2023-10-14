@@ -249,7 +249,7 @@ struct ForwardRayTracingUtils {
         using Point = bg::model::point<int, 2, bg::cs::cartesian>;
         tbb::concurrent_vector<Point> theta_roots_index;
         tbb::concurrent_vector<Point> phi_roots_index;
-        oneapi::tbb::parallel_for(oneapi::tbb::blocked_range2d<size_t>(0u, lgd_size, 0u, rc_size),
+        oneapi::tbb::parallel_for(oneapi::tbb::blocked_range2d<size_t>(1u, lgd_size, 1u, rc_size),
                                   [&](const oneapi::tbb::blocked_range2d<size_t, size_t> &r) {
                                       int d_row, d_col, d_row_lambda, d_col_lambda;
                                       for (size_t i = r.rows().begin(); i != r.rows().end(); ++i) {
