@@ -22,10 +22,10 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 find_package(fmt CONFIG REQUIRED)
-find_package(Eigen3 REQUIRED)
+find_package(Eigen3 CONFIG REQUIRED)
 find_package(TBB CONFIG REQUIRED)
-find_package(Boost 1.82.0 COMPONENTS filesystem program_options REQUIRED)
-set(LIBRARIES Boost::boost Boost::filesystem fmt::fmt Eigen3::Eigen TBB::tbb TBB::tbbmalloc TBB::tbbmalloc_proxy)
+find_package(Boost 1.83.0 COMPONENTS filesystem program_options REQUIRED)
+set(LIBRARIES Boost::boost Boost::filesystem fmt::fmt Eigen3::Eigen TBB::tbb TBB::tbbmalloc)
 
 # add_definitions(-DPRINT_DEBUG)
 
