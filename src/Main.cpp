@@ -21,36 +21,36 @@ int main(int argc, char *argv[]) {
   auto theta_o = 17 * pi / 180;
   auto phi_o = pi / 4;
   params.r_o = 1000;
-  params.nu_r = Sign::NEGATIVE;
+  params.nu_r = Sign::POSITIVE;
   params.nu_theta = Sign::NEGATIVE;
 
-  auto [rc_down, rc_up] = get_rc_range(params.a);
-  rc_down += 1e-6;
-  rc_up -= 1e-6;
-
-
-  int cut_off = 50;
-  std::vector<Real> rc_list(1000);
-  std::vector<Real> lgd_list(2000);
-  // rc_list = np.linspace(rc_down, rc_up, 1000)
-  // lgd_list = np.linspace(-10, 2, 2000)
-  for (int i = 0; i < rc_list.size(); i++) {
-    rc_list[i] = rc_down + (rc_up - rc_down) * i / (rc_list.size() - 1);
-  }
-  for (int i = 0; i < lgd_list.size(); i++) {
-    lgd_list[i] = -10 + 12 * i / (lgd_list.size() - 1);
-  }
-  auto data = ForwardRayTracingUtils<Real, Complex>::sweep_rc_d(params, theta_o, phi_o, rc_list, lgd_list, cut_off);
-//  params.rc = 1.8117208808167675;
-//  params.log_abs_d = 0.34917458729364625;
-//  params.log_abs_d_sign = Sign::NEGATIVE;
-
-//  params.rc_d_to_lambda_q();
+//  auto [rc_down, rc_up] = get_rc_range(params.a);
+//  rc_down += 1e-6;
+//  rc_up -= 1e-6;
 //
-//  auto forward = ForwardRayTracing<Real, Complex>::get_from_cache();
-//  forward->calc_ray(params);
-//  fmt::println("ray status: {}", ray_status_to_str(forward->ray_status));
-//  fmt::println("theta_f: {}, phi_f: {}", forward->theta_f, forward->phi_f);
+//
+//  int cut_off = 50;
+//  std::vector<Real> rc_list(1000);
+//  std::vector<Real> lgd_list(2000);
+//  // rc_list = np.linspace(rc_down, rc_up, 1000)
+//  // lgd_list = np.linspace(-10, 2, 2000)
+//  for (int i = 0; i < rc_list.size(); i++) {
+//    rc_list[i] = rc_down + (rc_up - rc_down) * i / (rc_list.size() - 1);
+//  }
+//  for (int i = 0; i < lgd_list.size(); i++) {
+//    lgd_list[i] = -10 + 12 * i / (lgd_list.size() - 1);
+//  }
+//  auto data = ForwardRayTracingUtils<Real, Complex>::sweep_rc_d(params, theta_o, phi_o, rc_list, lgd_list, cut_off);
+  params.rc = 1.8117208808167675;
+  params.log_abs_d = 0.34917458729364625;
+  params.log_abs_d_sign = Sign::NEGATIVE;
+
+  params.rc_d_to_lambda_q();
+
+  auto forward = ForwardRayTracing<Real, Complex>::get_from_cache();
+  forward->calc_ray(params);
+  fmt::println("ray status: {}", ray_status_to_str(forward->ray_status));
+  fmt::println("theta_f: {}, phi_f: {}", forward->theta_f, forward->phi_f);
 }
 
 //int main(int argc, char *argv[]) {
