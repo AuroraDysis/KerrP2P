@@ -7,6 +7,8 @@
 #include "ForwardRayTracing.h"
 #include "Utils.h"
 
+#include <fmt/ranges.h>
+
 using std::string;
 
 int main(int argc, char *argv[]) {
@@ -17,15 +19,17 @@ int main(int argc, char *argv[]) {
   auto pi = boost::math::constants::pi<Real>();
   params.a = 0.8;
   params.r_s = 10;
-  params.theta_s = 90 * pi / 180;
+  params.theta_s = 89.999999999999999999999 * pi / 180;
   params.r_o = 1000;
   params.nu_r = Sign::NEGATIVE;
   params.nu_theta = Sign::NEGATIVE;
   params.log_abs_d_sign = Sign::POSITIVE;
 
   auto [rc_down, rc_up] = get_rc_range(params.a);
-  rc_down += 0.05;
-  rc_up -= 0.05;
+  rc_down -= 0.05;
+  rc_up += 0.05;
+
+  std::cout << "rc_down: " << rc_down << ", rc_up: " << rc_up << std::endl;
 
   int cut_off = 50;
   std::vector<Real> rc_list(100);
@@ -36,7 +40,16 @@ int main(int argc, char *argv[]) {
     rc_list[i] = rc_down + (rc_up - rc_down) * i / (rc_list.size() - 1);
   }
   for (int i = 0; i < lgd_list.size(); i++) {
-    lgd_list[i] = -10 + 12 * i / (lgd_list.size() - 1);
+      lgd_list[i] = -10.0 + (12.0 * i) / (lgd_list.size() - 1);
+  }
+
+  std::cout << "rc_list: " << std::endl;
+  for (auto rc : rc_list) {
+	std::cout << rc << ", ";
+  }
+  std::cout << "lgd_list: " << std::endl;
+  for (auto lgd : lgd_list) {
+      std::cout << lgd << ", ";
   }
 
   double theta_o = 17 * pi / 180;
