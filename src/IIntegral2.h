@@ -41,6 +41,7 @@ public:
         CHECK_VAR(ellint_sin_phi_ro2, ellint_sin_phi_ro2 >= 0 && ellint_sin_phi_ro2 <= 1);
 
         ellint_k = sqrt(((-r2 + r3) * (-r1 + r4)) / ((r1 - r3) * (r2 - r4)));
+        CHECK_VAR(ellint_k, ellint_k > 0 && ellint_k < 1);
 
         E2_coeff = sqrt((r1 - r3) * (r2 - r4));
         F2_coeff = 2 / E2_coeff;
