@@ -71,6 +71,12 @@ struct ForwardRayTracingParams {
         Real d = GET_SIGN(d_sign) * pow(static_cast<Real>(10), log_abs_d);
         lambda = lambda_c + d * ((3 - rc) / (a * (-1 + rc)) / coeff);
         q = qc + d * (sqrt(eta_c) / MY_SQUARE(rc) / coeff);
+
+        if (d_sign == Sign::NEGATIVE && q < 0) {
+            fmt::println("q out of range, which should be positive when d_sign is NEGATIVE: q = {}", q);
+            lambda = std::numeric_limits<Real>::quiet_NaN();
+            q = std::numeric_limits<Real>::quiet_NaN();
+        }
 #ifdef PRINT_DEBUG
         fmt::println("rc: {}, log_abs_d: {}", rc, log_abs_d);
         fmt::println("lambda_c: {}, eta_c: {}, qc: {}", lambda_c, eta_c, qc);
