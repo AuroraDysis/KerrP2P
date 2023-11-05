@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
   params.r_o = 1000;
   params.nu_r = Sign::NEGATIVE;
   params.nu_theta = Sign::NEGATIVE;
-  params.log_abs_d_sign = Sign::POSITIVE;
+  params.d_sign = Sign::POSITIVE;
 
   auto [rc_down, rc_up] = get_rc_range(params.a);
   rc_down -= 0.05;
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
   auto data = ForwardRayTracingUtils<Real, Complex>::sweep_rc_d(params, theta_o, phi_o, rc_list, lgd_list, cut_off);
 //  params.rc = 1.8117208808167675;
 //  params.log_abs_d = 0.34917458729364625;
-//  params.log_abs_d_sign = Sign::NEGATIVE;
+//  params.d_sign = Sign::NEGATIVE;
 //
 //  params.rc_d_to_lambda_q();
 //

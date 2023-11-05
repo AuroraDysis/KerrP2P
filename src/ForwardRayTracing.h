@@ -27,7 +27,7 @@ struct ForwardRayTracingParams {
     Sign nu_theta;
 
     Real rc, log_abs_d;
-    Sign log_abs_d_sign;
+    Sign d_sign;
 
     Real lambda, q;
 
@@ -44,7 +44,7 @@ struct ForwardRayTracingParams {
         nu_theta = params.nu_theta;
         rc = params.rc;
         log_abs_d = params.log_abs_d;
-        log_abs_d_sign = params.log_abs_d_sign;
+        d_sign = params.d_sign;
         lambda = params.lambda;
         q = params.q;
         calc_t_f = params.calc_t_f;
@@ -68,7 +68,7 @@ struct ForwardRayTracingParams {
         Real coeff = sqrt(
                 MY_SQUARE(-3 + rc) / (MY_SQUARE(a) * MY_SQUARE(-1 + rc)) + eta_c / pow(rc, 4));
 
-        Real d = GET_SIGN(log_abs_d_sign) * pow(static_cast<Real>(10), log_abs_d);
+        Real d = GET_SIGN(d_sign) * pow(static_cast<Real>(10), log_abs_d);
         lambda = lambda_c + d * ((3 - rc) / (a * (-1 + rc)) / coeff);
         q = qc + d * (sqrt(eta_c) / MY_SQUARE(rc) / coeff);
 #ifdef PRINT_DEBUG
@@ -89,7 +89,7 @@ struct ForwardRayTracingResult {
     Real n_half;
     Real eta, lambda, q;
     Real rc, log_abs_d;
-    Sign log_abs_d_sign;
+    Sign d_sign;
     RayStatus ray_status;
 };
 

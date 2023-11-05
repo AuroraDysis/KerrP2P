@@ -174,7 +174,7 @@ struct ForwardRayTracingUtils {
         auto &root = (*result.root);
         root.rc = x[0];
         root.log_abs_d = x[1];
-        root.log_abs_d_sign = local_params.log_abs_d_sign;
+        root.d_sign = local_params.d_sign;
 
         return result;
     }

@@ -39,7 +39,7 @@ void define_params(pybind11::module_ &mod, const char *name) {
             .def_readwrite("nu_theta", &Params::nu_theta)
             .def_readwrite("rc", &Params::rc)
             .def_readwrite("log_abs_d", &Params::log_abs_d)
-            .def_readwrite("log_abs_d_sign", &Params::log_abs_d_sign)
+            .def_readwrite("d_sign", &Params::d_sign)
             .def_readwrite("lam", &Params::lambda)
             .def_readwrite("q", &Params::q)
             .def_readwrite("calc_t_f", &Params::calc_t_f)
@@ -73,7 +73,7 @@ void define_forward_ray_tracing_result(pybind11::module_ &mod, const char *name)
             .def_readonly("lam", &ResultType::lambda) // lambda
             .def_readonly("rc", &ResultType::rc)
             .def_readonly("log_abs_d", &ResultType::log_abs_d)
-            .def_readonly("log_abs_d_sign", &ResultType::log_abs_d_sign)
+            .def_readonly("d_sign", &ResultType::d_sign)
             .def_readonly("ray_status", &ResultType::ray_status);
 }
 

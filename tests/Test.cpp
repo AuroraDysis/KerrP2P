@@ -132,7 +132,7 @@ TEMPLATE_TEST_CASE("Forward Function", "[forward]", TEST_TYPES) {
 //
 //    Real rc = boost::lexical_cast<Real>(data.get<string>("rc"));
 //    Real d = boost::lexical_cast<Real>(data.get<string>("d"));
-//    params.log_abs_d_sign = d > 0 ? Sign::POSITIVE : Sign::NEGATIVE;
+//    params.d_sign = d > 0 ? Sign::POSITIVE : Sign::NEGATIVE;
 //    Real log_abs_d = log10(abs(d));
 //    params.calc_t_f = false;
 //
