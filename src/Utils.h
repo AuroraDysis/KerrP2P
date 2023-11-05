@@ -162,9 +162,9 @@ struct ForwardRayTracingUtils {
             return result;
         }
 
-        if (residual.norm() > ErrorLimit<Real>::Value * 1000) {
+        if (residual.norm() > ErrorLimit<Real>::Value * 10000) {
             result.success = false;
-            result.fail_reason = fmt::format("residual: {}", residual.norm());
+            result.fail_reason = fmt::format("residual > threshold: {} > {}", residual.norm(), ErrorLimit<Real>::Value * 10000);
             return result;
         }
 
@@ -344,7 +344,7 @@ struct ForwardRayTracingUtils {
                                       std::lock_guard<std::mutex> lock(results_mutex);
                                       results.push_back(std::move(root));
                                   } else {
-                                      fmt::println("find root failed, reason: {}\n", root_res.fail_reason);
+                                      fmt::println("find root failed, rc = {}, log_abs_d = {}, reason: {}\n", rc_list[col], lgd_list[row], root_res.fail_reason);
                                   }
                               }
                           });
@@ -352,8 +352,8 @@ struct ForwardRayTracingUtils {
         std::vector<size_t> duplicated_index;
         for (size_t i = 0; i < results.size(); i++) {
             for (size_t j = i + 1; j < results.size(); j++) {
-                if (abs(results[i].rc - results[j].rc) < 10000 * ErrorLimit<Real>::Value &&
-                    abs(results[i].log_abs_d - results[j].log_abs_d) < 10000 * ErrorLimit<Real>::Value) {
+                if (abs(results[i].rc - results[j].rc) < 100000 * ErrorLimit<Real>::Value &&
+                    abs(results[i].log_abs_d - results[j].log_abs_d) < 100000 * ErrorLimit<Real>::Value) {
                     duplicated_index.push_back(j);
                     break;
                 }
