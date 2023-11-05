@@ -12,49 +12,57 @@
 using std::string;
 
 int main(int argc, char *argv[]) {
-  using Real = double;
-  using Complex = std::complex<Real>;
-  ForwardRayTracingParams<Real> params;
+    using Real = double;
+    using Complex = std::complex<Real>;
+    ForwardRayTracingParams<Real> params;
 
-  auto pi = boost::math::constants::pi<Real>();
-  params.a = 0.8;
-  params.r_s = 10;
-  params.theta_s = 89.999999999999999999999 * pi / 180;
-  params.r_o = 1000;
-  params.nu_r = Sign::NEGATIVE;
-  params.nu_theta = Sign::NEGATIVE;
-  params.d_sign = Sign::POSITIVE;
+    auto pi = boost::math::constants::pi<Real>();
+    params.a = 0.8;
+    params.r_s = 10;
+    params.theta_s = 89.999999999999999999999 * pi / 180;
+    params.r_o = 1000;
+    params.nu_r = Sign::NEGATIVE;
+    params.nu_theta = Sign::POSITIVE;
+    params.d_sign = Sign::POSITIVE;
 
-  auto [rc_down, rc_up] = get_rc_range(params.a);
-  rc_down -= 0.05;
-  rc_up += 0.05;
+    auto [rc_down, rc_up] = get_rc_range(params.a);
+    rc_down -= 0.05;
+    rc_up += 0.05;
 
-  std::cout << "rc_down: " << rc_down << ", rc_up: " << rc_up << std::endl;
+    std::cout << "rc_down: " << rc_down << ", rc_up: " << rc_up << std::endl;
 
-  int cut_off = 50;
-  std::vector<Real> rc_list(100);
-  std::vector<Real> lgd_list(200);
-  // rc_list = np.linspace(rc_down, rc_up, 1000)
-  // lgd_list = np.linspace(-10, 2, 200)
-  for (int i = 0; i < rc_list.size(); i++) {
-    rc_list[i] = rc_down + (rc_up - rc_down) * i / (rc_list.size() - 1);
-  }
-  for (int i = 0; i < lgd_list.size(); i++) {
-      lgd_list[i] = -10.0 + (12.0 * i) / (lgd_list.size() - 1);
-  }
+    int cut_off = 50;
+    std::vector<Real> rc_list(1000);
+    std::vector<Real> lgd_list(2000);
+    // rc_list = np.linspace(rc_down, rc_up, 1000)
+    // lgd_list = np.linspace(-12, -8, 200)
+    for (int i = 0; i < rc_list.size(); i++) {
+        rc_list[i] = rc_down + (rc_up - rc_down) * i / (rc_list.size() - 1.);
+    }
+    for (int i = 0; i < lgd_list.size(); i++) {
+        lgd_list[i] = -12 + 4 * i / (lgd_list.size() - 1.);
+    }
 
-  std::cout << "rc_list: " << std::endl;
-  for (auto rc : rc_list) {
-	std::cout << rc << ", ";
-  }
-  std::cout << "lgd_list: " << std::endl;
-  for (auto lgd : lgd_list) {
-      std::cout << lgd << ", ";
-  }
+    std::cout << "rc_list: " << std::endl;
+    for (auto rc: rc_list) {
+        std::cout << rc << ", ";
+    }
+    std::cout << "lgd_list: " << std::endl;
+    for (auto lgd: lgd_list) {
+        std::cout << lgd << ", ";
+    }
 
-  double theta_o = 17 * pi / 180;
-  double phi_o = - pi / 2;
-  auto data = ForwardRayTracingUtils<Real, Complex>::sweep_rc_d(params, theta_o, phi_o, rc_list, lgd_list, cut_off);
+    double theta_o = 17 * pi / 180;
+    double phi_o = pi / 4;
+    auto data = ForwardRayTracingUtils<Real, Complex>::sweep_rc_d(params, theta_o, phi_o, rc_list, lgd_list, cut_off);
+
+    // print data.results
+    std::cout << "data.results: " << data.results.size() << std::endl;
+    for (auto &item: data.results) {
+        std::cout << item.rc << ", " << item.log_abs_d << std::endl;
+    }
+
+
 //  params.rc = 1.8117208808167675;
 //  params.log_abs_d = 0.34917458729364625;
 //  params.d_sign = Sign::NEGATIVE;
