@@ -36,8 +36,6 @@ private:
 
         // Cauchy principal value: https://dlmf.nist.gov/19.25.E16
 
-        // check if always Cauchy principal value
-        CHECK_VAR(alpha2, alpha2 * ellint_sin_phi2 > 1);
         // https://dlmf.nist.gov/19.20.E6
         ellint_3_tmp = -third<Real>() * ellint3_n1 * ellint_sin_phi2 * ellint_sin_phi *
             ellint_rj(1 - ellint_sin_phi2, 1 - ellint_m * ellint_sin_phi2, 1, 1 - ellint3_n1 * ellint_sin_phi2);
