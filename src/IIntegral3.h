@@ -28,11 +28,6 @@ private:
         ellint3_n = alpha2 / (alpha2 - 1);
         ellint3_n1 = ellint_m / ellint3_n;
 
-#ifdef PRINT_DEBUG
-        fmt::println("R1 - ellint_phi: {}, ellint_m: {}, ellint3_n: {}", ellint_phi, ellint_m, ellint3_n);
-        fmt::println("R1 - ellint3_n1: {}, alpha2: {}", ellint3_n1, alpha2);
-#endif
-
         using boost::math::ellint_rc;
         using boost::math::ellint_rj;
 
@@ -41,13 +36,15 @@ private:
 
         // Cauchy principal value: https://dlmf.nist.gov/19.25.E16
 
+        // check if always Cauchy principal value
+        CHECK_VAR(alpha2, alpha2 * ellint_sin_phi2 > 1);
         // https://dlmf.nist.gov/19.20.E6
         ellint_3_tmp = -third<Real>() * ellint3_n1 * ellint_sin_phi2 * ellint_sin_phi *
-                       ellint_rj(1 - ellint_sin_phi2, 1 - ellint_m * ellint_sin_phi2, 1, 1 - ellint3_n1 * ellint_sin_phi2);
+            ellint_rj(1 - ellint_sin_phi2, 1 - ellint_m * ellint_sin_phi2, 1, 1 - ellint3_n1 * ellint_sin_phi2);
         // https://dlmf.nist.gov/19.20.E1
         ellint_3_tmp += sqrt((1 - ellint_sin_phi2) * (1 - ellint_m * ellint_sin_phi2) / ((ellint3_n - 1) * (1 - ellint3_n1))) *
-                        ellint_rc(ellint_sin_phi2 * (ellint3_n - 1) * (1 - ellint3_n1),
-                                  (ellint3_n * ellint_sin_phi2 - 1) * (1 - ellint3_n1 * ellint_sin_phi2));
+            ellint_rc(ellint_sin_phi2 * (ellint3_n - 1) * (1 - ellint3_n1),
+                (ellint3_n * ellint_sin_phi2 - 1) * (1 - ellint3_n1 * ellint_sin_phi2));
         if (ellint_phi >= half_pi<Real>()) {
             // Cauchy principal value: https://dlmf.nist.gov/19.25.E4
             ellint_3_tmp += two_thirds<Real>() * ellint3_n1 * ellint_rj(0, 1 - ellint_m, 1, 1 - ellint3_n1);
@@ -58,8 +55,7 @@ private:
         f1 = half<Real>() * p1 * log(abs((ellint_sin_phi + p1 * sqrt(1 - ellint_m * ellint_sin_phi2)) /
                                          (-ellint_sin_phi + p1 * sqrt(1 - ellint_m * ellint_sin_phi2))));
 #ifdef PRINT_DEBUG
-        fmt::println("R1 - k: {}, n: {}, phi: {}", ellint_k, ellint3_n, ellint_phi);
-        fmt::println("R1 - ellint_3: {}, f1: {}", ellint_3_tmp, f1);
+        fmt::println("R1 - alpha: {}, ellint_phi: {}, ellint_m: {}, ellint3_n: {}, ellint3_n1: {}, alpha2: {}, f1: {}, ellint_sin_phi2: {}, ellint_3_tmp: {}", alpha, ellint_phi, ellint_m, ellint3_n, ellint3_n1, alpha2, f1, ellint_sin_phi2, ellint_3_tmp);
 #endif
         // sign is different from Mathematica
         res = (ellint_3_tmp + alpha * f1) / (alpha2 - 1);
