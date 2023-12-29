@@ -48,6 +48,7 @@ private:
         if (ellint_phi >= half_pi<Real>()) {
             // Cauchy principal value: https://dlmf.nist.gov/19.25.E4
             ellint_3_tmp += two_thirds<Real>() * ellint3_n1 * ellint_rj(0, 1 - ellint_m, 1, 1 - ellint3_n1);
+            ellint_3_tmp = -ellint_3_tmp;
         }
 
         // p_1 > 0 (B65)
@@ -57,8 +58,8 @@ private:
 #ifdef PRINT_DEBUG
         fmt::println("R1 - alpha: {}, ellint_phi: {}, ellint_m: {}, ellint3_n: {}, ellint3_n1: {}, alpha2: {}, f1: {}, ellint_sin_phi2: {}, ellint_3_tmp: {}", alpha, ellint_phi, ellint_m, ellint3_n, ellint3_n1, alpha2, f1, ellint_sin_phi2, ellint_3_tmp);
 #endif
-        // sign is different from Mathematica
-        res = (ellint_3_tmp + alpha * f1) / (alpha2 - 1);
+
+        res = (-ellint_3_tmp + alpha * f1) / (alpha2 - 1);
     }
 
 public:
