@@ -36,10 +36,10 @@ private:
 
         // Cauchy principal value: https://dlmf.nist.gov/19.25.E16
 
-        // https://dlmf.nist.gov/19.20.E6
+        // Symmetric Integrals: https://dlmf.nist.gov/19.20.E6
         ellint_3_tmp = -third<Real>() * ellint3_n1 * ellint_sin_phi2 * ellint_sin_phi *
             ellint_rj(1 - ellint_sin_phi2, 1 - ellint_m * ellint_sin_phi2, 1, 1 - ellint3_n1 * ellint_sin_phi2);
-        // https://dlmf.nist.gov/19.20.E1
+        // Symmetric Integrals: https://dlmf.nist.gov/19.20.E1
         ellint_3_tmp += sqrt((1 - ellint_sin_phi2) * (1 - ellint_m * ellint_sin_phi2) / ((ellint3_n - 1) * (1 - ellint3_n1))) *
             ellint_rc(ellint_sin_phi2 * (ellint3_n - 1) * (1 - ellint3_n1),
                 (ellint3_n * ellint_sin_phi2 - 1) * (1 - ellint3_n1 * ellint_sin_phi2));
