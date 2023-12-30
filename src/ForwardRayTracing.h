@@ -115,38 +115,38 @@ struct ForwardRayTracingResult {
     Real rc, log_abs_d;
     Sign d_sign;
     RayStatus ray_status;
-
-    template <typename LReal, typename LComplex>
-    ForwardRayTracingResult <LReal, LComplex> get_low_prec() {
-        ForwardRayTracingResult<LReal, LComplex> result;
-        result.a = a.convert_to<LReal>();
-        result.rp = rp.convert_to<LReal>();
-        result.rm = rm.convert_to<LReal>();
-        result.r_s = r_s.convert_to<LReal>();
-        result.theta_s = theta_s.convert_to<LReal>();
-        result.r_o = r_o.convert_to<LReal>();
-        result.r1 = r1.convert_to<LReal>();
-        result.r2 = r2.convert_to<LReal>();
-        result.r3 = r3.convert_to<LReal>();
-        result.r4 = r4.convert_to<LReal>();
-        result.r1_c = r1_c.convert_to<LComplex>();
-        result.r2_c = r2_c.convert_to<LComplex>();
-        result.r3_c = r3_c.convert_to<LComplex>();
-        result.r4_c = r4_c.convert_to<LComplex>();
-        result.t_f = t_f.convert_to<LReal>();
-        result.theta_f = theta_f.convert_to<LReal>();
-        result.phi_f = phi_f.convert_to<LReal>();
-        result.m = m;
-        result.n_half = n_half.convert_to<LReal>();
-        result.eta = eta.convert_to<LReal>();
-        result.lambda = lambda.convert_to<LReal>();
-        result.q = q.convert_to<LReal>();
-        result.rc = rc.convert_to<LReal>();
-        result.log_abs_d = log_abs_d.convert_to<LReal>();
-        result.d_sign = d_sign;
-        result.ray_status = ray_status;
-    }
 };
+
+template <typename LReal, typename LComplex, typename Real, typename Complex>
+ForwardRayTracingResult <LReal, LComplex> get_low_prec(const ForwardRayTracingResult <Real, Complex> &x) {
+    ForwardRayTracingResult<LReal, LComplex> result;
+    result.a = x.a.template convert_to<LReal>();
+    result.rp = x.rp.template convert_to<LReal>();
+    result.rm = x.rm.template convert_to<LReal>();
+    result.r_s = x.r_s.template convert_to<LReal>();
+    result.theta_s = x.theta_s.template convert_to<LReal>();
+    result.r_o = x.r_o.template convert_to<LReal>();
+    result.r1 = x.r1.template convert_to<LReal>();
+    result.r2 = x.r2.template convert_to<LReal>();
+    result.r3 = x.r3.template convert_to<LReal>();
+    result.r4 = x.r4.template convert_to<LReal>();
+    result.r1_c = x.r1_c.template convert_to<LComplex>();
+    result.r2_c = x.r2_c.template convert_to<LComplex>();
+    result.r3_c = x.r3_c.template convert_to<LComplex>();
+    result.r4_c = x.r4_c.template convert_to<LComplex>();
+    result.t_f = x.t_f.template convert_to<LReal>();
+    result.theta_f = x.theta_f.template convert_to<LReal>();
+    result.phi_f = x.phi_f.template convert_to<LReal>();
+    result.m = x.m;
+    result.n_half = x.n_half.template convert_to<LReal>();
+    result.eta = x.eta.template convert_to<LReal>();
+    result.lambda = x.lambda.template convert_to<LReal>();
+    result.q = x.q.template convert_to<LReal>();
+    result.rc = x.rc.template convert_to<LReal>();
+    result.log_abs_d = x.log_abs_d.template convert_to<LReal>();
+    result.d_sign = x.d_sign;
+    result.ray_status = x.ray_status;
+}
 
 template<typename Real, typename Complex>
 class ForwardRayTracing {
