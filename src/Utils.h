@@ -111,6 +111,15 @@ int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
+// move phi to [0, 2pi)
+template <typename T>
+void wrap_phi(T& phi) {
+    const T& two_pi = boost::math::constants::two_pi<T>();
+    if (phi < 0 || phi >= two_pi) {
+        phi -= two_pi * MY_FLOOR<T>::convert(phi / two_pi);
+    }
+}
+
 template<typename Real, typename Complex>
 struct ForwardRayTracingUtils {
     static ForwardRayTracingResult<Real, Complex> calc_ray(const ForwardRayTracingParams<Real> &params) {
@@ -135,6 +144,7 @@ struct ForwardRayTracingUtils {
 
     static FindRootResult<Real, Complex>
     find_root_period(const ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o, Real tol) {
+        wrap_phi(phi_o);
         ForwardRayTracingParams<Real> local_params(params);
 
         Eigen::Vector<Real, 2> x = Eigen::Vector<Real, 2>::Zero(2);
@@ -181,6 +191,7 @@ struct ForwardRayTracingUtils {
 
     static FindRootResult<Real, Complex>
     find_root(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, Real tol) {
+        wrap_phi(phi_o);
         return find_root_period(params, std::numeric_limits<int>::max(), theta_o, phi_o, tol);
     }
 
@@ -190,6 +201,7 @@ struct ForwardRayTracingUtils {
     static SweepResult<Real, Complex>
     sweep_rc_d(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, const std::vector<Real> &rc_list,
                const std::vector<Real> &lgd_list, size_t cutoff, Real tol) {
+        wrap_phi(phi_o);
         size_t rc_size = rc_list.size();
         size_t lgd_size = lgd_list.size();
 
