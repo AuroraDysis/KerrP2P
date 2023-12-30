@@ -229,6 +229,16 @@ struct HigherPrecision<std::complex<double>> {
 };
 
 template<>
+struct HigherPrecision<long double> {
+    using Type = Float128;
+};
+
+template<>
+struct HigherPrecision<std::complex<long double>> {
+    using Type = Complex128;
+};
+
+template<>
 struct HigherPrecision<Float128> {
     using Type = Float256;
 };
