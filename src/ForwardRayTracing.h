@@ -146,6 +146,7 @@ ForwardRayTracingResult <LReal, LComplex> get_low_prec(const ForwardRayTracingRe
     result.log_abs_d = x.log_abs_d.template convert_to<LReal>();
     result.d_sign = x.d_sign;
     result.ray_status = x.ray_status;
+    return result;
 }
 
 template<typename Real, typename Complex>

@@ -49,7 +49,7 @@ SweepResult<LReal, LComplex> get_low_prec(const SweepResult<Real, Complex> &x) {
     result.theta_roots_closest = x.theta_roots_closest.template cast<LReal>();
     result.results.reserve(x.results.size());
     for (auto &res: x.results) {
-        result.results.push_back(res.template get_low_prec<LReal, LComplex>());
+        result.results.push_back(get_low_prec<LReal, LComplex, Real, Complex>(res));
     }
     return result;
 }
@@ -221,7 +221,7 @@ struct ForwardRayTracingUtils {
         sweep_rc_d_high(const ForwardRayTracingParams<Real>& params, Real theta_o, Real phi_o, const std::vector<Real>& rc_list,
             const std::vector<Real>& lgd_list, size_t cutoff, Real tol) {
         using HReal = typename HigherPrecision<Real>::Type;
-        using HComplex = typename HigherPrecision<HReal>::Type;
+        using HComplex = typename HigherPrecision<Complex>::Type;
 
         ForwardRayTracingParams<HReal> params_h = params.template get_high_prec<HReal>();
         HReal theta_o_h = theta_o;
