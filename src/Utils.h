@@ -134,7 +134,7 @@ struct ForwardRayTracingUtils {
     }
 
     static FindRootResult<Real, Complex>
-    find_root_period(const ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o) {
+    find_root_period(const ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o, Real tol) {
         ForwardRayTracingParams<Real> local_params(params);
 
         Eigen::Vector<Real, 2> x = Eigen::Vector<Real, 2>::Zero(2);
@@ -162,9 +162,9 @@ struct ForwardRayTracingUtils {
             return result;
         }
 
-        if (residual.norm() > ErrorLimit<Real>::Value * 10000) {
+        if (residual.norm() > tol) {
             result.success = false;
-            result.fail_reason = fmt::format("residual > threshold: {} > {}", residual.norm(), ErrorLimit<Real>::Value * 10000);
+            result.fail_reason = fmt::format("residual > threshold: {} > {}", residual.norm(), tol);
             return result;
         }
 
@@ -180,8 +180,8 @@ struct ForwardRayTracingUtils {
     }
 
     static FindRootResult<Real, Complex>
-    find_root(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o) {
-        return find_root_period(params, std::numeric_limits<int>::max(), theta_o, phi_o);
+    find_root(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, Real tol) {
+        return find_root_period(params, std::numeric_limits<int>::max(), theta_o, phi_o, tol);
     }
 
     static ForwardRayTracingResult<Real, Complex> refine_result(ForwardRayTracingResult<Real, Complex> &res) {
@@ -189,7 +189,7 @@ struct ForwardRayTracingUtils {
 
     static SweepResult<Real, Complex>
     sweep_rc_d(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, const std::vector<Real> &rc_list,
-               const std::vector<Real> &lgd_list, size_t cutoff) {
+               const std::vector<Real> &lgd_list, size_t cutoff, Real tol) {
         size_t rc_size = rc_list.size();
         size_t lgd_size = lgd_list.size();
 
@@ -338,7 +338,7 @@ struct ForwardRayTracingUtils {
                                   local_params.log_abs_d = lgd_list[row];
                                   local_params.rc_d_to_lambda_q();
                                   int period = MY_FLOOR<Real>::convert(phi(row, col) / two_pi);
-                                  auto root_res = find_root_period(local_params, period, theta_o, phi_o);
+                                  auto root_res = find_root_period(local_params, period, theta_o, phi_o, tol);
                                   if (root_res.success) {
                                       auto root = *std::move(root_res.root);
                                       std::lock_guard<std::mutex> lock(results_mutex);
@@ -352,8 +352,8 @@ struct ForwardRayTracingUtils {
         std::vector<size_t> duplicated_index;
         for (size_t i = 0; i < results.size(); i++) {
             for (size_t j = i + 1; j < results.size(); j++) {
-                if (abs(results[i].rc - results[j].rc) < 100000 * ErrorLimit<Real>::Value &&
-                    abs(results[i].log_abs_d - results[j].log_abs_d) < 100000 * ErrorLimit<Real>::Value) {
+                if (abs(results[i].rc - results[j].rc) < tol &&
+                    abs(results[i].log_abs_d - results[j].log_abs_d) < tol) {
                     duplicated_index.push_back(j);
                     break;
                 }
