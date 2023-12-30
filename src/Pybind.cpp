@@ -99,7 +99,9 @@ void define_methods(pybind11::module_ &mod, const std::string &suffix) {
     mod.def(("clean_cache" + suffix).c_str(), ForwardRayTracing<Real, Complex>::clear_cache);
     if constexpr (std::is_same_v<Real, double> || std::is_same_v<Real, long double>) {
         mod.def(("sweep_rc_d" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::sweep_rc_d,
-                py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
+            py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
+        mod.def(("sweep_rc_d_high" + suffix).c_str(), &ForwardRayTracingUtils<Real, Complex>::sweep_rc_d_high,
+            py::call_guard<py::gil_scoped_release>(), py::return_value_policy::move);
     }
 }
 

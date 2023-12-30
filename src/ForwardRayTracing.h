@@ -50,6 +50,24 @@ struct ForwardRayTracingParams {
         calc_t_f = params.calc_t_f;
     }
 
+    template <typename TH>
+    ForwardRayTracingParams<TH> get_high_prec() const {
+        ForwardRayTracingParams<TH> params;
+		params.a = a;
+		params.r_s = r_s;
+		params.theta_s = theta_s;
+		params.r_o = r_o;
+		params.nu_r = nu_r;
+		params.nu_theta = nu_theta;
+		params.rc = rc;
+		params.log_abs_d = log_abs_d;
+		params.d_sign = d_sign;
+		params.lambda = lambda;
+		params.q = q;
+		params.calc_t_f = calc_t_f;
+		return params;
+    }
+
     void rc_d_to_lambda_q() {
         auto [r_down, r_up] = get_rc_range(a);
 
@@ -97,6 +115,37 @@ struct ForwardRayTracingResult {
     Real rc, log_abs_d;
     Sign d_sign;
     RayStatus ray_status;
+
+    template <typename LReal, typename LComplex>
+    ForwardRayTracingResult <LReal, LComplex> get_low_prec() {
+        ForwardRayTracingResult<LReal, LComplex> result;
+        result.a = a.convert_to<LReal>();
+        result.rp = rp.convert_to<LReal>();
+        result.rm = rm.convert_to<LReal>();
+        result.r_s = r_s.convert_to<LReal>();
+        result.theta_s = theta_s.convert_to<LReal>();
+        result.r_o = r_o.convert_to<LReal>();
+        result.r1 = r1.convert_to<LReal>();
+        result.r2 = r2.convert_to<LReal>();
+        result.r3 = r3.convert_to<LReal>();
+        result.r4 = r4.convert_to<LReal>();
+        result.r1_c = r1_c.convert_to<LComplex>();
+        result.r2_c = r2_c.convert_to<LComplex>();
+        result.r3_c = r3_c.convert_to<LComplex>();
+        result.r4_c = r4_c.convert_to<LComplex>();
+        result.t_f = t_f.convert_to<LReal>();
+        result.theta_f = theta_f.convert_to<LReal>();
+        result.phi_f = phi_f.convert_to<LReal>();
+        result.m = m;
+        result.n_half = n_half.convert_to<LReal>();
+        result.eta = eta.convert_to<LReal>();
+        result.lambda = lambda.convert_to<LReal>();
+        result.q = q.convert_to<LReal>();
+        result.rc = rc.convert_to<LReal>();
+        result.log_abs_d = log_abs_d.convert_to<LReal>();
+        result.d_sign = d_sign;
+        result.ray_status = ray_status;
+    }
 };
 
 template<typename Real, typename Complex>

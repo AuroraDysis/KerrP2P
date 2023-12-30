@@ -33,6 +33,25 @@ struct SweepResult {
     PointVector theta_roots_closest;
 
     std::vector<ForwardRayTracingResult<Real, Complex>> results;
+
+    template <typename LReal, typename LComplex>
+    SweepResult<LReal, LComplex> get_low_prec() {
+		SweepResult<LReal, LComplex> result;
+		result.theta = theta.template cast<LReal>();
+		result.phi = phi.template cast<LReal>();
+		result.lambda = lambda.template cast<LReal>();
+		result.eta = eta.template cast<LReal>();
+		result.delta_theta = delta_theta.template cast<LReal>();
+		result.delta_phi = delta_phi.template cast<LReal>();
+		result.theta_roots = theta_roots.template cast<LReal>();
+		result.phi_roots = phi_roots.template cast<LReal>();
+		result.theta_roots_closest = theta_roots_closest.template cast<LReal>();
+		result.results.reserve(results.size());
+		for (auto& res : results) {
+			result.results.push_back(res.template get_low_prec<LReal, LComplex>());
+		}
+		return result;
+	}
 };
 
 template<typename Real, typename Complex>
@@ -196,6 +215,29 @@ struct ForwardRayTracingUtils {
     }
 
     static ForwardRayTracingResult<Real, Complex> refine_result(ForwardRayTracingResult<Real, Complex> &res) {
+    }
+
+    static SweepResult<Real, Complex>
+        sweep_rc_d_high(const ForwardRayTracingParams<Real>& params, Real theta_o, Real phi_o, const std::vector<Real>& rc_list,
+            const std::vector<Real>& lgd_list, size_t cutoff, Real tol) {
+        using HReal = HigherPrecision<Real>::Type;
+        using HComplex = HigherPrecision<HReal>::Type;
+
+        ForwardRayTracingParams<HReal> params_h = params.template get_high_prec<HReal>();
+        HReal theta_o_h = theta_o;
+        HReal phi_o_h = phi_o;
+        std::vector<HReal> rc_list_h(rc_list.size());
+        for (size_t i = 0; i < rc_list.size(); i++) {
+            rc_list_h[i] = rc_list[i];
+        }
+        std::vector<HReal> lgd_list_h(lgd_list.size());
+        for (size_t i = 0; i < lgd_list.size(); i++) {
+            lgd_list_h[i] = lgd_list[i];
+        }
+        HReal tol_h = tol;
+
+        auto result = ForwardRayTracingUtils<HReal, HComplex>::sweep_rc_d(params_h, theta_o_h, phi_o_h, rc_list_h, lgd_list_h, cutoff, tol_h);
+        return result.template get_low_prec<Real, Complex>();
     }
 
     static SweepResult<Real, Complex>
