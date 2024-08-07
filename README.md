@@ -9,6 +9,7 @@
 
 - Forward ray tracing in Kerr spacetime
 - Support for arbitrary precision arithmetic
+- Python bindings for easy to use interface
 - Support for multiple platforms: Linux, macOS, and Windows
 
 ## Installation
