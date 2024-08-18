@@ -1,13 +1,15 @@
 # KerrP2P
 
-`KerrP2P` is a software package designed for forward ray tracing in Kerr spacetime. It is specifically tailored to calculate null geodesics between designated "source" and "observer" points. The software provides precise solutions to the geodesic equations using Jacobi elliptic functions, based on the methodology outlined in the paper 'The Null Geodesics of the Kerr Exterior' ([arXiv:1910.12881](https://arxiv.org/abs/1910.12881)).
+`KerrP2P` is a software package designed for forward ray tracing in Kerr spacetime. It is specifically tailored to calculate **multiple** null geodesics between designated "source" and "observer" points as detailed in the paper `"Forward Ray Tracing and Hot Spots in Kerr Spacetime" by Lihang Zhou, Zhen Zhong, Yifan Chen, and Vitor Cardoso` (The preprint will be available soon on arXiv).
+
+The software provides precise solutions to the geodesic equations using Jacobi elliptic functions, based on the methodology outlined in the paper 'The Null Geodesics of the Kerr Exterior' ([arXiv:1910.12881](https://arxiv.org/abs/1910.12881)).
 
 [![Paper](https://img.shields.io/badge/Paper-arXiv-blue)](https://arxiv.org/abs/your_paper_link)
 [![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
 
 # Features
 
-- Forward ray tracing in Kerr spacetime: this involves calculating the trajectory of light (null geodesics) from a given source to an observer
+- Forward ray tracing in Kerr spacetime: this involves calculating **multiple** null geodesics from a given source to an observer
 - Support for arbitrary precision arithmetic
 - Python bindings for easy to use interface
 - Support for multiple platforms: Linux, macOS, and Windows
