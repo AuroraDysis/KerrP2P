@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(forward_ray_tracing)
+project(KerrP2P)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -49,8 +49,14 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 
 set(SOURCE_FILES src/Common.h src/ForwardRayTracing.h src/GIntegral.h src/IIntegral2.h src/IIntegral3.h src/ObjectPool.h src/Utils.h src/Integral.h src/Broyden.h)
 
-add_executable(forward_ray_tracing src/Main.cpp ${SOURCE_FILES})
-target_link_libraries(forward_ray_tracing PRIVATE Boost::program_options ${LIBRARIES})
+add_executable(KerrP2P src/Main.cpp ${SOURCE_FILES})
+target_link_libraries(KerrP2P PRIVATE Boost::program_options ${LIBRARIES})
+
+# build examples
+if (BUILD_EXAMPLES)
+    add_executable(cpp_tutorial_basic examples/cpp_tutorial_basic.cpp ${SOURCE_FILES})
+    target_link_libraries(cpp_tutorial_basic PRIVATE ${LIBRARIES})
+endif()
 
 if (ENABLE_TESTING)
 find_package(Catch2 3 REQUIRED)
@@ -73,8 +79,8 @@ endif()
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
 find_package(pybind11 CONFIG REQUIRED)
 
-pybind11_add_module(py_forward_ray_tracing src/Pybind.cpp ${SOURCE_FILES})
-target_link_libraries(py_forward_ray_tracing PUBLIC ${LIBRARIES})
+pybind11_add_module(kerrp2p src/Pybind.cpp ${SOURCE_FILES})
+target_link_libraries(kerrp2p PUBLIC ${LIBRARIES})
 
 # if (WIN32)
 # file(GLOB OUTPUT_FILES ${CMAKE_CURRENT_BINARY_DIR}/*.exe ${CMAKE_CURRENT_BINARY_DIR}/*.dll  ${CMAKE_CURRENT_BINARY_DIR}/*.pyd)

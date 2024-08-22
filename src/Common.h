@@ -13,6 +13,8 @@
 #include <boost/math/special_functions/ellint_3.hpp>
 #include <boost/math/special_functions/jacobi_elliptic.hpp>
 
+#include <boost/numeric/conversion/converter.hpp>
+
 using boost::math::ellint_1;
 using boost::math::ellint_2;
 using boost::math::ellint_3;
