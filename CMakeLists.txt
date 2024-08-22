@@ -2,10 +2,13 @@ cmake_minimum_required(VERSION 3.17)
 project(KerrP2P)
 
 set(CMAKE_CXX_STANDARD 17)
+# remove FindBoost module from cmake
+cmake_policy(SET CMP0167 NEW)
 
 option(ENABLE_TESTING "Enable Test Builds" ON)
 option(FLOAT128_NATIVE "Enable float128 native support quadmath" ON)
 option(ENABLE_MPFR "Enable mpfr support" OFF)
+option(ENABLE_EXAMPLES "Enable Examples" ON)
 
 if (WIN32)
     SET(FLOAT128_NATIVE OFF)
@@ -53,7 +56,7 @@ add_executable(KerrP2P src/Main.cpp ${SOURCE_FILES})
 target_link_libraries(KerrP2P PRIVATE Boost::program_options ${LIBRARIES})
 
 # build examples
-if (BUILD_EXAMPLES)
+if (ENABLE_EXAMPLES)
     add_executable(cpp_tutorial_basic examples/cpp_tutorial_basic.cpp ${SOURCE_FILES})
     target_link_libraries(cpp_tutorial_basic PRIVATE ${LIBRARIES})
 endif()
