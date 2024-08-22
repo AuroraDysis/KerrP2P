@@ -85,8 +85,8 @@ endif()
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
 find_package(pybind11 CONFIG REQUIRED)
 
-pybind11_add_module(kerrp2p src/Pybind.cpp ${SOURCE_FILES})
-target_link_libraries(kerrp2p PUBLIC ${LIBRARIES})
+pybind11_add_module(pykerrp2p src/Pybind.cpp ${SOURCE_FILES})
+target_link_libraries(pykerrp2p PUBLIC ${LIBRARIES})
 
 # if (WIN32)
 # file(GLOB OUTPUT_FILES ${CMAKE_CURRENT_BINARY_DIR}/*.exe ${CMAKE_CURRENT_BINARY_DIR}/*.dll  ${CMAKE_CURRENT_BINARY_DIR}/*.pyd)
