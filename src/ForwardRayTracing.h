@@ -74,16 +74,17 @@ struct ForwardRayTracingParams
         return params;
     }
 
-    void rc_d_to_lambda_q()
+    bool rc_d_to_lambda_q(bool print_error = true)
     {
         auto [r_down, r_up] = get_rc_range(a);
 
         if (rc < r_down || rc > r_up)
         {
-            fmt::println("rc out of range: rc = {}, r_down: {}, r_up: {}", rc, r_down, r_up);
+            if (print_error)
+                fmt::println("rc out of range: rc = {}, r_down: {}, r_up: {}", rc, r_down, r_up);
             lambda = std::numeric_limits<Real>::quiet_NaN();
             q = std::numeric_limits<Real>::quiet_NaN();
-            return;
+            return false;
         }
 
         Real lambda_c = a + (rc * (2 * MY_SQUARE(a) + (-3 + rc) * rc)) / (a * (1 - rc));
@@ -100,15 +101,18 @@ struct ForwardRayTracingParams
 
         if (d_sign == Sign::NEGATIVE && q < 0)
         {
-            fmt::println("q out of range, which should be positive when d_sign is NEGATIVE: q = {}", q);
+            if (print_error)
+                fmt::println("q out of range, which should be positive when d_sign is NEGATIVE: q = {}", q);
             lambda = std::numeric_limits<Real>::quiet_NaN();
             q = std::numeric_limits<Real>::quiet_NaN();
+            return false;
         }
 #ifdef PRINT_DEBUG
         fmt::println("rc: {}, log_abs_d: {}", rc, log_abs_d);
         fmt::println("lambda_c: {}, eta_c: {}, qc: {}", lambda_c, eta_c, qc);
         fmt::println("coeff: {}", coeff);
 #endif
+        return true;
     }
 };
 
