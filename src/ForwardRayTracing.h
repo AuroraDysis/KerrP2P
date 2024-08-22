@@ -36,6 +36,7 @@ struct ForwardRayTracingParams
     Real lambda, q;
 
     bool calc_t_f = false;
+    bool print_params_error = true;
 
     ForwardRayTracingParams() = default;
 
@@ -53,6 +54,7 @@ struct ForwardRayTracingParams
         lambda = params.lambda;
         q = params.q;
         calc_t_f = params.calc_t_f;
+        print_params_error = params.print_params_error;
     }
 
     template <typename TH>
@@ -74,13 +76,13 @@ struct ForwardRayTracingParams
         return params;
     }
 
-    bool rc_d_to_lambda_q(bool print_error = true)
+    bool rc_d_to_lambda_q()
     {
         auto [r_down, r_up] = get_rc_range(a);
 
         if (rc < r_down || rc > r_up)
         {
-            if (print_error)
+            if (print_params_error)
                 fmt::println("rc out of range: rc = {}, r_down: {}, r_up: {}", rc, r_down, r_up);
             lambda = std::numeric_limits<Real>::quiet_NaN();
             q = std::numeric_limits<Real>::quiet_NaN();
@@ -101,7 +103,7 @@ struct ForwardRayTracingParams
 
         if (d_sign == Sign::NEGATIVE && q < 0)
         {
-            if (print_error)
+            if (print_params_error)
                 fmt::println("q out of range, which should be positive when d_sign is NEGATIVE: q = {}", q);
             lambda = std::numeric_limits<Real>::quiet_NaN();
             q = std::numeric_limits<Real>::quiet_NaN();
