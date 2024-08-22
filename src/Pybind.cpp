@@ -162,7 +162,7 @@ void define_numerical_type(pybind11::module_ &mod, const char *name, bool is_com
     }
 }
 
-PYBIND11_MODULE(py_forward_ray_tracing, mod) {
+PYBIND11_MODULE(pykerrp2p, mod) {
     py::enum_<RayStatus>(mod, "RayStatus")
             .value("NORMAL", RayStatus::NORMAL)
             .value("FALLS_IN", RayStatus::FALLS_IN)
