@@ -1,10 +1,3 @@
-#include <iostream>
-#include <string>
-
-
-#include <boost/filesystem.hpp>
-#include <boost/program_options.hpp>
-
 #include "ForwardRayTracing.h"
 #include "Utils.h"
 
@@ -17,7 +10,7 @@ int main(int argc, char *argv[]) {
   using Complex = Complex256;
   ForwardRayTracingParams<Real> params;
 
-  auto pi = boost::math::constants::pi<Real>();
+  const auto &pi = boost::math::constants::pi<Real>();
   params.a = boost::lexical_cast<Real>("0.8");
   params.r_s = boost::lexical_cast<Real>("1.7");
   params.theta_s = boost::lexical_cast<Real>("89.9") * pi / 180;

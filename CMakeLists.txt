@@ -59,6 +59,9 @@ target_link_libraries(KerrP2P PRIVATE Boost::program_options ${LIBRARIES})
 if (ENABLE_EXAMPLES)
     add_executable(cpp_tutorial_basic examples/cpp_tutorial_basic.cpp ${SOURCE_FILES})
     target_link_libraries(cpp_tutorial_basic PRIVATE ${LIBRARIES})
+
+    add_executable(cpp_tutorial_sweep examples/cpp_tutorial_sweep.cpp ${SOURCE_FILES})
+    target_link_libraries(cpp_tutorial_sweep PRIVATE ${LIBRARIES})
 endif()
 
 if (ENABLE_TESTING)
