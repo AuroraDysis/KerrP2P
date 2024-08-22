@@ -43,7 +43,7 @@ void define_params(pybind11::module_ &mod, const char *name) {
             .def_readwrite("lam", &Params::lambda)
             .def_readwrite("q", &Params::q)
             .def_readwrite("calc_t_f", &Params::calc_t_f)
-            .def_readwrite("print_params_error", &Params::print_params_error)
+            .def_readwrite("print_args_error", &Params::print_args_error)
             .def("rc_d_to_lambda_q", &Params::rc_d_to_lambda_q);
 }
 

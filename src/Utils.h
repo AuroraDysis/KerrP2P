@@ -13,8 +13,9 @@
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
-template<typename Real, typename Complex>
-struct SweepResult {
+template <typename Real, typename Complex>
+struct SweepResult
+{
     using PointVector = Eigen::Matrix<Real, Eigen::Dynamic, 2>;
     using Matrix = Eigen::Matrix<Real, Eigen::Dynamic, Eigen::Dynamic>;
 
@@ -36,7 +37,8 @@ struct SweepResult {
 };
 
 template <typename LReal, typename LComplex, typename Real, typename Complex>
-SweepResult<LReal, LComplex> get_low_prec(const SweepResult<Real, Complex> &x) {
+SweepResult<LReal, LComplex> get_low_prec(const SweepResult<Real, Complex> &x)
+{
     SweepResult<LReal, LComplex> result;
     result.theta = x.theta.template cast<LReal>();
     result.phi = x.phi.template cast<LReal>();
@@ -48,21 +50,24 @@ SweepResult<LReal, LComplex> get_low_prec(const SweepResult<Real, Complex> &x) {
     result.phi_roots = x.phi_roots.template cast<LReal>();
     result.theta_roots_closest = x.theta_roots_closest.template cast<LReal>();
     result.results.reserve(x.results.size());
-    for (auto &res: x.results) {
+    for (auto &res : x.results)
+    {
         result.results.push_back(get_low_prec<LReal, LComplex, Real, Complex>(res));
     }
     return result;
 }
 
-template<typename Real, typename Complex>
-struct FindRootResult {
+template <typename Real, typename Complex>
+struct FindRootResult
+{
     bool success;
     std::string fail_reason;
     std::optional<ForwardRayTracingResult<Real, Complex>> root;
 };
 
-template<typename Real, typename Complex>
-class RootFunctor {
+template <typename Real, typename Complex>
+class RootFunctor
+{
 private:
     using Vector = Eigen::Vector<Real, 2>;
 
@@ -77,26 +82,29 @@ public:
     std::shared_ptr<ForwardRayTracing<Real, Complex>> ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
 
     RootFunctor(ForwardRayTracingParams<Real> &params_, Real theta_o_, Real phi_o_)
-            : params(params_),
-              period(std::numeric_limits<int>::max()),
-              fixed_period(false),
-              theta_o(std::move(
-                      theta_o_)),
-              phi_o(std::move(phi_o_)) {
+        : params(params_),
+          period(std::numeric_limits<int>::max()),
+          fixed_period(false),
+          theta_o(std::move(
+              theta_o_)),
+          phi_o(std::move(phi_o_))
+    {
         ray_tracing->calc_t_f = false;
     }
 
     RootFunctor(ForwardRayTracingParams<Real> &params_, int period_, Real theta_o_, Real phi_o_)
-            : params(params_),
-              period(period_),
-              fixed_period(true),
-              theta_o(std::move(
-                      theta_o_)),
-              phi_o(std::move(phi_o_)) {
+        : params(params_),
+          period(period_),
+          fixed_period(true),
+          theta_o(std::move(
+              theta_o_)),
+          phi_o(std::move(phi_o_))
+    {
         ray_tracing->calc_t_f = false;
     }
 
-    Vector operator()(const Vector &x) {
+    Vector operator()(const Vector &x)
+    {
         auto &rc = x[0];
         auto &log_abs_d = x[1];
         params.rc = rc;
@@ -104,16 +112,23 @@ public:
         params.rc_d_to_lambda_q();
         ray_tracing->calc_ray(params);
 
-        if (ray_tracing->ray_status != RayStatus::NORMAL) {
-            fmt::println("ray status: {}", ray_status_to_str(ray_tracing->ray_status));
+        if (ray_tracing->ray_status != RayStatus::NORMAL)
+        {
+            if (params.print_args_error || ray_tracing->ray_status != RayStatus::ARGUMENT_ERROR)
+            {
+                fmt::println("ray status: {}", ray_status_to_str(ray_tracing->ray_status));
+            }
             return Vector::Constant(std::numeric_limits<Real>::quiet_NaN());
         }
 
         Vector residual;
         residual[0] = ray_tracing->theta_f - theta_o;
-        if (fixed_period) {
+        if (fixed_period)
+        {
             residual[1] = ray_tracing->phi_f - phi_o - period * two_pi;
-        } else {
+        }
+        else
+        {
             residual[1] = sin((ray_tracing->phi_f - phi_o) * half<Real>());
         }
 
@@ -125,34 +140,42 @@ public:
     }
 };
 
-template<typename T>
-int sgn(T val) {
+template <typename T>
+int sgn(T val)
+{
     return (T(0) < val) - (val < T(0));
 }
 
 // move phi to [0, 2pi)
 template <typename T>
-void wrap_phi(T& phi) {
-    const T& two_pi = boost::math::constants::two_pi<T>();
-    if (phi < 0 || phi >= two_pi) {
+void wrap_phi(T &phi)
+{
+    const T &two_pi = boost::math::constants::two_pi<T>();
+    if (phi < 0 || phi >= two_pi)
+    {
         phi -= two_pi * MY_FLOOR<T>::convert(phi / two_pi);
     }
 }
 
-template<typename Real, typename Complex>
-struct ForwardRayTracingUtils {
-    static ForwardRayTracingResult<Real, Complex> calc_ray(const ForwardRayTracingParams<Real> &params) {
+template <typename Real, typename Complex>
+struct ForwardRayTracingUtils
+{
+    static ForwardRayTracingResult<Real, Complex> calc_ray(const ForwardRayTracingParams<Real> &params)
+    {
         auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
         ray_tracing->calc_ray(params);
         return ray_tracing->to_result();
     }
 
     static std::vector<ForwardRayTracingResult<Real, Complex>>
-    calc_ray_batch(const std::vector<ForwardRayTracingParams<Real>> &params_list) {
+    calc_ray_batch(const std::vector<ForwardRayTracingParams<Real>> &params_list)
+    {
         std::vector<ForwardRayTracingResult<Real, Complex>> results(params_list.size());
         oneapi::tbb::parallel_for(oneapi::tbb::blocked_range<size_t>(0u, params_list.size()),
-                                  [&](const oneapi::tbb::blocked_range<size_t> &r) {
-                                      for (size_t i = r.begin(); i != r.end(); ++i) {
+                                  [&](const oneapi::tbb::blocked_range<size_t> &r)
+                                  {
+                                      for (size_t i = r.begin(); i != r.end(); ++i)
+                                      {
                                           auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
                                           ray_tracing->calc_ray(params_list[i]);
                                           results[i] = ray_tracing->to_result();
@@ -162,7 +185,8 @@ struct ForwardRayTracingUtils {
     }
 
     static FindRootResult<Real, Complex>
-    find_root_period(const ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o, Real tol) {
+    find_root_period(const ForwardRayTracingParams<Real> &params, int period, Real theta_o, Real phi_o, Real tol)
+    {
         wrap_phi(phi_o);
         ForwardRayTracingParams<Real> local_params(params);
 
@@ -170,10 +194,10 @@ struct ForwardRayTracingUtils {
         x << local_params.rc, local_params.log_abs_d;
 
         auto root_functor =
-                period == std::numeric_limits<int>::max() ? RootFunctor<Real, Complex>(local_params, theta_o, phi_o)
-                                                          : RootFunctor<Real, Complex>(local_params, period,
-                                                                                       std::move(theta_o),
-                                                                                       std::move(phi_o));
+            period == std::numeric_limits<int>::max() ? RootFunctor<Real, Complex>(local_params, theta_o, phi_o)
+                                                      : RootFunctor<Real, Complex>(local_params, period,
+                                                                                   std::move(theta_o),
+                                                                                   std::move(phi_o));
 
         BroydenDF<Real, 2, RootFunctor<Real, Complex>> solver;
         AlgoParams<Real, 2> settings;
@@ -185,13 +209,15 @@ struct ForwardRayTracingUtils {
         auto residual = root_functor(x);
         FindRootResult<Real, Complex> result;
 
-        if (root_functor.ray_tracing->ray_status != RayStatus::NORMAL) {
+        if (root_functor.ray_tracing->ray_status != RayStatus::NORMAL)
+        {
             result.success = false;
             result.fail_reason = fmt::format("ray status: {}", ray_status_to_str(root_functor.ray_tracing->ray_status));
             return result;
         }
 
-        if (residual.norm() > tol) {
+        if (residual.norm() > tol)
+        {
             result.success = false;
             result.fail_reason = fmt::format("residual > threshold: {} > {}", residual.norm(), tol);
             return result;
@@ -209,17 +235,20 @@ struct ForwardRayTracingUtils {
     }
 
     static FindRootResult<Real, Complex>
-    find_root(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, Real tol) {
+    find_root(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, Real tol)
+    {
         wrap_phi(phi_o);
         return find_root_period(params, std::numeric_limits<int>::max(), theta_o, phi_o, tol);
     }
 
-    static ForwardRayTracingResult<Real, Complex> refine_result(ForwardRayTracingResult<Real, Complex> &res) {
+    static ForwardRayTracingResult<Real, Complex> refine_result(ForwardRayTracingResult<Real, Complex> &res)
+    {
     }
 
     static SweepResult<Real, Complex>
-        sweep_rc_d_high(const ForwardRayTracingParams<Real>& params, Real theta_o, Real phi_o, const std::vector<Real>& rc_list,
-            const std::vector<Real>& lgd_list, size_t cutoff, Real tol) {
+    sweep_rc_d_high(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, const std::vector<Real> &rc_list,
+                    const std::vector<Real> &lgd_list, size_t cutoff, Real tol)
+    {
         using HReal = typename HigherPrecision<Real>::Type;
         using HComplex = typename HigherPrecision<Complex>::Type;
 
@@ -227,11 +256,13 @@ struct ForwardRayTracingUtils {
         HReal theta_o_h = theta_o;
         HReal phi_o_h = phi_o;
         std::vector<HReal> rc_list_h(rc_list.size());
-        for (size_t i = 0; i < rc_list.size(); i++) {
+        for (size_t i = 0; i < rc_list.size(); i++)
+        {
             rc_list_h[i] = rc_list[i];
         }
         std::vector<HReal> lgd_list_h(lgd_list.size());
-        for (size_t i = 0; i < lgd_list.size(); i++) {
+        for (size_t i = 0; i < lgd_list.size(); i++)
+        {
             lgd_list_h[i] = lgd_list[i];
         }
         HReal tol_h = tol;
@@ -243,7 +274,8 @@ struct ForwardRayTracingUtils {
 
     static SweepResult<Real, Complex>
     sweep_rc_d(const ForwardRayTracingParams<Real> &params, Real theta_o, Real phi_o, const std::vector<Real> &rc_list,
-               const std::vector<Real> &lgd_list, size_t cutoff, Real tol) {
+               const std::vector<Real> &lgd_list, size_t cutoff, Real tol)
+    {
         wrap_phi(phi_o);
         size_t rc_size = rc_list.size();
         size_t lgd_size = lgd_list.size();
@@ -270,24 +302,30 @@ struct ForwardRayTracingUtils {
 
         // rc and d
         oneapi::tbb::parallel_for(oneapi::tbb::blocked_range2d<size_t>(0u, lgd_size, 0u, rc_size),
-                                  [&](const oneapi::tbb::blocked_range2d<size_t, size_t> &r) {
+                                  [&](const oneapi::tbb::blocked_range2d<size_t, size_t> &r)
+                                  {
                                       auto ray_tracing = ForwardRayTracing<Real, Complex>::get_from_cache();
                                       Real two_pi = boost::math::constants::two_pi<Real>();
                                       ForwardRayTracingParams<Real> local_params(params);
-                                      for (size_t i = r.rows().begin(); i != r.rows().end(); ++i) {
-                                          for (size_t j = r.cols().begin(); j != r.cols().end(); ++j) {
+                                      for (size_t i = r.rows().begin(); i != r.rows().end(); ++i)
+                                      {
+                                          for (size_t j = r.cols().begin(); j != r.cols().end(); ++j)
+                                          {
                                               local_params.rc = rc_list[j];
                                               local_params.log_abs_d = lgd_list[i];
                                               local_params.rc_d_to_lambda_q();
                                               ray_tracing->calc_ray(local_params);
-                                              if (ray_tracing->ray_status == RayStatus::NORMAL) {
+                                              if (ray_tracing->ray_status == RayStatus::NORMAL)
+                                              {
                                                   theta(i, j) = ray_tracing->theta_f;
                                                   phi(i, j) = ray_tracing->phi_f;
                                                   delta_theta(i, j) = theta(i, j) - theta_o;
                                                   delta_phi(i, j) = sin((phi(i, j) - phi_o) * half<Real>());
                                                   lambda(i, j) = ray_tracing->lambda;
                                                   eta(i, j) = ray_tracing->eta;
-                                              } else {
+                                              }
+                                              else
+                                              {
                                                   theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
                                                   phi(i, j) = std::numeric_limits<Real>::quiet_NaN();
                                                   delta_theta(i, j) = std::numeric_limits<Real>::quiet_NaN();
@@ -305,15 +343,19 @@ struct ForwardRayTracingUtils {
         tbb::concurrent_vector<Point> theta_roots_index;
         tbb::concurrent_vector<Point> phi_roots_index;
         oneapi::tbb::parallel_for(oneapi::tbb::blocked_range2d<size_t>(1u, lgd_size, 1u, rc_size),
-                                  [&](const oneapi::tbb::blocked_range2d<size_t, size_t> &r) {
+                                  [&](const oneapi::tbb::blocked_range2d<size_t, size_t> &r)
+                                  {
                                       int d_row, d_col, d_row_lambda, d_col_lambda;
-                                      for (size_t i = r.rows().begin(); i != r.rows().end(); ++i) {
-                                          for (size_t j = r.cols().begin(); j != r.cols().end(); ++j) {
+                                      for (size_t i = r.rows().begin(); i != r.rows().end(); ++i)
+                                      {
+                                          for (size_t j = r.cols().begin(); j != r.cols().end(); ++j)
+                                          {
                                               d_row = sgn(delta_theta(i, j)) * sgn(delta_theta(i, j - 1));
                                               d_col = sgn(delta_theta(i, j)) * sgn(delta_theta(i - 1, j));
                                               if (!isnan(delta_theta(i, j)) && !isnan(delta_theta(i, j - 1)) &&
                                                   !isnan(delta_theta(i - 1, j)) &&
-                                                  (d_row <= 0 || d_col <= 0)) {
+                                                  (d_row <= 0 || d_col <= 0))
+                                              {
                                                   theta_roots_index.emplace_back(i, j);
                                               }
                                               d_row = sgn(delta_phi(i, j)) * sgn(delta_phi(i, j - 1));
@@ -325,31 +367,36 @@ struct ForwardRayTracingUtils {
                                                   !isnan(lambda(i, j)) && !isnan(lambda(i, j - 1)) &&
                                                   !isnan(lambda(i - 1, j)) && d_row_lambda > 0 &&
                                                   d_col_lambda > 0 &&
-                                                  (d_row <= 0 || d_col <= 0)) {
+                                                  (d_row <= 0 || d_col <= 0))
+                                              {
                                                   phi_roots_index.emplace_back(i, j);
                                               }
                                           }
                                       }
                                   });
 
-        if (theta_roots_index.empty() && phi_roots_index.empty()) {
+        if (theta_roots_index.empty() && phi_roots_index.empty())
+        {
             return sweep_result;
         }
 
         auto &theta_roots = sweep_result.theta_roots;
         theta_roots.resize(theta_roots_index.size(), 2);
-        for (size_t i = 0; i < theta_roots_index.size(); i++) {
+        for (size_t i = 0; i < theta_roots_index.size(); i++)
+        {
             theta_roots(i, 0) = rc_list[theta_roots_index[i].template get<1>()];
             theta_roots(i, 1) = lgd_list[theta_roots_index[i].template get<0>()];
         }
 
-        if (phi_roots_index.empty()) {
+        if (phi_roots_index.empty())
+        {
             return sweep_result;
         }
 
         auto &phi_roots = sweep_result.phi_roots;
         phi_roots.resize(phi_roots_index.size(), 2);
-        for (size_t i = 0; i < phi_roots_index.size(); i++) {
+        for (size_t i = 0; i < phi_roots_index.size(); i++)
+        {
             phi_roots(i, 0) = rc_list[phi_roots_index[i].template get<1>()];
             phi_roots(i, 1) = lgd_list[phi_roots_index[i].template get<0>()];
         }
@@ -358,7 +405,8 @@ struct ForwardRayTracingUtils {
         theta_roots_closest_index.reserve(theta_roots_index.size());
         std::vector<double> distances(theta_roots_index.size());
         bgi::rtree<Point, bgi::quadratic<16>> rtree(phi_roots_index);
-        for (size_t i = 0; i < theta_roots_index.size(); i++) {
+        for (size_t i = 0; i < theta_roots_index.size(); i++)
+        {
             Point p = theta_roots_index[i];
             rtree.query(bgi::nearest(p, 1), std::back_inserter(theta_roots_closest_index));
             distances[i] = bg::distance(p, theta_roots_closest_index.back());
@@ -368,11 +416,13 @@ struct ForwardRayTracingUtils {
         std::vector<size_t> indices(theta_roots_index.size());
         std::iota(indices.begin(), indices.end(), 0);
         std::sort(indices.begin(), indices.end(),
-                  [&distances](size_t i1, size_t i2) { return distances[i1] < distances[i2]; });
+                  [&distances](size_t i1, size_t i2)
+                  { return distances[i1] < distances[i2]; });
 
         auto &theta_roots_closest = sweep_result.theta_roots_closest;
         theta_roots_closest.resize(theta_roots_index.size(), 2);
-        for (size_t i = 0; i < theta_roots_index.size(); i++) {
+        for (size_t i = 0; i < theta_roots_index.size(); i++)
+        {
             theta_roots_closest(i, 0) = rc_list[theta_roots_closest_index[indices[i]].template get<1>()];
             theta_roots_closest(i, 1) = lgd_list[theta_roots_closest_index[indices[i]].template get<0>()];
         }
@@ -383,10 +433,12 @@ struct ForwardRayTracingUtils {
         results.reserve(cutoff);
         std::mutex results_mutex;
         tbb::parallel_for(tbb::blocked_range<size_t>(0u, cutoff),
-                          [&](const tbb::blocked_range<size_t> &r) {
+                          [&](const tbb::blocked_range<size_t> &r)
+                          {
                               ForwardRayTracingParams<Real> local_params(params);
                               Real two_pi = boost::math::constants::two_pi<Real>();
-                              for (size_t i = r.begin(); i != r.end(); ++i) {
+                              for (size_t i = r.begin(); i != r.end(); ++i)
+                              {
                                   size_t row = theta_roots_closest_index[indices[i]].template get<0>();
                                   size_t col = theta_roots_closest_index[indices[i]].template get<1>();
                                   local_params.rc = rc_list[col];
@@ -394,21 +446,27 @@ struct ForwardRayTracingUtils {
                                   local_params.rc_d_to_lambda_q();
                                   int period = MY_FLOOR<Real>::convert(phi(row, col) / two_pi);
                                   auto root_res = find_root_period(local_params, period, theta_o, phi_o, tol);
-                                  if (root_res.success) {
+                                  if (root_res.success)
+                                  {
                                       auto root = *std::move(root_res.root);
                                       std::lock_guard<std::mutex> lock(results_mutex);
                                       results.push_back(std::move(root));
-                                  } else {
+                                  }
+                                  else
+                                  {
                                       fmt::println("find root failed, rc = {}, log_abs_d = {}, reason: {}\n", rc_list[col], lgd_list[row], root_res.fail_reason);
                                   }
                               }
                           });
 
         std::vector<size_t> duplicated_index;
-        for (size_t i = 0; i < results.size(); i++) {
-            for (size_t j = i + 1; j < results.size(); j++) {
+        for (size_t i = 0; i < results.size(); i++)
+        {
+            for (size_t j = i + 1; j < results.size(); j++)
+            {
                 if (abs(results[i].rc - results[j].rc) < tol &&
-                    abs(results[i].log_abs_d - results[j].log_abs_d) < tol) {
+                    abs(results[i].log_abs_d - results[j].log_abs_d) < tol)
+                {
                     duplicated_index.push_back(j);
                     break;
                 }
@@ -416,7 +474,8 @@ struct ForwardRayTracingUtils {
         }
         // remove duplicated results
         std::sort(duplicated_index.begin(), duplicated_index.end());
-        for (size_t i = duplicated_index.size(); i > 0; i--) {
+        for (size_t i = duplicated_index.size(); i > 0; i--)
+        {
             results.erase(results.begin() + duplicated_index[i - 1]);
         }
 
