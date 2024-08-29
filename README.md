@@ -20,7 +20,7 @@ The software provides precise solutions to the geodesic equations using Jacobi e
 
 Before installing `KerrP2P`, ensure that you have the following dependencies installed on your system:
 
-- Boost (with filesystem and program_options components)
+- Boost (with filesystem components)
 - Catch2 (optional, for testing)
 - fmt
 - GMP (optional)
