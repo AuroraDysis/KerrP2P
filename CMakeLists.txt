@@ -52,8 +52,8 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 
 set(SOURCE_FILES src/Common.h src/ForwardRayTracing.h src/GIntegral.h src/IIntegral2.h src/IIntegral3.h src/ObjectPool.h src/Utils.h src/Integral.h src/Broyden.h)
 
-add_executable(KerrP2P src/Main.cpp ${SOURCE_FILES})
-target_link_libraries(KerrP2P PRIVATE Boost::program_options ${LIBRARIES})
+#add_executable(KerrP2P src/Main.cpp ${SOURCE_FILES})
+#target_link_libraries(KerrP2P PRIVATE Boost::program_options ${LIBRARIES})
 
 # build examples
 if (ENABLE_EXAMPLES)
