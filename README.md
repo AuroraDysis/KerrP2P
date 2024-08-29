@@ -2,14 +2,14 @@
 
 `KerrP2P` is a software package designed for forward ray tracing in Kerr spacetime. It is specifically tailored to efficiently calculate **multiple** null geodesics between designated "source" and "observer" points, locate apparent positions of the corresponding images, and quantify their shapes. Detailed information can be found in the paper [_Forward Ray Tracing and Hot Spots in Kerr Spacetime_](https://arxiv.org) by Lihang Zhou, Zhen Zhong, Yifan Chen, and Vitor Cardoso.
 
-Using Jacobi elliptic functions to express the solutions to the geodesic equations, based on the methodology outlined in the paper [_The Null Geodesics of the Kerr Exterior_](https://arxiv.org/abs/1910.12881), this software consists of two tools. The first is a Python/C++ package that computes null geodesics and thoroughly explores the parameter space to identify multiple images. The second is a Mathematica code, which also includes functions for geodesic calculation and can be utilized to visualize geodesics, image positions, and image shapes.
+Using Jacobi elliptic functions to express the solutions to the geodesic equations based on [Gralla and Lupsasca 2019](https://arxiv.org/abs/1910.12881), this software consists of two tools. The first is a Python/C++ package that computes null geodesics and thoroughly explores the parameter space to identify multiple images. The second is a Mathematica code, which also includes functions for geodesic calculation and can be utilized to visualize geodesics, image positions, and image shapes.
 
 [![Paper](https://img.shields.io/badge/Paper-arXiv-blue)](https://arxiv.org/abs/your_paper_link)
 [![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
 
 # Features
 
-- Forward ray tracing in Kerr spacetime: this involves calculating **multiple** null geodesics from a given source to an observer
+- Forward ray tracing in Kerr spacetime: this involves calculating **multiple** null geodesics that connects a given source to an observer
 - Support for arbitrary precision arithmetic
 - Python bindings for easy to use interface
 - Support for multiple platforms: Linux, macOS, and Windows
