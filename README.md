@@ -101,9 +101,6 @@ Contributions to `KerrP2P` are welcome! If you find any issues or have suggestio
 
 If you use `KerrP2P` in your research, please cite the following paper:
 
-// > [!CAUTION]
-// > The preprint will be available soon on arXiv.
-
 ```bibtex
  @article{zhou2024forward,
       title={Forward Ray Tracing and Hot Spots in Kerr Spacetime}, 
