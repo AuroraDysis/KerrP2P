@@ -1,10 +1,10 @@
 # KerrP2P (Kerr Point-to-Point)
 
-`KerrP2P` is a software designed for forward ray tracing in Kerr spacetime. It is specifically tailored to efficiently calculate **multiple** null geodesics between designated "source" and "observer" points, locate apparent positions of the corresponding images, and quantify their shapes. Detailed information can be found in the paper [_Forward Ray Tracing and Hot Spots in Kerr Spacetime_](https://arxiv.org) by Lihang Zhou, Zhen Zhong, Yifan Chen, and Vitor Cardoso.
+`KerrP2P` is a software designed for forward ray tracing in Kerr spacetime. It is specifically tailored to efficiently calculate **multiple** null geodesics between designated "source" and "observer" points, locate apparent positions of the corresponding images, and quantify their shapes. Detailed information can be found in the paper [_Forward Ray Tracing and Hot Spots in Kerr Spacetime_](https://arxiv.org/abs/2408.16049) by Lihang Zhou, Zhen Zhong, Yifan Chen, and Vitor Cardoso.
 
 Using Jacobi elliptic functions to express the solutions to the geodesic equations based on [Gralla and Lupsasca 2019](https://arxiv.org/abs/1910.12881), this software consists of two tools. The first is a Python/C++ package that computes null geodesics and thoroughly explores the parameter space to identify multiple images. The second is a Mathematica code, which also includes functions for geodesic calculation and can be utilized to visualize geodesics, image positions, and image shapes.
 
-[![Paper](https://img.shields.io/badge/Paper-arXiv-blue)](https://arxiv.org/abs/your_paper_link)
+[![Paper](https://img.shields.io/badge/Paper-arXiv-blue)](https://arxiv.org/abs/2408.16049)
 [![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
 
 # Features
@@ -101,13 +101,17 @@ Contributions to `KerrP2P` are welcome! If you find any issues or have suggestio
 
 If you use `KerrP2P` in your research, please cite the following paper:
 
-> [!CAUTION]
-> The preprint will be available soon on arXiv.
+// > [!CAUTION]
+// > The preprint will be available soon on arXiv.
 
 ```bibtex
-@article{KerrP2P,
-  title = "{Forward Ray Tracing and Hot Spots in Kerr Spacetime}",
-  author = "Lihang Zhou, Zhen Zhong, Yifan Chen and Vitor Cardoso",
-  year = "2024",
+ @article{zhou2024forward,
+      title={Forward Ray Tracing and Hot Spots in Kerr Spacetime}, 
+      author={Lihang Zhou and Zhen Zhong and Yifan Chen and Vitor Cardoso},
+      year={2024},
+      eprint={2408.16049},
+      archivePrefix={arXiv},
+      primaryClass={gr-qc},
+      url={https://arxiv.org/abs/2408.16049}, 
 }
 ```
