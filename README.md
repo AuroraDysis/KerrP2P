@@ -38,7 +38,7 @@ On Linux, you can use [Spack](https://spack.io/) to install the dependencies:
 ```yaml
 spack:
   specs:
-    - boost+filesystem+program_options
+    - boost+filesystem
     - catch2
     - fmt
     - gmp
