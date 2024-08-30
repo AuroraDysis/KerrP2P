@@ -102,13 +102,13 @@ Contributions to `KerrP2P` are welcome! If you find any issues or have suggestio
 If you use `KerrP2P` in your research, please cite the following paper:
 
 ```bibtex
- @article{zhou2024forward,
-      title={Forward Ray Tracing and Hot Spots in Kerr Spacetime}, 
-      author={Lihang Zhou and Zhen Zhong and Yifan Chen and Vitor Cardoso},
-      year={2024},
-      eprint={2408.16049},
-      archivePrefix={arXiv},
-      primaryClass={gr-qc},
-      url={https://arxiv.org/abs/2408.16049}, 
+@article{Zhou:2024dbc,
+    author = "Zhou, Lihang and Zhong, Zhen and Chen, Yifan and Cardoso, Vitor",
+    title = "{Forward Ray Tracing and Hot Spots in Kerr Spacetime}",
+    eprint = "2408.16049",
+    archivePrefix = "arXiv",
+    primaryClass = "gr-qc",
+    month = "8",
+    year = "2024"
 }
 ```
