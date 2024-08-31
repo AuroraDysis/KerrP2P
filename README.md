@@ -2,15 +2,15 @@
 
 `KerrP2P` is a software designed for forward ray tracing in Kerr spacetime. It is specifically tailored to efficiently calculate **multiple** null geodesics between designated "source" and "observer" points, locate apparent positions of the corresponding images, and quantify their shapes. Detailed information can be found in the paper [_Forward Ray Tracing and Hot Spots in Kerr Spacetime_](https://arxiv.org/abs/2408.16049) by Lihang Zhou, Zhen Zhong, Yifan Chen, and Vitor Cardoso.
 
-Using Jacobi elliptic functions to express the solutions to the geodesic equations based on [Gralla and Lupsasca 2019](https://arxiv.org/abs/1910.12881), this software consists of two tools, with tutorials presented in the folder `examples`:  
+Using Jacobi elliptic functions to express the solutions to the geodesic equations based on [Gralla and Lupsasca 2019](https://arxiv.org/abs/1910.12881), this software consists of two tools.
 
-1. A Python/C++ package that computes null geodesics and thoroughly explores the parameter space to identify multiple images.
+1. A Python/C++ package that computes null geodesics and thoroughly explores the parameter space to identify multiple images. Tutorials for it are presented in the folder `examples`:  
     - `tutorial_float64_sweep.ipynb`: geodesic calculation and parameter space sweep in double precision  
     - `tutorial_float128or256.ipynb`: geodesic calculation in quad/oct precision  
     - `cpp_tutorial_basic.cpp`: geodesic calculation  
     - `cpp_tutorial_sweep.cpp`: parameter space sweep
 
-2. A Mathematica code, `tutorial_geodesic_and_image.nb`, which also includes functions for geodesic calculation and can be utilized to visualize geodesics, image positions, and image shapes.
+2. A Mathematica code, `examples/tutorial_geodesic_and_image.nb`. It also includes functions for geodesic calculation and can be utilized to visualize geodesics, image positions, and image shapes.
 
 [![Paper](https://img.shields.io/badge/Paper-arXiv-blue)](https://arxiv.org/abs/2408.16049)
 [![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
