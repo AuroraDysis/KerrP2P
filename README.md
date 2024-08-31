@@ -10,7 +10,7 @@ Using Jacobi elliptic functions to express the solutions to the geodesic equatio
     - `cpp_tutorial_basic.cpp`: geodesic calculation  
     - `cpp_tutorial_sweep.cpp`: parameter space sweep
 
-2. A Mathematica code, `examples/tutorial_geodesic_and_image.nb`. It also includes functions for geodesic calculation and can be utilized to visualize geodesics, image positions, and image shapes.
+2. A Mathematica code: `examples/tutorial_geodesic_and_image.nb`. It also includes functions for geodesic calculation and can be utilized to visualize geodesics, image positions, and image shapes.
 
 [![Paper](https://img.shields.io/badge/Paper-arXiv-blue)](https://arxiv.org/abs/2408.16049)
 [![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
@@ -96,6 +96,8 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make
 ```
+
+Remember to copy the generated .so file to your working directory.
 
 ## Contributing
 
