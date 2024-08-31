@@ -114,6 +114,7 @@ If you use `KerrP2P` in your research, please cite the following paper:
     author = "Zhou, Lihang and Zhong, Zhen and Chen, Yifan and Cardoso, Vitor",
     title = "{Forward Ray Tracing and Hot Spots in Kerr Spacetime}",
     eprint = "2408.16049",
+    journal = "",
     archivePrefix = "arXiv",
     primaryClass = "gr-qc",
     month = "8",
