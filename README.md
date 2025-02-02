@@ -87,7 +87,7 @@ To use `KerrP2P`, follow these steps:
 git clone https://github.com/your_username/KerrP2P.git
 ```
 
-2. Build the project using CMake.
+2. Build the project using CMake:
 
 ```bash
 cd KerrP2P
