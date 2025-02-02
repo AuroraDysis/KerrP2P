@@ -97,7 +97,7 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 make
 ```
 
-3. Remember to copy the generated `.so` file to your working directory to enable the package's usage in Python/C++.
+3. Remember to copy the generated `.so` file to your working directory to enable the package's usage in Python/C++, while the Mathematica code can be used without this.
 
 ## Contributing
 
