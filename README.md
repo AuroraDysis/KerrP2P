@@ -97,7 +97,7 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 make
 ```
 
-Remember to copy the generated .so file to your working directory.
+3. Remember to copy the generated `.so` file to your working directory to enable the package's usage in Python/C++.
 
 ## Contributing
 
