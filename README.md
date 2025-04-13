@@ -1,6 +1,6 @@
 # KerrP2P (Kerr Point-to-Point)
 
-`KerrP2P` is a software designed for forward ray tracing in Kerr spacetime. It is specifically tailored to efficiently calculate **multiple** null geodesics between designated "source" and "observer" points, locate apparent positions of the corresponding images, and quantify their shapes. Detailed information can be found in the paper [_Forward Ray Tracing and Hot Spots in Kerr Spacetime_](https://arxiv.org/abs/2408.16049) by Lihang Zhou, Zhen Zhong, Yifan Chen, and Vitor Cardoso.
+`KerrP2P` is a software designed for forward ray tracing in Kerr spacetime. It is specifically tailored to efficiently calculate **multiple** null geodesics between designated "source" and "observer" points, locate apparent positions of the corresponding images, and quantify their shapes. Detailed information can be found in the paper [_Forward Ray Tracing and Hot Spots in Kerr Spacetime_](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.111.064075) by Lihang Zhou, Zhen Zhong, Yifan Chen, and Vitor Cardoso.
 
 Using Jacobi elliptic functions to express the solutions to the geodesic equations based on [Gralla and Lupsasca 2019](https://arxiv.org/abs/1910.12881), this software consists of two tools.
 
