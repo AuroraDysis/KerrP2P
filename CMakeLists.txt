@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.30)
 project(KerrP2P)
 
 set(CMAKE_CXX_STANDARD 17)
