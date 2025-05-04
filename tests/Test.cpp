@@ -2,6 +2,7 @@
 
 #include "TestData.h"
 #include <oneapi/tbb.h>
+#include <fmt/ranges.h>
 
 using std::string;
 
