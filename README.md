@@ -21,7 +21,7 @@ _**Primary-Image Solver along a Trajectory (Sep 5, 2026)**_
 
 We added a polished Python `.ipynb` notebook for computing the primary image of a point source moving along a continuous trajectory. The current notebook uses a circular orbit as the working example, while the same continuation-and-fallback strategy can be easily adapted to other source trajectories.
 
-<img align="right" width="52%" src="examples/primary_image_solver/test_01_primary_image.png" alt="primary-image example">
+<img align="right" width="52%" src="assets/primary_image_demo.png" alt="primary image example">
 
 The notebook initializes the primary image with an all-branch <code>(r_c, log10|d|)</code> sweep over the eight <code>(nu_r, nu_theta, sign(d))</code> branch choices, selecting the smallest-<code>n_half</code> image among the candidates found. It then moves the source point along the orbit and solves for the corresponding <code>(lambda, q)</code> image parameters at each orbital phase, using the previous phase's solution as the initial guess. If no acceptable root is found, or if the change in <code>n_half</code> is too large (indicating an unwanted jumping to higher-level images), the solver tries locally perturbed <code>(lambda, q)</code> seeds, flipped <code>(nu_r, nu_theta)</code> signs and, if necessary, falls back to an all-branch sweep. The selected sweep solution is then used to resume the continuation in the <code>(lambda, q)</code> plane.
 
@@ -36,6 +36,8 @@ Notebook in <code>examples/primary_image_solver</code>, with an <code>.md</code>
 - Support for arbitrary precision arithmetic
 - Python bindings for easy-to-use interface
 - Support for multiple platforms: Linux, macOS, and Windows
+
+<p align="center"><img src="assets/KerrP2P_demo.png" alt="KerrP2P demo" width="75%"></p>
 
 ## Installation
 
