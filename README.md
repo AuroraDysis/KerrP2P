@@ -15,13 +15,15 @@ Using Jacobi elliptic functions to express the solutions to the geodesic equatio
 [![Paper](https://img.shields.io/badge/Paper-arXiv-blue)](https://arxiv.org/abs/2408.16049)
 [![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
 
-## Latest Update (Sep 5, 2026): Primary-Image Solver along a Trajectory
+## Latest Update
 
-> We added a polished Python notebook for computing the primary image of a point source moving along a continuous trajectory. The current notebook uses a circular orbit as the working example, while the same continuation-and-fallback strategy can be easily adapted to other source trajectories.
->
-> The notebook initializes the primary image with an all-branch `(r_c, log10|d|)` sweep over the eight `(nu_r, nu_theta, sign(d))` branch choices. It then moves the source point along the orbit and solves for the corresponding `(lambda, q)` image parameters at each orbital phase, using the previous phase's result as the initial guess. If continuation fails or appears to jump to a different image branch, the solver tries branch-sign changes, local perturbations, and finally an all-branch sweep fallback. The primary branch is selected and guarded using `n_half`.
->
-> Notebook in `examples/primary_solver`, with a detailed technical notes file for developers or AI agents.
+_**Primary-Image Solver along a Trajectory (Sep 5, 2026)**_
+
+We added a polished Python `.ipynb` notebook for computing the primary image of a point source moving along a continuous trajectory. The current notebook uses a circular orbit as the working example, while the same continuation-and-fallback strategy can be easily adapted to other source trajectories.
+
+The notebook initializes the primary image with an all-branch `(r_c, log10|d|)` sweep over the eight `(nu_r, nu_theta, sign(d))` branch choices. It then moves the source point along the orbit and solves for the corresponding `(lambda, q)` image parameters at each orbital phase, using the previous phase's result as the initial guess. If continuation fails or appears to jump to a different image branch, the solver tries branch-sign changes, local perturbations, and finally an all-branch sweep fallback if necessary. The primary branch is selected and guarded using `n_half`.
+
+Notebook in `examples/primary_image_solver`, with a detailed technical notes `.md` document for developers or AI agents. 
 
 ## Features
 
