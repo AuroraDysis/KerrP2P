@@ -2,7 +2,7 @@
 
 `KerrP2P` is a software designed for forward ray tracing in Kerr spacetime. It is specifically tailored to efficiently calculate **multiple** null geodesics between designated "source" and "observer" points, locate apparent positions of the corresponding images, and quantify their shapes. Detailed information can be found in the paper [_Forward Ray Tracing and Hot Spots in Kerr Spacetime_](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.111.064075) by Lihang Zhou, Zhen Zhong, Yifan Chen, and Vitor Cardoso.
 
-Using Jacobi elliptic functions to express the solutions to the geodesic equations based on [Gralla and Lupsasca 2019](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.101.044032), this software consists of two tools.
+Using Jacobi elliptic functions to express the solutions to the geodesic equations based on [Gralla and Lupsasca 2019](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.101.044032), this software consists of two tools:
 
 1. A Python/C++ package that computes null geodesics and thoroughly explores the parameter space to identify multiple images. Tutorials for it are presented in the folder `examples`:  
     - `tutorial_float64_sweep.ipynb`: geodesic calculation and parameter space sweep in double precision  
@@ -15,11 +15,19 @@ Using Jacobi elliptic functions to express the solutions to the geodesic equatio
 [![Paper](https://img.shields.io/badge/Paper-arXiv-blue)](https://arxiv.org/abs/2408.16049)
 [![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
 
-# Features
+## Latest Update (Sep 5, 2026): Primary-Image Solver along a Trajectory
+
+> We added a polished Python notebook for computing the primary image of a point source moving along a continuous trajectory. The current notebook uses a circular orbit as the working example, while the same continuation-and-fallback strategy can be easily adapted to other source trajectories.
+>
+> The notebook initializes the primary image with an all-branch `(r_c, log10|d|)` sweep over the eight `(nu_r, nu_theta, sign(d))` branch choices. It then moves the source point along the orbit and solves for the corresponding `(lambda, q)` image parameters at each orbital phase, using the previous phase's result as the initial guess. If continuation fails or appears to jump to a different image branch, the solver tries branch-sign changes, local perturbations, and finally an all-branch sweep fallback. The primary branch is selected and guarded using `n_half`.
+>
+> Notebook in `examples/primary_solver`, with a detailed technical notes file for developers or AI agents.
+
+## Features
 
 - Forward ray tracing in Kerr spacetime: this involves calculating **multiple** null geodesics that connects a given source to an observer
 - Support for arbitrary precision arithmetic
-- Python bindings for easy to use interface
+- Python bindings for easy-to-use interface
 - Support for multiple platforms: Linux, macOS, and Windows
 
 ## Installation
