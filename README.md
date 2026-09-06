@@ -21,12 +21,7 @@ _**Primary-Image Solver along a Trajectory (Sep 5, 2026)**_
 
 We added a polished Python `.ipynb` notebook for computing the primary image of a point source moving along a continuous trajectory. The current notebook uses a circular orbit as the working example, while the same continuation-and-fallback strategy can be easily adapted to other source trajectories.
 
-<img
-  align="right"
-  width="52%"
-  src="examples/primary_image_solver/test_01_primary_image.png"
-  alt="primary-image example"
->
+<img align="right" width="52%" src="examples/primary_image_solver/test_01_primary_image.png" alt="primary-image example">
 The notebook initializes the primary image with an all-branch `(r_c, log10|d|)` sweep over the eight `(nu_r, nu_theta, sign(d))` branch choices. It then moves the source point along the orbit and solves for the corresponding `(lambda, q)` image parameters at each orbital phase, using the previous phase's result as the initial guess. If continuation fails or appears to jump to a different image branch, the solver tries branch-sign changes, local perturbations, and finally an all-branch sweep fallback if necessary. The primary branch is selected and guarded using `n_half`.
 <br clear="right">
 
