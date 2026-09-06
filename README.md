@@ -37,7 +37,7 @@ Notebook in <code>examples/primary_image_solver</code>, with an <code>.md</code>
 - Python bindings for easy-to-use interface
 - Support for multiple platforms: Linux, macOS, and Windows
 
-<p align="center"><img src="assets/KerrP2P_demo.png" alt="KerrP2P demo" width="75%"></p>
+<p align="center"><img src="assets/KerrP2P_demo.png" alt="KerrP2P demo" width="80%"></p>
 
 ## Installation
 
