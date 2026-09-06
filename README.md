@@ -25,9 +25,10 @@ We added a polished Python `.ipynb` notebook for computing the primary image of 
 
 The notebook initializes the primary image with an all-branch <code>(r_c, log10|d|)</code> sweep over the eight <code>(nu_r, nu_theta, sign(d))</code> branch choices. It then moves the source point along the orbit and solves for the corresponding <code>(lambda, q)</code> image parameters at each orbital phase, using the previous phase's result as the initial guess. If continuation fails or appears to jump to a different image branch, the solver tries branch-sign changes, local perturbations, and finally an all-branch sweep fallback if necessary. The primary branch is selected and guarded using <code>n_half</code>.
 
+Notebook in <code>examples/primary_image_solver<\code>, with an <code>.md<\code> document containing detailed technical notes for users and AI agents.
+
 <br clear="right">
 
-Notebook in `examples/primary_image_solver`, with a detailed technical notes `.md` document for developers or AI agents. 
 
 ## Features
 
